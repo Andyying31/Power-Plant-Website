@@ -1,20 +1,19 @@
 /* =========================================
-   全局设置
+   基础
 ========================================= */
 
 * {
     box-sizing: border-box;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
 
-
 body {
-
     margin: 0;
+
+    min-height: 100vh;
 
     font-family:
         "Microsoft YaHei",
@@ -26,50 +25,38 @@ body {
     background: #f6f8fb;
 
     color: #1f2937;
-
-    min-height: 100vh;
-
 }
 
 
-
 /* =========================================
-   左侧导航
+   左侧
 ========================================= */
 
 .sidebar {
-
     position: fixed;
 
     left: 0;
-
     top: 0;
 
     width: 250px;
-
     height: 100vh;
 
-    background: #ffffff;
-
-    border-right:
-        1px solid #e5e9ef;
+    padding: 28px 18px;
 
     display: flex;
 
     flex-direction: column;
 
-    padding: 28px 18px;
+    background: #ffffff;
 
+    border-right:
+        1px solid #e5e9ef;
 }
 
 
-
-/* =========================================
-   品牌区域
-========================================= */
+/* 品牌 */
 
 .brand {
-
     display: flex;
 
     align-items: center;
@@ -81,14 +68,11 @@ body {
 
     border-bottom:
         1px solid #edf0f4;
-
 }
 
 
 .brand-logo {
-
     width: 44px;
-
     height: 44px;
 
     flex-shrink: 0;
@@ -96,7 +80,6 @@ body {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     border-radius: 11px;
@@ -113,42 +96,33 @@ body {
     font-size: 19px;
 
     font-weight: 700;
-
 }
 
 
 .brand-text h2 {
-
     margin: 0;
 
     font-size: 15px;
 
     font-weight: 600;
-
-    color: #1f2937;
-
 }
 
 
 .brand-text p {
-
     margin:
         5px 0 0;
 
     color: #9aa3b2;
 
     font-size: 11px;
-
 }
 
 
-
 /* =========================================
-   左侧菜单
+   菜单
 ========================================= */
 
 .menu {
-
     margin-top: 25px;
 
     display: flex;
@@ -156,22 +130,20 @@ body {
     flex-direction: column;
 
     gap: 5px;
-
 }
 
 
 .menu-item {
-
     width: 100%;
-
-    border: none;
-
-    background: transparent;
 
     padding:
         12px 15px;
 
+    border: none;
+
     border-radius: 9px;
+
+    background: transparent;
 
     color: #596273;
 
@@ -186,35 +158,24 @@ body {
     transition:
         background 0.2s ease,
         color 0.2s ease;
-
 }
 
 
 .menu-item:hover {
-
     background: #f4f7fb;
-
 }
 
 
 .menu-item.active {
-
     background: #edf4ff;
 
     color: #1677ff;
 
     font-weight: 600;
-
 }
 
 
-
-/* =========================================
-   左侧底部
-========================================= */
-
 .sidebar-footer {
-
     margin-top: auto;
 
     padding:
@@ -223,33 +184,29 @@ body {
     color: #a4acb8;
 
     font-size: 11px;
-
 }
 
 
-
 /* =========================================
-   主内容
+   主区域
 ========================================= */
 
 .main {
-
     margin-left: 250px;
 
     min-height: 100vh;
 
     padding:
         42px 50px;
-
 }
 
 
-
 /* =========================================
-   顶部区域
+   顶部
 ========================================= */
 
 .topbar {
+    max-width: 1120px;
 
     display: flex;
 
@@ -259,46 +216,39 @@ body {
 
     gap: 30px;
 
-    margin-bottom: 48px;
-
+    margin-bottom: 42px;
 }
 
 
 .page-title h1 {
-
     margin: 0;
 
     font-size: 28px;
 
     font-weight: 650;
-
-    letter-spacing: 0.2px;
-
 }
 
 
 .page-title p {
-
     margin:
         8px 0 0;
 
     color: #929baa;
 
     font-size: 13px;
-
 }
 
 
-
 /* =========================================
-   搜索框
+   搜索
 ========================================= */
 
 .search-box {
-
     width: 330px;
-
     height: 44px;
+
+    padding:
+        0 15px;
 
     display: flex;
 
@@ -306,49 +256,33 @@ body {
 
     gap: 10px;
 
-    padding:
-        0 15px;
-
     background: #ffffff;
 
     border:
         1px solid #e1e6ed;
 
     border-radius: 10px;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-
 }
 
 
 .search-box:focus-within {
-
     border-color: #1677ff;
 
     box-shadow:
         0 0 0 3px
         rgba(22,119,255,0.08);
-
 }
 
 
 .search-symbol {
-
     color: #9aa3b2;
 
     font-size: 12px;
-
-    white-space: nowrap;
-
 }
 
 
 .search-box input {
-
     width: 100%;
-
     height: 100%;
 
     border: none;
@@ -362,239 +296,284 @@ body {
     font-size: 13px;
 
     color: #374151;
-
 }
-
-
-.search-box input::placeholder {
-
-    color: #a3abb7;
-
-}
-
-
-
-/* =========================================
-   内容
-========================================= */
-
-.content {
-
-    max-width: 1050px;
-
-}
-
-
-.section-heading {
-
-    margin-bottom: 22px;
-
-}
-
-
-.section-heading h2 {
-
-    margin: 0;
-
-    font-size: 21px;
-
-    font-weight: 600;
-
-}
-
-
-.section-heading p {
-
-    margin:
-        7px 0 0;
-
-    color: #9aa3b2;
-
-    font-size: 13px;
-
-}
-
 
 
 /* =========================================
    页面切换
 ========================================= */
 
-.page-panel {
-
+.page-section {
     display: none;
 
+    max-width: 1050px;
 }
 
 
-.page-panel.active-page {
-
+.page-section.active-page {
     display: block;
-
 }
 
+
+.search-hidden {
+    display: none !important;
+}
 
 
 /* =========================================
-   首页模块卡片
+   首页顶部
 ========================================= */
 
-.home-grid {
+.home-header {
+    min-height: 180px;
 
-    display: grid;
+    display: flex;
 
-    grid-template-columns:
-        repeat(
-            3,
-            minmax(220px, 1fr)
-        );
-
-    gap: 16px;
-
-}
-
-
-.home-card {
-
-    position: relative;
-
-    min-height: 118px;
+    align-items: center;
 
     padding:
-        21px 22px;
+        34px 38px;
 
     background: #ffffff;
 
     border:
         1px solid #e5e9ef;
 
-    border-radius: 13px;
+    border-radius: 15px;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 18px;
-
-    text-align: left;
-
-    font-family: inherit;
-
-    color: #1f2937;
-
-    cursor: pointer;
-
-    overflow: hidden;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-
+    margin-bottom: 34px;
 }
 
 
-.home-card::before {
+.home-label {
+    display: block;
 
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    top: 0;
-
-    width: 3px;
-
-    height: 100%;
-
-    background: #1677ff;
-
-    opacity: 0;
-
-    transition:
-        opacity 0.2s ease;
-
-}
-
-
-.home-card:hover {
-
-    transform:
-        translateY(-3px);
-
-    border-color:
-        #d5e2f7;
-
-    box-shadow:
-        0 9px 25px
-        rgba(31,41,55,0.07);
-
-}
-
-
-.home-card:hover::before {
-
-    opacity: 1;
-
-}
-
-
-.home-card:hover .card-arrow {
-
-    background: #edf4ff;
+    margin-bottom: 12px;
 
     color: #1677ff;
 
-    transform:
-        translateX(3px);
-
-}
-
-
-.home-card-main {
-
-    flex: 1;
-
-}
-
-
-.home-card h3 {
-
-    margin: 0;
-
-    font-size: 16px;
+    font-size: 10px;
 
     font-weight: 600;
 
-    color: #273142;
-
+    letter-spacing: 1.6px;
 }
 
 
-.home-card p {
+.home-header h2 {
+    margin: 0;
 
+    font-size: 25px;
+
+    font-weight: 650;
+}
+
+
+.home-header p {
     margin:
-        8px 0 0;
+        10px 0 0;
 
-    color: #9aa3b2;
+    color: #8993a3;
 
-    font-size: 12px;
-
-    line-height: 1.6;
-
+    font-size: 13px;
 }
-
 
 
 /* =========================================
-   会议链接卡片
+   首页模块标题
+========================================= */
+
+.home-section-title {
+    margin-bottom: 16px;
+}
+
+
+.home-section-title h3 {
+    margin: 0;
+
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+
+.home-section-title p {
+    margin:
+        6px 0 0;
+
+    font-size: 12px;
+
+    color: #9aa3b2;
+}
+
+
+/* =========================================
+   首页模块
+========================================= */
+
+.module-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 14px;
+}
+
+
+.module-card {
+    min-height: 175px;
+
+    padding:
+        20px 21px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    border:
+        1px solid #e5e9ef;
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    font-family: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.module-card:hover {
+    transform:
+        translateY(-3px);
+
+    border-color: #ccdaf0;
+
+    box-shadow:
+        0 10px 25px
+        rgba(31,41,55,0.06);
+}
+
+
+.module-number {
+    margin-bottom: 25px;
+
+    color: #a1aab7;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+}
+
+
+.module-content {
+    flex: 1;
+}
+
+
+.module-content h3 {
+    margin: 0;
+
+    color: #273142;
+
+    font-size: 17px;
+
+    font-weight: 600;
+}
+
+
+.module-content p {
+    margin:
+        8px 0 0;
+
+    color: #929baa;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+}
+
+
+.module-enter {
+    width: 100%;
+
+    padding-top: 14px;
+
+    border-top:
+        1px solid #edf0f4;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    color: #7b8594;
+
+    font-size: 11px;
+}
+
+
+.module-enter span {
+    font-size: 15px;
+
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.module-card:hover .module-enter span {
+    transform:
+        translateX(3px);
+
+    color: #1677ff;
+}
+
+
+/* =========================================
+   普通页面标题
+========================================= */
+
+.section-heading {
+    margin-bottom: 22px;
+}
+
+
+.section-heading h2 {
+    margin: 0;
+
+    font-size: 21px;
+
+    font-weight: 600;
+}
+
+
+.section-heading p {
+    margin:
+        7px 0 0;
+
+    color: #9aa3b2;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   会议
 ========================================= */
 
 .link-grid {
-
     display: grid;
 
     grid-template-columns:
@@ -604,22 +583,20 @@ body {
         );
 
     gap: 16px;
-
 }
 
 
 .link-card {
-
     position: relative;
-
-    display: flex;
-
-    align-items: center;
 
     min-height: 92px;
 
     padding:
         19px 22px;
+
+    display: flex;
+
+    align-items: center;
 
     background: #ffffff;
 
@@ -628,125 +605,86 @@ body {
 
     border-radius: 13px;
 
-    text-decoration: none;
-
     color: #1f2937;
+
+    text-decoration: none;
 
     overflow: hidden;
 
     transition:
         transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
-
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 
-
-/* 左边细线 */
-
 .link-card::before {
-
     content: "";
 
     position: absolute;
 
     left: 0;
-
     top: 0;
 
     width: 3px;
-
     height: 100%;
 
     background: #1677ff;
 
     opacity: 0;
-
-    transition:
-        opacity 0.2s ease;
-
 }
 
 
 .link-card:hover {
-
     transform:
         translateY(-3px);
 
-    border-color:
-        #d5e2f7;
+    border-color: #d5e2f7;
 
     box-shadow:
         0 9px 25px
         rgba(31,41,55,0.07);
-
 }
 
 
 .link-card:hover::before {
-
     opacity: 1;
-
 }
 
 
-
-/* =========================================
-   会议卡片内容
-========================================= */
-
 .card-content {
-
     flex: 1;
 
     padding-right: 20px;
-
 }
 
 
 .card-content h3 {
-
     margin: 0;
 
     font-size: 15px;
 
     font-weight: 600;
-
-    color: #273142;
-
 }
 
 
 .card-content p {
-
     margin:
         7px 0 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
-
 }
 
 
-
-/* =========================================
-   箭头
-========================================= */
-
 .card-arrow {
-
     width: 32px;
-
     height: 32px;
-
-    flex-shrink: 0;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     border-radius: 50%;
@@ -756,36 +694,23 @@ body {
     color: #9aa3b2;
 
     font-size: 17px;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
-
 }
 
 
 .link-card:hover .card-arrow {
-
     background: #edf4ff;
 
     color: #1677ff;
-
-    transform:
-        translateX(3px);
-
 }
 
 
-
 /* =========================================
-   日报 / 花名册暂未配置
+   暂未配置
 ========================================= */
 
-.empty-state {
-
+.placeholder-box {
     padding:
-        38px 32px;
+        34px 30px;
 
     background: #ffffff;
 
@@ -793,38 +718,24 @@ body {
         1px solid #e5e9ef;
 
     border-radius: 13px;
-
 }
 
 
-.empty-state h3 {
-
-    margin: 0;
-
-    font-size: 16px;
+.placeholder-title {
+    font-size: 15px;
 
     font-weight: 600;
-
-    color: #273142;
-
 }
 
 
-.empty-state p {
-
-    max-width: 680px;
-
+.placeholder-box p {
     margin:
-        9px 0 0;
+        8px 0 0;
 
     color: #9aa3b2;
 
-    font-size: 13px;
-
-    line-height: 1.7;
-
+    font-size: 12px;
 }
-
 
 
 /* =========================================
@@ -832,7 +743,6 @@ body {
 ========================================= */
 
 footer {
-
     max-width: 1050px;
 
     margin-top: 65px;
@@ -845,9 +755,7 @@ footer {
     color: #a0a8b4;
 
     font-size: 11px;
-
 }
-
 
 
 /* =========================================
@@ -856,10 +764,8 @@ footer {
 
 @media (max-width: 950px) {
 
-    .home-grid {
-
+    .module-grid {
         grid-template-columns: 1fr;
-
     }
 
 }
@@ -868,29 +774,22 @@ footer {
 @media (max-width: 850px) {
 
     .link-grid {
-
         grid-template-columns: 1fr;
-
     }
 
 
     .topbar {
-
         align-items: flex-start;
 
         flex-direction: column;
-
     }
 
 
     .search-box {
-
         width: 100%;
-
     }
 
 }
-
 
 
 /* =========================================
@@ -900,7 +799,6 @@ footer {
 @media (max-width: 650px) {
 
     .sidebar {
-
         position: relative;
 
         width: 100%;
@@ -911,61 +809,37 @@ footer {
 
         border-bottom:
             1px solid #e5e9ef;
-
-        padding: 18px;
-
-    }
-
-
-    .brand {
-
-        padding-bottom: 18px;
-
-    }
-
-
-    .menu {
-
-        margin-top: 15px;
-
     }
 
 
     .sidebar-footer {
-
         display: none;
-
     }
 
 
     .main {
-
         margin-left: 0;
 
         padding:
             28px 18px;
-
     }
 
 
     .page-title h1 {
-
         font-size: 23px;
-
     }
 
 
-    .link-grid {
+    .home-header {
+        min-height: auto;
 
-        grid-template-columns: 1fr;
-
+        padding:
+            28px 24px;
     }
 
 
-    .home-grid {
-
+    .module-grid {
         grid-template-columns: 1fr;
-
     }
 
 }

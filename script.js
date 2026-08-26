@@ -1,109 +1,15 @@
 // ========================================
 // 沙巴光伏自备电厂导航
-// 左侧菜单切换 + 搜索
+// 搜索功能
 // ========================================
-
-
-// ================================
-// 获取元素
-// ================================
-
-const menuItems =
-    document.querySelectorAll(".menu-item");
 
 const searchInput =
     document.getElementById("search");
 
-const meetingPage =
-    document.getElementById("meeting-page");
 
-const organizationPage =
-    document.getElementById("organization-page");
+const linkCards =
+    document.querySelectorAll(".link-card");
 
-const pageDescription =
-    document.getElementById("page-description");
-
-
-// ================================
-// 左侧菜单
-// ================================
-
-menuItems.forEach(function (item) {
-
-    item.addEventListener("click", function () {
-
-        const category =
-            this.dataset.category;
-
-
-        // ----------------------------
-        // 清除所有 active
-        // ----------------------------
-
-        menuItems.forEach(function (menu) {
-
-            menu.classList.remove("active");
-
-        });
-
-
-        // 当前菜单变 active
-
-        this.classList.add("active");
-
-
-        // ----------------------------
-        // 会议
-        // ----------------------------
-
-        if (category === "会议") {
-
-            meetingPage.style.display = "block";
-
-            organizationPage.style.display = "none";
-
-            pageDescription.textContent =
-                "常用业务系统快捷入口";
-
-            searchInput.placeholder =
-                "搜索功能...";
-
-        }
-
-
-        // ----------------------------
-        // 组织架构
-        // ----------------------------
-
-        if (category === "组织架构") {
-
-            meetingPage.style.display = "none";
-
-            organizationPage.style.display = "block";
-
-            pageDescription.textContent =
-                "自备电厂部组织结构";
-
-            searchInput.placeholder =
-                "搜索姓名或岗位...";
-
-        }
-
-
-        // 清空搜索
-
-        searchInput.value = "";
-
-        resetSearch();
-
-    });
-
-});
-
-
-// ================================
-// 搜索
-// ================================
 
 searchInput.addEventListener(
     "input",
@@ -115,94 +21,30 @@ searchInput.addEventListener(
                 .trim();
 
 
-        // 当前是会议
-
-        if (
-            meetingPage.style.display !== "none"
-        ) {
-
-            const cards =
-                document.querySelectorAll(
-                    "#meeting-links .link-card"
-                );
-
-
-            cards.forEach(function (card) {
+        linkCards.forEach(
+            function (card) {
 
                 const text =
                     card.textContent
                         .toLowerCase();
 
 
-                card.style.display =
+                if (
                     text.includes(keyword)
-                        ? "flex"
-                        : "none";
+                ) {
 
-            });
+                    card.style.display =
+                        "flex";
 
-        }
+                } else {
 
+                    card.style.display =
+                        "none";
 
-        // 当前是组织架构
+                }
 
-        else {
-
-            const cards =
-                document.querySelectorAll(
-                    "#organization-page .organization-card"
-                );
-
-
-            cards.forEach(function (card) {
-
-                const text =
-                    card.textContent
-                        .toLowerCase();
-
-
-                card.style.display =
-                    text.includes(keyword)
-                        ? ""
-                        : "none";
-
-            });
-
-        }
+            }
+        );
 
     }
 );
-
-
-// ================================
-// 重置搜索
-// ================================
-
-function resetSearch() {
-
-    const meetingCards =
-        document.querySelectorAll(
-            "#meeting-links .link-card"
-        );
-
-
-    meetingCards.forEach(function (card) {
-
-        card.style.display = "flex";
-
-    });
-
-
-    const organizationCards =
-        document.querySelectorAll(
-            "#organization-page .organization-card"
-        );
-
-
-    organizationCards.forEach(function (card) {
-
-        card.style.display = "";
-
-    });
-
-}

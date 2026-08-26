@@ -1,16 +1,14 @@
 /* =========================================
-   全局设置
+   全局
 ========================================= */
 
 * {
     box-sizing: border-box;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
-
 
 body {
 
@@ -27,10 +25,7 @@ body {
 
     color: #1f2937;
 
-    min-height: 100vh;
-
 }
-
 
 
 /* =========================================
@@ -42,17 +37,14 @@ body {
     position: fixed;
 
     left: 0;
-
     top: 0;
 
     width: 250px;
-
     height: 100vh;
 
     background: #ffffff;
 
-    border-right:
-        1px solid #e5e9ef;
+    border-right: 1px solid #e5e9ef;
 
     display: flex;
 
@@ -62,11 +54,6 @@ body {
 
 }
 
-
-
-/* =========================================
-   品牌区域
-========================================= */
 
 .brand {
 
@@ -88,15 +75,11 @@ body {
 .brand-logo {
 
     width: 44px;
-
     height: 44px;
-
-    flex-shrink: 0;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     border-radius: 11px;
@@ -108,7 +91,7 @@ body {
             #4f46e5
         );
 
-    color: #ffffff;
+    color: white;
 
     font-size: 19px;
 
@@ -125,22 +108,18 @@ body {
 
     font-weight: 600;
 
-    color: #1f2937;
-
 }
 
 
 .brand-text p {
 
-    margin:
-        5px 0 0;
+    margin: 5px 0 0;
 
     color: #9aa3b2;
 
     font-size: 11px;
 
 }
-
 
 
 /* =========================================
@@ -208,11 +187,6 @@ body {
 }
 
 
-
-/* =========================================
-   左侧底部
-========================================= */
-
 .sidebar-footer {
 
     margin-top: auto;
@@ -227,9 +201,8 @@ body {
 }
 
 
-
 /* =========================================
-   主内容
+   主页面
 ========================================= */
 
 .main {
@@ -244,11 +217,6 @@ body {
 }
 
 
-
-/* =========================================
-   顶部区域
-========================================= */
-
 .topbar {
 
     display: flex;
@@ -259,7 +227,7 @@ body {
 
     gap: 30px;
 
-    margin-bottom: 48px;
+    margin-bottom: 45px;
 
 }
 
@@ -271,8 +239,6 @@ body {
     font-size: 28px;
 
     font-weight: 650;
-
-    letter-spacing: 0.2px;
 
 }
 
@@ -289,7 +255,6 @@ body {
 }
 
 
-
 /* =========================================
    搜索框
 ========================================= */
@@ -297,7 +262,6 @@ body {
 .search-box {
 
     width: 330px;
-
     height: 44px;
 
     display: flex;
@@ -309,16 +273,12 @@ body {
     padding:
         0 15px;
 
-    background: #ffffff;
+    background: white;
 
     border:
         1px solid #e1e6ed;
 
     border-radius: 10px;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
 
 }
 
@@ -334,13 +294,11 @@ body {
 }
 
 
-.search-symbol {
+.search-label {
 
     color: #9aa3b2;
 
     font-size: 12px;
-
-    white-space: nowrap;
 
 }
 
@@ -361,26 +319,23 @@ body {
 
     font-size: 13px;
 
-    color: #374151;
-
 }
-
-
-.search-box input::placeholder {
-
-    color: #a3abb7;
-
-}
-
 
 
 /* =========================================
-   内容
+   页面
 ========================================= */
 
-.content {
+.page-section {
 
-    max-width: 1050px;
+    max-width: 1200px;
+
+}
+
+
+.hidden {
+
+    display: none;
 
 }
 
@@ -415,9 +370,8 @@ body {
 }
 
 
-
 /* =========================================
-   链接卡片
+   会议按钮
 ========================================= */
 
 .link-grid {
@@ -448,7 +402,7 @@ body {
     padding:
         19px 22px;
 
-    background: #ffffff;
+    background: white;
 
     border:
         1px solid #e5e9ef;
@@ -459,8 +413,6 @@ body {
 
     color: #1f2937;
 
-    overflow: hidden;
-
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease,
@@ -469,8 +421,20 @@ body {
 }
 
 
+.link-card:hover {
 
-/* 左边细线 */
+    transform:
+        translateY(-3px);
+
+    border-color:
+        #cfdcf0;
+
+    box-shadow:
+        0 9px 25px
+        rgba(31,41,55,0.07);
+
+}
+
 
 .link-card::before {
 
@@ -479,11 +443,9 @@ body {
     position: absolute;
 
     left: 0;
-
     top: 0;
 
     width: 3px;
-
     height: 100%;
 
     background: #1677ff;
@@ -496,21 +458,6 @@ body {
 }
 
 
-.link-card:hover {
-
-    transform:
-        translateY(-3px);
-
-    border-color:
-        #d5e2f7;
-
-    box-shadow:
-        0 9px 25px
-        rgba(31,41,55,0.07);
-
-}
-
-
 .link-card:hover::before {
 
     opacity: 1;
@@ -518,16 +465,9 @@ body {
 }
 
 
-
-/* =========================================
-   卡片内容
-========================================= */
-
 .card-content {
 
     flex: 1;
-
-    padding-right: 20px;
 
 }
 
@@ -539,8 +479,6 @@ body {
     font-size: 15px;
 
     font-weight: 600;
-
-    color: #273142;
 
 }
 
@@ -557,21 +495,14 @@ body {
 }
 
 
-
-/* =========================================
-   箭头
-========================================= */
-
 .card-arrow {
 
     width: 32px;
-
     height: 32px;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     border-radius: 50%;
@@ -582,25 +513,315 @@ body {
 
     font-size: 17px;
 
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
+}
+
+
+/* =========================================
+   组织架构
+========================================= */
+
+.organization-container {
+
+    background: white;
+
+    border:
+        1px solid #e5e9ef;
+
+    border-radius: 16px;
+
+    padding: 35px;
+
+    overflow-x: auto;
 
 }
 
 
-.link-card:hover .card-arrow {
+.organization-title {
 
-    background: #edf4ff;
+    text-align: center;
+
+    margin-bottom: 35px;
+
+}
+
+
+.organization-title h2 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+    font-weight: 600;
+
+}
+
+
+.organization-title p {
+
+    margin:
+        7px 0 0;
+
+    color: #9aa3b2;
+
+    font-size: 11px;
+
+    letter-spacing: 0.5px;
+
+}
+
+
+/* =========================================
+   经理
+========================================= */
+
+.manager-level {
+
+    display: flex;
+
+    justify-content: center;
+
+}
+
+
+.person-card {
+
+    background: #ffffff;
+
+    border:
+        1px solid #e1e6ed;
+
+    border-radius: 10px;
+
+    padding:
+        13px 14px;
+
+    text-align: center;
+
+    box-shadow:
+        0 3px 10px
+        rgba(31,41,55,0.04);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+
+}
+
+
+.person-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #bcd3f5;
+
+    box-shadow:
+        0 7px 18px
+        rgba(31,41,55,0.08);
+
+}
+
+
+.person-card.manager {
+
+    width: 230px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #f7faff,
+            #ffffff
+        );
+
+    border-color:
+        #cfe0ff;
+
+}
+
+
+.person-name {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #263244;
+
+}
+
+
+.person-name-en {
+
+    margin-top: 4px;
+
+    font-size: 10px;
+
+    color: #8993a3;
+
+}
+
+
+.person-position {
+
+    margin-top: 6px;
+
+    font-size: 11px;
+
+    color: #6f7988;
+
+}
+
+
+/* =========================================
+   分隔线
+========================================= */
+
+.org-line.vertical {
+
+    width: 1px;
+
+    height: 30px;
+
+    background: #d8dee8;
+
+    margin:
+        0 auto 20px;
+
+}
+
+
+/* =========================================
+   四大栏目
+========================================= */
+
+.org-columns {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(220px, 1fr)
+        );
+
+    gap: 16px;
+
+}
+
+
+.org-column {
+
+    background: #fafbfd;
+
+    border:
+        1px solid #e8ecf2;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+}
+
+
+.department-title {
+
+    padding-bottom: 12px;
+
+    margin-bottom: 12px;
+
+    border-bottom:
+        2px solid #edf2f8;
 
     color: #1677ff;
 
-    transform:
-        translateX(3px);
+    font-size: 14px;
+
+    font-weight: 600;
 
 }
 
+
+.org-column .person-card {
+
+    margin-bottom: 10px;
+
+}
+
+
+.sub-title {
+
+    margin:
+        16px 0 8px;
+
+    padding-left: 8px;
+
+    border-left:
+        3px solid #1677ff;
+
+    color: #596273;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+.small-card {
+
+    padding: 10px;
+
+}
+
+
+/* =========================================
+   其他人员
+========================================= */
+
+.other-section {
+
+    margin-top: 25px;
+
+    background: #fafbfd;
+
+    border:
+        1px solid #e8ecf2;
+
+    border-radius: 12px;
+
+    padding: 18px;
+
+}
+
+
+.staff-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(180px, 1fr)
+        );
+
+    gap: 10px;
+
+}
+
+
+.staff-grid .person-card {
+
+    min-height: 88px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+}
 
 
 /* =========================================
@@ -609,9 +830,9 @@ body {
 
 footer {
 
-    max-width: 1050px;
+    max-width: 1200px;
 
-    margin-top: 65px;
+    margin-top: 55px;
 
     padding-top: 20px;
 
@@ -625,19 +846,31 @@ footer {
 }
 
 
-
 /* =========================================
    平板
 ========================================= */
 
-@media (max-width: 850px) {
+@media (max-width: 1100px) {
 
-    .link-grid {
+    .org-columns {
 
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            repeat(2, 1fr);
 
     }
 
+
+    .staff-grid {
+
+        grid-template-columns:
+            repeat(3, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 850px) {
 
     .topbar {
 
@@ -654,8 +887,22 @@ footer {
 
     }
 
-}
 
+    .link-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .staff-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
 
 
 /* =========================================
@@ -720,9 +967,23 @@ footer {
     }
 
 
-    .link-grid {
+    .org-columns {
 
         grid-template-columns: 1fr;
+
+    }
+
+
+    .staff-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .organization-container {
+
+        padding: 20px;
 
     }
 

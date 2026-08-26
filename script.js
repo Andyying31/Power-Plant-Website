@@ -1,167 +1,134 @@
-// ========================================
-// 沙巴光伏自备电厂导航
-// ========================================
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
 
-// ========================================
-// 页面切换
-// ========================================
+        /* =====================================
+           首页搜索
+        ====================================== */
 
-const menuItems =
-    document.querySelectorAll(".menu-item");
-
-
-const meetingPage =
-    document.getElementById("meeting-page");
+        const homeSearch =
+            document.getElementById(
+                "searchInput"
+            );
 
 
-const organizationPage =
-    document.getElementById("organization-page");
+        if (homeSearch) {
 
-
-menuItems.forEach(
-    function (item) {
-
-        item.addEventListener(
-            "click",
-            function () {
-
-                // 移除所有 active
-
-                menuItems.forEach(
-                    function (menu) {
-
-                        menu.classList.remove(
-                            "active"
-                        );
-
-                    }
+            const cards =
+                document.querySelectorAll(
+                    ".link-card"
                 );
 
 
-                // 当前菜单添加 active
+            homeSearch.addEventListener(
+                "input",
+                function () {
 
-                this.classList.add("active");
+                    const keyword =
+                        this.value
+                            .trim()
+                            .toLowerCase();
 
 
-                // 获取页面名称
+                    cards.forEach(
+                        function (card) {
 
-                const page =
-                    this.dataset.page;
+                            const text =
+                                card
+                                    .textContent
+                                    .toLowerCase();
 
 
-                // 显示会议
+                            if (
+                                text.includes(
+                                    keyword
+                                )
+                            ) {
 
-                if (page === "meeting") {
+                                card.style.display =
+                                    "";
 
-                    meetingPage.classList.remove(
-                        "hidden"
-                    );
+                            } else {
 
-                    organizationPage.classList.add(
-                        "hidden"
+                                card.style.display =
+                                    "none";
+
+                            }
+
+                        }
                     );
 
                 }
-
-
-                // 显示组织架构
-
-                if (
-                    page === "organization"
-                ) {
-
-                    meetingPage.classList.add(
-                        "hidden"
-                    );
-
-                    organizationPage.classList.remove(
-                        "hidden"
-                    );
-
-                }
-
-
-                // 切换页面时清空搜索
-
-                searchInput.value = "";
-
-                resetSearch();
-
-            }
-
-        );
-
-    }
-);
-
-
-
-// ========================================
-// 搜索功能
-// ========================================
-
-const searchInput =
-    document.getElementById("search");
-
-
-const searchableItems =
-    document.querySelectorAll(
-        ".searchable, .person-card"
-    );
-
-
-
-searchInput.addEventListener(
-    "input",
-    function () {
-
-        const keyword =
-            this.value
-                .toLowerCase()
-                .trim();
-
-
-        searchableItems.forEach(
-            function (item) {
-
-                const text =
-                    item.textContent
-                        .toLowerCase();
-
-
-                if (
-                    text.includes(keyword)
-                ) {
-
-                    item.style.display = "";
-
-                } else {
-
-                    item.style.display = "none";
-
-                }
-
-            }
-        );
-
-    }
-);
-
-
-
-// ========================================
-// 清除搜索
-// ========================================
-
-function resetSearch() {
-
-    searchableItems.forEach(
-        function (item) {
-
-            item.style.display = "";
+            );
 
         }
-    );
 
-}
+
+
+        /* =====================================
+           组织架构搜索
+        ====================================== */
+
+        const organizationSearch =
+            document.getElementById(
+                "organizationSearch"
+            );
+
+
+        if (organizationSearch) {
+
+            const people =
+                document.querySelectorAll(
+                    ".searchable-person"
+                );
+
+
+            organizationSearch.addEventListener(
+                "input",
+                function () {
+
+                    const keyword =
+                        this.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    people.forEach(
+                        function (person) {
+
+                            const searchText =
+                                (
+                                    person.dataset.search ||
+                                    person.textContent
+                                ).toLowerCase();
+
+
+                            if (
+                                searchText.includes(
+                                    keyword
+                                )
+                            ) {
+
+                                person.classList.remove(
+                                    "search-hidden"
+                                );
+
+                            } else {
+
+                                person.classList.add(
+                                    "search-hidden"
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+    }
+);

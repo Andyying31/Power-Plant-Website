@@ -1,18 +1,14 @@
 /* =========================================
-   全局设置
+   全局
 ========================================= */
 
 * {
-
     box-sizing: border-box;
-
 }
 
 
 html {
-
     scroll-behavior: smooth;
-
 }
 
 
@@ -38,7 +34,7 @@ body {
 
 
 /* =========================================
-   左侧导航栏
+   左侧导航
 ========================================= */
 
 .sidebar {
@@ -69,7 +65,7 @@ body {
 
 
 /* =========================================
-   公司名称
+   品牌
 ========================================= */
 
 .brand {
@@ -87,7 +83,6 @@ body {
         1px solid #edf0f4;
 
 }
-
 
 
 .brand-logo {
@@ -113,14 +108,13 @@ body {
             #4f46e5
         );
 
-    color: #ffffff;
+    color: white;
 
     font-size: 19px;
 
     font-weight: 700;
 
 }
-
 
 
 .brand-text h2 {
@@ -131,10 +125,7 @@ body {
 
     font-weight: 600;
 
-    color: #1f2937;
-
 }
-
 
 
 .brand-text p {
@@ -151,7 +142,7 @@ body {
 
 
 /* =========================================
-   左侧菜单
+   菜单
 ========================================= */
 
 .menu {
@@ -165,7 +156,6 @@ body {
     gap: 5px;
 
 }
-
 
 
 .menu-item {
@@ -198,13 +188,11 @@ body {
 }
 
 
-
 .menu-item:hover {
 
     background: #f4f7fb;
 
 }
-
 
 
 .menu-item.active {
@@ -217,11 +205,6 @@ body {
 
 }
 
-
-
-/* =========================================
-   左侧最下面
-========================================= */
 
 .sidebar-footer {
 
@@ -239,7 +222,7 @@ body {
 
 
 /* =========================================
-   右边主内容
+   主内容
 ========================================= */
 
 .main {
@@ -261,7 +244,7 @@ body {
 
 .topbar {
 
-    max-width: 1100px;
+    max-width: 1180px;
 
     display: flex;
 
@@ -271,10 +254,9 @@ body {
 
     gap: 30px;
 
-    margin-bottom: 45px;
+    margin-bottom: 42px;
 
 }
-
 
 
 .page-title h1 {
@@ -285,10 +267,7 @@ body {
 
     font-weight: 650;
 
-    letter-spacing: 0.2px;
-
 }
-
 
 
 .page-title p {
@@ -330,12 +309,7 @@ body {
 
     border-radius: 10px;
 
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-
 }
-
 
 
 .search-box:focus-within {
@@ -349,17 +323,13 @@ body {
 }
 
 
-
 .search-symbol {
-
-    flex-shrink: 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
 
 }
-
 
 
 .search-box input {
@@ -376,41 +346,24 @@ body {
 
     font-family: inherit;
 
-    color: #374151;
-
     font-size: 13px;
 
 }
 
 
 
-.search-box input::placeholder {
-
-    color: #a3abb7;
-
-}
-
-
-
 /* =========================================
-   非常重要
-
-   所有页面默认隐藏
+   页面显示 / 隐藏
 ========================================= */
 
 .page-section {
 
     display: none;
 
-    max-width: 1050px;
+    max-width: 1180px;
 
 }
 
-
-
-/* =========================================
-   只有当前页面才显示
-========================================= */
 
 .page-section.active-page {
 
@@ -418,11 +371,6 @@ body {
 
 }
 
-
-
-/* =========================================
-   搜索隐藏
-========================================= */
 
 .search-hidden {
 
@@ -433,74 +381,39 @@ body {
 
 
 /* =========================================
-   主页
+   主页介绍
 ========================================= */
 
-.welcome-panel {
+.home-intro {
 
-    position: relative;
-
-    min-height: 350px;
+    min-height: 125px;
 
     padding:
-        58px 55px;
+        26px 30px;
 
     display: flex;
 
-    flex-direction: column;
+    align-items: center;
 
-    justify-content: center;
+    justify-content: space-between;
+
+    gap: 30px;
+
+    margin-bottom: 18px;
 
     background: #ffffff;
 
     border:
         1px solid #e5e9ef;
 
-    border-radius: 16px;
-
-    overflow: hidden;
+    border-radius: 14px;
 
 }
 
 
+.home-label {
 
-/* 主页右上角装饰 */
-
-.welcome-panel::after {
-
-    content: "";
-
-    position: absolute;
-
-    right: -100px;
-
-    top: -130px;
-
-    width: 330px;
-
-    height: 330px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(
-            22,
-            119,
-            255,
-            0.035
-        );
-
-}
-
-
-
-.welcome-small {
-
-    position: relative;
-
-    z-index: 1;
-
-    margin-bottom: 16px;
+    margin-bottom: 7px;
 
     color: #1677ff;
 
@@ -508,95 +421,373 @@ body {
 
     font-weight: 600;
 
-    letter-spacing: 2px;
+    letter-spacing: 1.6px;
 
 }
 
 
-
-.welcome-panel h2 {
-
-    position: relative;
-
-    z-index: 1;
+.home-intro h2 {
 
     margin: 0;
 
-    max-width: 650px;
-
     color: #273142;
 
-    font-size: 29px;
+    font-size: 25px;
 
     font-weight: 650;
 
 }
 
 
-
-.welcome-panel > p {
-
-    position: relative;
-
-    z-index: 1;
+.home-intro p {
 
     margin:
-        14px 0 0;
+        7px 0 0;
+
+    color: #9aa3b2;
+
+    font-size: 11px;
+
+}
+
+
+.home-intro-side {
+
+    padding:
+        8px 13px;
+
+    border-radius: 7px;
+
+    background: #edf4ff;
+
+    color: #1677ff;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+
+/* =========================================
+   组织架构整体
+========================================= */
+
+.org-overview {
+
+    padding:
+        27px 28px 32px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #e5e9ef;
+
+    border-radius: 14px;
+
+}
+
+
+.org-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding-bottom: 22px;
+
+    border-bottom:
+        1px solid #edf0f4;
+
+}
+
+
+.org-header h3 {
+
+    margin: 0;
+
+    color: #273142;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+}
+
+
+.org-header p {
+
+    margin:
+        6px 0 0;
+
+    color: #9aa3b2;
+
+    font-size: 11px;
+
+}
+
+
+
+/* =========================================
+   查看花名册
+========================================= */
+
+.view-roster {
+
+    padding:
+        9px 13px;
+
+    border:
+        1px solid #dfe5ed;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #667085;
+
+    font-family: inherit;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.view-roster span {
+
+    margin-left: 7px;
+
+}
+
+
+.view-roster:hover {
+
+    border-color: #bcd2f3;
+
+    background: #f8fbff;
+
+    color: #1677ff;
+
+}
+
+
+
+/* =========================================
+   经理
+========================================= */
+
+.manager-area {
+
+    display: flex;
+
+    justify-content: center;
+
+    padding-top: 28px;
+
+}
+
+
+.manager-card {
+
+    width: 230px;
+
+    padding:
+        16px 20px;
+
+    text-align: center;
+
+    background: #f8fbff;
+
+    border:
+        1px solid #cfe0f7;
+
+    border-radius: 10px;
+
+}
+
+
+.org-role {
+
+    margin-bottom: 6px;
+
+    color: #1677ff;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+.manager-name {
+
+    color: #273142;
+
+    font-size: 17px;
+
+    font-weight: 650;
+
+}
+
+
+.manager-en {
+
+    margin-top: 4px;
 
     color: #929baa;
 
-    font-size: 14px;
+    font-size: 9px;
 
 }
 
 
 
-.welcome-line {
+/* =========================================
+   组织线
+========================================= */
+
+.org-main-line {
+
+    width: 1px;
+
+    height: 30px;
+
+    margin: 0 auto;
+
+    background: #cfd6df;
+
+}
+
+
+
+/* =========================================
+   三大分支
+========================================= */
+
+.org-branches {
 
     position: relative;
 
-    z-index: 1;
+    display: grid;
 
-    width: 100%;
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+    padding-top: 28px;
+
+}
+
+
+/* 横线 */
+
+.org-branches::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 16.66%;
+
+    right: 16.66%;
+
+    top: 0;
 
     height: 1px;
 
-    margin:
-        45px 0 24px;
-
-    background: #edf0f4;
+    background: #cfd6df;
 
 }
 
 
-
-.welcome-info {
+.org-branch {
 
     position: relative;
 
-    z-index: 1;
+}
 
-    display: flex;
 
-    gap: 55px;
+.branch-top-line {
+
+    position: absolute;
+
+    left: 50%;
+
+    top: -28px;
+
+    width: 1px;
+
+    height: 28px;
+
+    background: #cfd6df;
 
 }
 
 
 
-.welcome-info div {
+/* =========================================
+   分支负责人卡
+========================================= */
 
-    display: flex;
+.branch-head {
 
-    flex-direction: column;
+    min-height: 112px;
 
-    gap: 6px;
+    padding:
+        18px 16px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border:
+        1px solid #dfe5ed;
+
+    border-radius: 10px;
 
 }
 
 
+.branch-title {
 
-.welcome-info span {
+    margin-bottom: 11px;
+
+    color: #1677ff;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+.branch-person {
+
+    color: #273142;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+}
+
+
+.branch-position {
+
+    margin-top: 5px;
 
     color: #9aa3b2;
 
@@ -606,13 +797,64 @@ body {
 
 
 
-.welcome-info strong {
+/* =========================================
+   下方岗位
+========================================= */
+
+.branch-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-top: 10px;
+
+}
+
+
+.branch-item {
+
+    min-height: 63px;
+
+    padding:
+        12px 13px;
+
+    background: #f8fafc;
+
+    border:
+        1px solid #edf0f4;
+
+    border-radius: 8px;
+
+}
+
+
+.branch-item strong {
+
+    display: block;
 
     color: #4b5563;
 
-    font-size: 12px;
+    font-size: 11px;
 
-    font-weight: 500;
+    font-weight: 600;
+
+}
+
+
+.branch-item span {
+
+    display: block;
+
+    margin-top: 5px;
+
+    color: #9aa3b2;
+
+    font-size: 9px;
+
+    line-height: 1.4;
 
 }
 
@@ -629,7 +871,6 @@ body {
 }
 
 
-
 .section-heading h2 {
 
     margin: 0;
@@ -641,7 +882,6 @@ body {
     font-weight: 600;
 
 }
-
 
 
 .section-heading p {
@@ -658,7 +898,7 @@ body {
 
 
 /* =========================================
-   会议卡片排列
+   会议卡片
 ========================================= */
 
 .link-grid {
@@ -675,11 +915,6 @@ body {
 
 }
 
-
-
-/* =========================================
-   会议卡片
-========================================= */
 
 .link-card {
 
@@ -715,9 +950,6 @@ body {
 }
 
 
-
-/* 卡片左边蓝色线 */
-
 .link-card::before {
 
     content: "";
@@ -736,11 +968,7 @@ body {
 
     opacity: 0;
 
-    transition:
-        opacity 0.2s ease;
-
 }
-
 
 
 .link-card:hover {
@@ -748,20 +976,13 @@ body {
     transform:
         translateY(-3px);
 
-    border-color:
-        #d5e2f7;
+    border-color: #d5e2f7;
 
     box-shadow:
         0 9px 25px
-        rgba(
-            31,
-            41,
-            55,
-            0.07
-        );
+        rgba(31,41,55,0.07);
 
 }
-
 
 
 .link-card:hover::before {
@@ -771,11 +992,6 @@ body {
 }
 
 
-
-/* =========================================
-   卡片文字
-========================================= */
-
 .card-content {
 
     flex: 1;
@@ -783,7 +999,6 @@ body {
     padding-right: 20px;
 
 }
-
 
 
 .card-content h3 {
@@ -799,7 +1014,6 @@ body {
 }
 
 
-
 .card-content p {
 
     margin:
@@ -811,11 +1025,6 @@ body {
 
 }
 
-
-
-/* =========================================
-   卡片箭头
-========================================= */
 
 .card-arrow {
 
@@ -839,13 +1048,7 @@ body {
 
     font-size: 17px;
 
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
-
 }
-
 
 
 .link-card:hover .card-arrow {
@@ -854,15 +1057,12 @@ body {
 
     color: #1677ff;
 
-    transform:
-        translateX(3px);
-
 }
 
 
 
 /* =========================================
-   日报 / 花名册暂时空白区域
+   日报 / 花名册空白
 ========================================= */
 
 .empty-panel {
@@ -882,7 +1082,6 @@ body {
 }
 
 
-
 .empty-title {
 
     color: #273142;
@@ -892,7 +1091,6 @@ body {
     font-weight: 600;
 
 }
-
 
 
 .empty-panel p {
@@ -909,12 +1107,12 @@ body {
 
 
 /* =========================================
-   页脚
+   Footer
 ========================================= */
 
 footer {
 
-    max-width: 1050px;
+    max-width: 1180px;
 
     margin-top: 65px;
 
@@ -935,8 +1133,40 @@ footer {
    平板
 ========================================= */
 
-@media (max-width: 850px) {
+@media (max-width: 950px) {
 
+    .org-branches {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .org-branches::before {
+
+        display: none;
+
+    }
+
+
+    .branch-top-line {
+
+        display: none;
+
+    }
+
+
+    .org-main-line {
+
+        display: none;
+
+    }
+
+
+}
+
+
+@media (max-width: 850px) {
 
     .link-grid {
 
@@ -947,9 +1177,9 @@ footer {
 
     .topbar {
 
-        align-items: flex-start;
-
         flex-direction: column;
+
+        align-items: flex-start;
 
     }
 
@@ -971,7 +1201,6 @@ footer {
 
 @media (max-width: 650px) {
 
-
     .sidebar {
 
         position: relative;
@@ -980,26 +1209,10 @@ footer {
 
         height: auto;
 
-        padding: 18px;
-
         border-right: none;
 
         border-bottom:
             1px solid #e5e9ef;
-
-    }
-
-
-    .brand {
-
-        padding-bottom: 18px;
-
-    }
-
-
-    .menu {
-
-        margin-top: 15px;
 
     }
 
@@ -1028,35 +1241,27 @@ footer {
     }
 
 
-    .welcome-panel {
-
-        min-height: 280px;
-
-        padding:
-            38px 28px;
-
-    }
-
-
-    .welcome-panel h2 {
-
-        font-size: 23px;
-
-    }
-
-
-    .welcome-info {
+    .home-intro {
 
         flex-direction: column;
 
-        gap: 18px;
+        align-items: flex-start;
 
     }
 
 
-    .link-grid {
+    .org-header {
 
-        grid-template-columns: 1fr;
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .manager-card {
+
+        width: 100%;
 
     }
 

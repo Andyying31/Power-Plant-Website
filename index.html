@@ -12,12 +12,9 @@
 
     <title>沙巴光伏自备电厂导航</title>
 
-    <!--
-        ?v=4 是为了避免浏览器继续读取旧版 CSS
-    -->
     <link
         rel="stylesheet"
-        href="style.css?v=4"
+        href="style.css?v=5"
     >
 
 </head>
@@ -32,8 +29,6 @@
 
     <aside class="sidebar">
 
-
-        <!-- 公司名称 -->
 
         <div class="brand">
 
@@ -58,14 +53,8 @@
 
 
 
-        <!-- =========================================
-             左侧菜单
-        ========================================== -->
-
         <nav class="menu">
 
-
-            <!-- 主页 -->
 
             <button
                 type="button"
@@ -76,9 +65,6 @@
             </button>
 
 
-
-            <!-- 会议 -->
-
             <button
                 type="button"
                 class="menu-item"
@@ -88,9 +74,6 @@
             </button>
 
 
-
-            <!-- 日报 -->
-
             <button
                 type="button"
                 class="menu-item"
@@ -99,9 +82,6 @@
                 日报
             </button>
 
-
-
-            <!-- 花名册 -->
 
             <button
                 type="button"
@@ -116,8 +96,6 @@
 
 
 
-        <!-- 左侧底部 -->
-
         <div class="sidebar-footer">
 
             内部业务导航
@@ -130,7 +108,7 @@
 
 
     <!-- =========================================
-         右边主内容
+         主内容
     ========================================== -->
 
     <main class="main">
@@ -143,29 +121,31 @@
         <header class="topbar">
 
 
-            <!-- 标题 -->
-
             <div class="page-title">
 
                 <h1 id="page-title">
+
                     沙巴光伏自备电厂导航
+
                 </h1>
 
 
                 <p id="page-subtitle">
+
                     部门常用业务统一入口
+
                 </p>
 
             </div>
 
 
 
-            <!-- 搜索 -->
-
             <div class="search-box">
 
                 <span class="search-symbol">
+
                     搜索
+
                 </span>
 
 
@@ -184,8 +164,6 @@
 
         <!-- =========================================
              主页
-
-             默认显示
         ========================================== -->
 
         <section
@@ -194,59 +172,378 @@
         >
 
 
-            <div class="welcome-panel">
+            <!-- 主页介绍 -->
+
+            <div class="home-intro">
 
 
-                <div class="welcome-small">
+                <div>
 
-                    POWER PLANT PORTAL
+                    <div class="home-label">
+
+                        POWER PLANT DEPARTMENT
+
+                    </div>
+
+
+                    <h2>
+
+                        自备电厂部
+
+                    </h2>
+
+
+                    <p>
+
+                        POWER PLANT DEPARTMENT ORGANISATION OVERVIEW
+
+                    </p>
+
+                </div>
+
+
+                <div class="home-intro-side">
+
+                    部门组织结构概览
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =====================================
+                 组织架构概览
+            ====================================== -->
+
+            <div class="org-overview">
+
+
+                <div class="org-header">
+
+                    <div>
+
+                        <h3>
+                            组织结构概览
+                        </h3>
+
+                        <p>
+                            自备电厂部主要管理及业务结构
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="view-roster"
+                        data-open-page="roster"
+                    >
+
+                        查看完整花名册
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
 
                 </div>
 
 
 
-                <h2>
+                <!-- =================================
+                     经理
+                ================================== -->
 
-                    欢迎使用沙巴光伏自备电厂导航
+                <div class="manager-area">
 
-                </h2>
+                    <div class="manager-card searchable">
 
+                        <div class="org-role">
 
+                            经理
 
-                <p>
-
-                    请从左侧导航栏选择需要进入的业务模块
-
-                </p>
-
-
-                <div class="welcome-line"></div>
+                        </div>
 
 
-                <div class="welcome-info">
+                        <div class="manager-name">
 
-                    <div>
+                            卢彦廷
 
-                        <span>
-                            系统
-                        </span>
+                        </div>
 
-                        <strong>
-                            内部业务导航
-                        </strong>
+
+                        <div class="manager-en">
+
+                            LU YANTING
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- 中间连接线 -->
+
+                <div class="org-main-line"></div>
+
+
+
+                <!-- =================================
+                     三个主要分支
+                ================================== -->
+
+                <div class="org-branches">
+
+
+                    <!-- 内燃机维护 -->
+
+                    <div class="org-branch">
+
+
+                        <div class="branch-top-line"></div>
+
+
+                        <div class="branch-head searchable">
+
+                            <div class="branch-title">
+
+                                内燃机维护
+
+                            </div>
+
+
+                            <div class="branch-person">
+
+                                李健全
+
+                            </div>
+
+
+                            <div class="branch-position">
+
+                                内燃机维护专家
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="branch-list">
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    徐洁
+                                </strong>
+
+                                <span>
+                                    维护技师
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    维修岗位
+                                </strong>
+
+                                <span>
+                                    维修技师
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    机械岗位
+                                </strong>
+
+                                <span>
+                                    机械技师 / 机械工业
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
 
                     </div>
 
 
-                    <div>
 
-                        <span>
-                            部门
-                        </span>
+                    <!-- 安全运行管理 -->
 
-                        <strong>
-                            沙巴光伏自备电厂
-                        </strong>
+                    <div class="org-branch">
+
+
+                        <div class="branch-top-line"></div>
+
+
+                        <div class="branch-head searchable">
+
+                            <div class="branch-title">
+
+                                安全运行管理
+
+                            </div>
+
+
+                            <div class="branch-person">
+
+                                冯亮
+
+                            </div>
+
+
+                            <div class="branch-position">
+
+                                安全运行管理
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="branch-list">
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    运行班组
+                                </strong>
+
+                                <span>
+                                    A / B / C / D 班值长、主值
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    汽机专业
+                                </strong>
+
+                                <span>
+                                    汽机工程师
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    电气 / 仪表
+                                </strong>
+
+                                <span>
+                                    电气工程师、仪表工程师
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- 设备维护 -->
+
+                    <div class="org-branch">
+
+
+                        <div class="branch-top-line"></div>
+
+
+                        <div class="branch-head searchable">
+
+                            <div class="branch-title">
+
+                                设备维护
+
+                            </div>
+
+
+                            <div class="branch-person">
+
+                                樊军辉
+
+                            </div>
+
+
+                            <div class="branch-position">
+
+                                设备维护主任
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="branch-list">
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    设备维护人员
+                                </strong>
+
+                                <span>
+                                    电机械技师 / 电厂机械工
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    工程技术
+                                </strong>
+
+                                <span>
+                                    电气 / 仪表 / 土木 / 锅炉
+                                </span>
+
+                            </div>
+
+
+                            <div class="branch-item searchable">
+
+                                <strong>
+                                    技术支持
+                                </strong>
+
+                                <span>
+                                    工艺技术员及相关岗位
+                                </span>
+
+                            </div>
+
+
+                        </div>
+
 
                     </div>
 
@@ -277,7 +574,6 @@
                     会议
                 </h2>
 
-
                 <p>
                     会议相关业务快捷入口
                 </p>
@@ -286,15 +582,10 @@
 
 
 
-            <div
-                id="meeting-links"
-                class="link-grid"
-            >
+            <div class="link-grid">
 
 
-                <!-- =================================
-                     月计划
-                ================================== -->
+                <!-- 月计划 -->
 
                 <a
                     href="https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd"
@@ -303,13 +594,11 @@
                     class="link-card searchable"
                 >
 
-
                     <div class="card-content">
 
                         <h3>
                             月计划
                         </h3>
-
 
                         <p>
                             月计划和周计划
@@ -322,14 +611,11 @@
                         →
                     </div>
 
-
                 </a>
 
 
 
-                <!-- =================================
-                     消缺单
-                ================================== -->
+                <!-- 消缺单 -->
 
                 <a
                     href="https://www.larksuite.com/"
@@ -338,13 +624,11 @@
                     class="link-card searchable"
                 >
 
-
                     <div class="card-content">
 
                         <h3>
                             消缺单
                         </h3>
-
 
                         <p>
                             消缺单
@@ -357,14 +641,11 @@
                         →
                     </div>
 
-
                 </a>
 
 
 
-                <!-- =================================
-                     会议纪要
-                ================================== -->
+                <!-- 会议纪要 -->
 
                 <a
                     href="https://www.larksuite.com/"
@@ -373,13 +654,11 @@
                     class="link-card searchable"
                 >
 
-
                     <div class="card-content">
 
                         <h3>
                             会议纪要
                         </h3>
-
 
                         <p>
                             查看及编辑会议纪要
@@ -392,14 +671,11 @@
                         →
                     </div>
 
-
                 </a>
 
 
 
-                <!-- =================================
-                     会议室预订
-                ================================== -->
+                <!-- 会议室 -->
 
                 <a
                     href="https://www.larksuite.com/"
@@ -408,13 +684,11 @@
                     class="link-card searchable"
                 >
 
-
                     <div class="card-content">
 
                         <h3>
                             会议室预订
                         </h3>
-
 
                         <p>
                             查看会议室并进行预订
@@ -426,7 +700,6 @@
                     <div class="card-arrow">
                         →
                     </div>
-
 
                 </a>
 
@@ -454,7 +727,6 @@
                     日报
                 </h2>
 
-
                 <p>
                     日报相关业务入口
                 </p>
@@ -465,16 +737,18 @@
 
             <div class="empty-panel">
 
-
                 <div class="empty-title">
+
                     日报
+
                 </div>
 
 
                 <p>
-                    日报内容暂未添加。
-                </p>
 
+                    日报内容暂未添加。
+
+                </p>
 
             </div>
 
@@ -499,9 +773,8 @@
                     花名册
                 </h2>
 
-
                 <p>
-                    部门人员及岗位信息
+                    自备电厂部人员及岗位信息
                 </p>
 
             </div>
@@ -510,16 +783,18 @@
 
             <div class="empty-panel">
 
-
                 <div class="empty-title">
-                    花名册
+
+                    自备电厂部花名册
+
                 </div>
 
 
                 <p>
-                    花名册内容暂未添加。
-                </p>
 
+                    下一步将在这里加入完整人员花名册。
+
+                </p>
 
             </div>
 
@@ -529,7 +804,7 @@
 
 
         <!-- =========================================
-             页脚
+             Footer
         ========================================== -->
 
         <footer>
@@ -543,11 +818,7 @@
 
 
 
-    <!--
-        ?v=4 是为了避免浏览器继续读取旧版 JS
-    -->
-
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
 
 
 </body>

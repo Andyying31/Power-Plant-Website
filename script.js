@@ -1,137 +1,109 @@
 // ========================================
 // 沙巴光伏自备电厂导航
-// 页面切换 + 搜索
+// 左侧菜单切换 + 搜索
 // ========================================
 
+
+// ================================
+// 获取元素
+// ================================
 
 const menuItems =
     document.querySelectorAll(".menu-item");
 
+const searchInput =
+    document.getElementById("search");
 
 const meetingPage =
     document.getElementById("meeting-page");
 
-
 const organizationPage =
     document.getElementById("organization-page");
-
-
-const searchInput =
-    document.getElementById("search");
-
 
 const pageDescription =
     document.getElementById("page-description");
 
 
+// ================================
+// 左侧菜单
+// ================================
 
-// ========================================
-// 左侧菜单切换
-// ========================================
+menuItems.forEach(function (item) {
 
-menuItems.forEach(
-    function (item) {
+    item.addEventListener("click", function () {
 
-        item.addEventListener(
-            "click",
-            function () {
-
-                const page =
-                    this.dataset.page;
+        const category =
+            this.dataset.category;
 
 
-                // -------------------------
-                // 清除 active
-                // -------------------------
+        // ----------------------------
+        // 清除所有 active
+        // ----------------------------
 
-                menuItems.forEach(
-                    function (menu) {
+        menuItems.forEach(function (menu) {
 
-                        menu.classList.remove(
-                            "active"
-                        );
+            menu.classList.remove("active");
 
-                    }
-                );
+        });
 
 
-                // 当前菜单 active
+        // 当前菜单变 active
 
-                this.classList.add(
-                    "active"
-                );
+        this.classList.add("active");
 
 
+        // ----------------------------
+        // 会议
+        // ----------------------------
 
-                // -------------------------
-                // 切换页面
-                // -------------------------
+        if (category === "会议") {
 
-                if (page === "meeting") {
+            meetingPage.style.display = "block";
 
-                    meetingPage.style.display =
-                        "block";
+            organizationPage.style.display = "none";
 
+            pageDescription.textContent =
+                "常用业务系统快捷入口";
 
-                    organizationPage.style.display =
-                        "none";
+            searchInput.placeholder =
+                "搜索功能...";
 
-
-                    pageDescription.textContent =
-                        "常用业务系统快捷入口";
-
-
-                    searchInput.placeholder =
-                        "搜索功能...";
+        }
 
 
-                }
+        // ----------------------------
+        // 组织架构
+        // ----------------------------
+
+        if (category === "组织架构") {
+
+            meetingPage.style.display = "none";
+
+            organizationPage.style.display = "block";
+
+            pageDescription.textContent =
+                "自备电厂部组织结构";
+
+            searchInput.placeholder =
+                "搜索姓名或岗位...";
+
+        }
 
 
-                else if (
-                    page === "organization"
-                ) {
+        // 清空搜索
 
-                    meetingPage.style.display =
-                        "none";
+        searchInput.value = "";
 
+        resetSearch();
 
-                    organizationPage.style.display =
-                        "block";
+    });
 
-
-                    pageDescription.textContent =
-                        "自备电厂部组织结构";
+});
 
 
-                    searchInput.placeholder =
-                        "搜索姓名或岗位...";
-
-                }
-
-
-
-                // -------------------------
-                // 切换页面时清空搜索
-                // -------------------------
-
-                searchInput.value = "";
-
-
-                resetSearch();
-
-            }
-
-        );
-
-    }
-);
-
-
-
-// ========================================
+// ================================
 // 搜索
-// ========================================
+// ================================
 
 searchInput.addEventListener(
     "input",
@@ -155,35 +127,21 @@ searchInput.addEventListener(
                 );
 
 
-            cards.forEach(
-                function (card) {
+            cards.forEach(function (card) {
 
-                    const text =
-                        card.textContent
-                            .toLowerCase();
+                const text =
+                    card.textContent
+                        .toLowerCase();
 
 
-                    if (
-                        text.includes(keyword)
-                    ) {
+                card.style.display =
+                    text.includes(keyword)
+                        ? "flex"
+                        : "none";
 
-                        card.style.display =
-                            "flex";
-
-                    }
-
-                    else {
-
-                        card.style.display =
-                            "none";
-
-                    }
-
-                }
-            );
+            });
 
         }
-
 
 
         // 当前是组织架构
@@ -196,32 +154,19 @@ searchInput.addEventListener(
                 );
 
 
-            cards.forEach(
-                function (card) {
+            cards.forEach(function (card) {
 
-                    const text =
-                        card.textContent
-                            .toLowerCase();
+                const text =
+                    card.textContent
+                        .toLowerCase();
 
 
-                    if (
-                        text.includes(keyword)
-                    ) {
+                card.style.display =
+                    text.includes(keyword)
+                        ? ""
+                        : "none";
 
-                        card.style.display =
-                            "";
-
-                    }
-
-                    else {
-
-                        card.style.display =
-                            "none";
-
-                    }
-
-                }
-            );
+            });
 
         }
 
@@ -229,13 +174,11 @@ searchInput.addEventListener(
 );
 
 
-
-// ========================================
-// 清除搜索结果
-// ========================================
+// ================================
+// 重置搜索
+// ================================
 
 function resetSearch() {
-
 
     const meetingCards =
         document.querySelectorAll(
@@ -243,15 +186,11 @@ function resetSearch() {
         );
 
 
-    meetingCards.forEach(
-        function (card) {
+    meetingCards.forEach(function (card) {
 
-            card.style.display =
-                "flex";
+        card.style.display = "flex";
 
-        }
-    );
-
+    });
 
 
     const organizationCards =
@@ -260,13 +199,10 @@ function resetSearch() {
         );
 
 
-    organizationCards.forEach(
-        function (card) {
+    organizationCards.forEach(function (card) {
 
-            card.style.display =
-                "";
+        card.style.display = "";
 
-        }
-    );
+    });
 
 }

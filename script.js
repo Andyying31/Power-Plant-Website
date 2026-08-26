@@ -1,325 +1,419 @@
-document.addEventListener("DOMContentLoaded", function () {
-
-    // ========================================
-    // 获取元素
-    // ========================================
-
-    const menuItems =
-        document.querySelectorAll(".menu-item[data-page]");
-
-    const pageSections =
-        document.querySelectorAll(".page-section");
-
-    const moduleCards =
-        document.querySelectorAll("[data-open-page]");
-
-    const searchInput =
-        document.getElementById("search");
-
-    const pageTitle =
-        document.getElementById("page-title");
-
-    const pageSubtitle =
-        document.getElementById("page-subtitle");
+// ========================================
+// 沙巴光伏自备电厂导航
+// 页面切换 + 搜索
+// ========================================
 
 
-    // ========================================
-    // 每个页面资料
-    // ========================================
-
-    const pageInfo = {
-
-        home: {
-            title: "沙巴光伏自备电厂导航",
-            subtitle: "部门常用业务统一入口",
-            placeholder: "搜索功能..."
-        },
-
-        meeting: {
-            title: "会议",
-            subtitle: "会议相关业务快捷入口",
-            placeholder: "搜索会议功能..."
-        },
-
-        daily: {
-            title: "日报",
-            subtitle: "日报相关业务入口",
-            placeholder: "搜索日报..."
-        },
-
-        roster: {
-            title: "花名册",
-            subtitle: "部门人员及岗位信息",
-            placeholder: "搜索人员..."
-        }
-
-    };
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
 
-    // ========================================
-    // 打开页面
-    // ========================================
+        // ========================================
+        // 找到网页里面需要控制的东西
+        // ========================================
 
-    function openPage(pageName) {
+        const menuItems =
+            document.querySelectorAll(
+                ".menu-item[data-page]"
+            );
 
-        const targetPage =
+
+        const pageSections =
+            document.querySelectorAll(
+                ".page-section"
+            );
+
+
+        const searchInput =
             document.getElementById(
-                pageName + "-page"
+                "search"
             );
 
 
-        // 找不到页面就停止
-        if (!targetPage) {
-
-            console.error(
-                "找不到页面：",
-                pageName
+        const pageTitle =
+            document.getElementById(
+                "page-title"
             );
 
-            return;
 
-        }
+        const pageSubtitle =
+            document.getElementById(
+                "page-subtitle"
+            );
 
 
-        // -----------------------------
-        // 隐藏全部页面
-        // -----------------------------
 
-        pageSections.forEach(
-            function (section) {
+        // ========================================
+        // 每个页面的顶部标题
+        // ========================================
 
-                section.classList.remove(
-                    "active-page"
-                );
+        const pageInformation = {
+
+
+            // 主页
+
+            home: {
+
+                title:
+                    "沙巴光伏自备电厂导航",
+
+                subtitle:
+                    "部门常用业务统一入口",
+
+                search:
+                    "搜索功能..."
+
+            },
+
+
+            // 会议
+
+            meeting: {
+
+                title:
+                    "会议",
+
+                subtitle:
+                    "会议相关业务快捷入口",
+
+                search:
+                    "搜索会议功能..."
+
+            },
+
+
+            // 日报
+
+            daily: {
+
+                title:
+                    "日报",
+
+                subtitle:
+                    "日报相关业务入口",
+
+                search:
+                    "搜索日报..."
+
+            },
+
+
+            // 花名册
+
+            roster: {
+
+                title:
+                    "花名册",
+
+                subtitle:
+                    "部门人员及岗位信息",
+
+                search:
+                    "搜索人员..."
 
             }
-        );
 
 
-        // -----------------------------
-        // 显示目标页面
-        // -----------------------------
-
-        targetPage.classList.add(
-            "active-page"
-        );
-
-
-        // -----------------------------
-        // 左边菜单 active
-        // -----------------------------
-
-        menuItems.forEach(
-            function (item) {
-
-                item.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-
-        const activeMenu =
-            document.querySelector(
-                '.menu-item[data-page="' +
-                pageName +
-                '"]'
-            );
-
-
-        if (activeMenu) {
-
-            activeMenu.classList.add(
-                "active"
-            );
-
-        }
-
-
-        // -----------------------------
-        // 修改顶部文字
-        // -----------------------------
-
-        const info =
-            pageInfo[pageName];
-
-
-        if (info) {
-
-            pageTitle.textContent =
-                info.title;
-
-            pageSubtitle.textContent =
-                info.subtitle;
-
-            searchInput.placeholder =
-                info.placeholder;
-
-        }
-
-
-        // 清除搜索
-        searchInput.value = "";
-
-        resetSearch();
-
-
-        // 回到页面顶部
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth"
-        });
-
-    }
+        };
 
 
 
-    // ========================================
-    // 左侧菜单
-    // ========================================
+        // ========================================
+        // 打开指定页面
+        // ========================================
 
-    menuItems.forEach(
-        function (item) {
-
-            item.addEventListener(
-                "click",
-                function () {
-
-                    const page =
-                        this.getAttribute(
-                            "data-page"
-                        );
-
-                    openPage(page);
-
-                }
-            );
-
-        }
-    );
+        function openPage(pageName) {
 
 
+            // 找到要显示的页面
 
-    // ========================================
-    // 首页模块卡片
-    // ========================================
-
-    moduleCards.forEach(
-        function (card) {
-
-            card.addEventListener(
-                "click",
-                function () {
-
-                    const page =
-                        this.getAttribute(
-                            "data-open-page"
-                        );
-
-                    openPage(page);
-
-                }
-            );
-
-        }
-    );
-
-
-
-    // ========================================
-    // 搜索
-    // ========================================
-
-    searchInput.addEventListener(
-        "input",
-        function () {
-
-            const keyword =
-                this.value
-                    .trim()
-                    .toLowerCase();
-
-
-            const activePage =
-                document.querySelector(
-                    ".page-section.active-page"
+            const targetPage =
+                document.getElementById(
+                    pageName + "-page"
                 );
 
 
-            if (!activePage) {
+            // 如果找不到页面就停止
+
+            if (!targetPage) {
+
                 return;
+
             }
 
 
-            const items =
-                activePage.querySelectorAll(
-                    ".searchable"
-                );
 
+            // ====================================
+            // 第一步
+            // 把所有页面隐藏
+            // ====================================
 
-            items.forEach(
-                function (item) {
+            pageSections.forEach(
+                function (page) {
 
-                    const text =
-                        item
-                            .textContent
-                            .toLowerCase();
-
-
-                    if (
-                        text.includes(keyword)
-                    ) {
-
-                        item.classList.remove(
-                            "search-hidden"
-                        );
-
-                    }
-
-                    else {
-
-                        item.classList.add(
-                            "search-hidden"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-
-    // ========================================
-    // 清除搜索隐藏
-    // ========================================
-
-    function resetSearch() {
-
-        document
-            .querySelectorAll(
-                ".search-hidden"
-            )
-            .forEach(
-                function (item) {
-
-                    item.classList.remove(
-                        "search-hidden"
+                    page.classList.remove(
+                        "active-page"
                     );
 
                 }
             );
 
+
+
+            // ====================================
+            // 第二步
+            // 只显示用户点击的页面
+            // ====================================
+
+            targetPage.classList.add(
+                "active-page"
+            );
+
+
+
+            // ====================================
+            // 第三步
+            // 左边菜单取消蓝色
+            // ====================================
+
+            menuItems.forEach(
+                function (item) {
+
+                    item.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
+
+
+
+            // ====================================
+            // 第四步
+            // 当前菜单变蓝
+            // ====================================
+
+            const activeMenu =
+                document.querySelector(
+                    '.menu-item[data-page="' +
+                    pageName +
+                    '"]'
+                );
+
+
+            if (activeMenu) {
+
+                activeMenu.classList.add(
+                    "active"
+                );
+
+            }
+
+
+
+            // ====================================
+            // 第五步
+            // 修改右边顶部标题
+            // ====================================
+
+            const information =
+                pageInformation[
+                    pageName
+                ];
+
+
+            if (information) {
+
+
+                pageTitle.textContent =
+                    information.title;
+
+
+                pageSubtitle.textContent =
+                    information.subtitle;
+
+
+                searchInput.placeholder =
+                    information.search;
+
+
+            }
+
+
+
+            // ====================================
+            // 第六步
+            // 清除之前输入的搜索文字
+            // ====================================
+
+            searchInput.value = "";
+
+
+            resetSearch();
+
+
+        }
+
+
+
+        // ========================================
+        // 左边菜单点击
+        // ========================================
+
+        menuItems.forEach(
+            function (item) {
+
+
+                item.addEventListener(
+                    "click",
+                    function () {
+
+
+                        const pageName =
+                            this.getAttribute(
+                                "data-page"
+                            );
+
+
+                        openPage(
+                            pageName
+                        );
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+
+        // ========================================
+        // 搜索框
+        // ========================================
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+
+                const keyword =
+                    this.value
+                        .trim()
+                        .toLowerCase();
+
+
+
+                // 找到现在正在显示的页面
+
+                const activePage =
+                    document.querySelector(
+                        ".page-section.active-page"
+                    );
+
+
+                if (!activePage) {
+
+                    return;
+
+                }
+
+
+
+                // 只搜索当前页面里面
+                // 有 searchable 的项目
+
+                const searchableItems =
+                    activePage.querySelectorAll(
+                        ".searchable"
+                    );
+
+
+
+                searchableItems.forEach(
+                    function (item) {
+
+
+                        const text =
+                            item
+                                .textContent
+                                .toLowerCase();
+
+
+                        if (
+                            text.includes(
+                                keyword
+                            )
+                        ) {
+
+
+                            item.classList.remove(
+                                "search-hidden"
+                            );
+
+
+                        } else {
+
+
+                            item.classList.add(
+                                "search-hidden"
+                            );
+
+
+                        }
+
+
+                    }
+                );
+
+
+            }
+        );
+
+
+
+        // ========================================
+        // 清除搜索隐藏
+        // ========================================
+
+        function resetSearch() {
+
+
+            const hiddenItems =
+                document.querySelectorAll(
+                    ".search-hidden"
+                );
+
+
+            hiddenItems.forEach(
+                function (item) {
+
+
+                    item.classList.remove(
+                        "search-hidden"
+                    );
+
+
+                }
+            );
+
+
+        }
+
+
+
+        // ========================================
+        // 网站第一次打开
+        //
+        // 强制进入主页
+        // ========================================
+
+        openPage(
+            "home"
+        );
+
+
     }
-
-
-    // ========================================
-    // 默认打开主页
-    // ========================================
-
-    openPage("home");
-
-});
+);

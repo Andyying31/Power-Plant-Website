@@ -1,452 +1,57 @@
 /* =========================================
-   全局设置
+   组织架构
 ========================================= */
 
-* {
-    box-sizing: border-box;
-}
-
-
-html {
-    scroll-behavior: smooth;
-}
-
-
-body {
-
-    margin: 0;
-
-    font-family:
-        "Microsoft YaHei",
-        "PingFang SC",
-        "Segoe UI",
-        Arial,
-        sans-serif;
-
-    background: #f6f8fb;
-
-    color: #1f2937;
-
-    min-height: 100vh;
-
-}
-
-
-
-/* =========================================
-   左侧导航
-========================================= */
-
-.sidebar {
-
-    position: fixed;
-
-    left: 0;
-
-    top: 0;
-
-    width: 250px;
-
-    height: 100vh;
-
-    background: #ffffff;
-
-    border-right:
-        1px solid #e5e9ef;
-
+.organization-manager {
     display: flex;
-
-    flex-direction: column;
-
-    padding: 28px 18px;
-
-}
-
-
-
-/* =========================================
-   品牌区域
-========================================= */
-
-.brand {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    padding:
-        5px 8px 30px;
-
-    border-bottom:
-        1px solid #edf0f4;
-
-}
-
-
-.brand-logo {
-
-    width: 44px;
-
-    height: 44px;
-
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
 
     justify-content: center;
 
-    border-radius: 11px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #1677ff,
-            #4f46e5
-        );
-
-    color: #ffffff;
-
-    font-size: 19px;
-
-    font-weight: 700;
-
+    margin-bottom: 28px;
 }
-
-
-.brand-text h2 {
-
-    margin: 0;
-
-    font-size: 15px;
-
-    font-weight: 600;
-
-    color: #1f2937;
-
-}
-
-
-.brand-text p {
-
-    margin:
-        5px 0 0;
-
-    color: #9aa3b2;
-
-    font-size: 11px;
-
-}
-
 
 
 /* =========================================
-   左侧菜单
+   经理卡片
 ========================================= */
 
-.menu {
+.manager-card {
+    width: 250px;
 
-    margin-top: 25px;
+    text-align: center;
 
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 5px;
-
-}
-
-
-.menu-item {
-
-    width: 100%;
-
-    border: none;
-
-    background: transparent;
-
-    padding:
-        12px 15px;
-
-    border-radius: 9px;
-
-    color: #596273;
-
-    font-family: inherit;
-
-    font-size: 14px;
-
-    text-align: left;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-
-}
-
-
-.menu-item:hover {
-
-    background: #f4f7fb;
-
-}
-
-
-.menu-item.active {
-
-    background: #edf4ff;
-
-    color: #1677ff;
-
-    font-weight: 600;
-
-}
-
-
-
-/* =========================================
-   左侧底部
-========================================= */
-
-.sidebar-footer {
-
-    margin-top: auto;
-
-    padding:
-        15px 8px 5px;
-
-    color: #a4acb8;
-
-    font-size: 11px;
-
-}
-
-
-
-/* =========================================
-   主内容
-========================================= */
-
-.main {
-
-    margin-left: 250px;
-
-    min-height: 100vh;
-
-    padding:
-        42px 50px;
-
-}
-
-
-
-/* =========================================
-   顶部区域
-========================================= */
-
-.topbar {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 30px;
-
-    margin-bottom: 48px;
-
-}
-
-
-.page-title h1 {
-
-    margin: 0;
-
-    font-size: 28px;
-
-    font-weight: 650;
-
-    letter-spacing: 0.2px;
-
-}
-
-
-.page-title p {
-
-    margin:
-        8px 0 0;
-
-    color: #929baa;
-
-    font-size: 13px;
-
-}
-
-
-
-/* =========================================
-   搜索框
-========================================= */
-
-.search-box {
-
-    width: 330px;
-
-    height: 44px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding:
-        0 15px;
+    border-color: #d7e1ef !important;
 
     background: #ffffff;
-
-    border:
-        1px solid #e1e6ed;
-
-    border-radius: 10px;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-
 }
 
 
-.search-box:focus-within {
-
-    border-color: #1677ff;
-
-    box-shadow:
-        0 0 0 3px
-        rgba(22,119,255,0.08);
-
+.manager-card .card-name {
+    font-size: 18px;
 }
-
-
-.search-symbol {
-
-    color: #9aa3b2;
-
-    font-size: 12px;
-
-    white-space: nowrap;
-
-}
-
-
-.search-box input {
-
-    width: 100%;
-
-    height: 100%;
-
-    border: none;
-
-    outline: none;
-
-    background: transparent;
-
-    font-family: inherit;
-
-    font-size: 13px;
-
-    color: #374151;
-
-}
-
-
-.search-box input::placeholder {
-
-    color: #a3abb7;
-
-}
-
 
 
 /* =========================================
-   内容
+   组织架构四大区域
 ========================================= */
 
-.content {
-
-    max-width: 1050px;
-
-}
-
-
-.section-heading {
-
-    margin-bottom: 22px;
-
-}
-
-
-.section-heading h2 {
-
-    margin: 0;
-
-    font-size: 21px;
-
-    font-weight: 600;
-
-}
-
-
-.section-heading p {
-
-    margin:
-        7px 0 0;
-
-    color: #9aa3b2;
-
-    font-size: 13px;
-
-}
-
-
-
-/* =========================================
-   链接卡片
-========================================= */
-
-.link-grid {
+.organization-grid {
 
     display: grid;
 
     grid-template-columns:
-        repeat(
-            2,
-            minmax(300px, 1fr)
-        );
+        repeat(2, minmax(320px, 1fr));
 
-    gap: 16px;
+    gap: 18px;
 
 }
 
 
-.link-card {
+/* =========================================
+   部门区域
+========================================= */
 
-    position: relative;
-
-    display: flex;
-
-    align-items: center;
-
-    min-height: 92px;
-
-    padding:
-        19px 22px;
+.organization-group {
 
     background: #ffffff;
 
@@ -455,86 +60,19 @@ body {
 
     border-radius: 13px;
 
-    text-decoration: none;
-
-    color: #1f2937;
-
-    overflow: hidden;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        border-color 0.2s ease;
+    padding: 18px;
 
 }
 
 
+.organization-title {
 
-/* 左边细线 */
+    margin-bottom: 14px;
 
-.link-card::before {
+    padding-bottom: 12px;
 
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    top: 0;
-
-    width: 3px;
-
-    height: 100%;
-
-    background: #1677ff;
-
-    opacity: 0;
-
-    transition:
-        opacity 0.2s ease;
-
-}
-
-
-.link-card:hover {
-
-    transform:
-        translateY(-3px);
-
-    border-color:
-        #d5e2f7;
-
-    box-shadow:
-        0 9px 25px
-        rgba(31,41,55,0.07);
-
-}
-
-
-.link-card:hover::before {
-
-    opacity: 1;
-
-}
-
-
-
-/* =========================================
-   卡片内容
-========================================= */
-
-.card-content {
-
-    flex: 1;
-
-    padding-right: 20px;
-
-}
-
-
-.card-content h3 {
-
-    margin: 0;
+    border-bottom:
+        1px solid #edf0f4;
 
     font-size: 15px;
 
@@ -545,184 +83,268 @@ body {
 }
 
 
-.card-content p {
+/* =========================================
+   人员卡片
+========================================= */
 
-    margin:
-        7px 0 0;
+.organization-people {
 
-    color: #9aa3b2;
+    display: grid;
 
-    font-size: 12px;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
 
 }
 
 
+.organization-card {
 
-/* =========================================
-   箭头
-========================================= */
+    min-height: 82px;
 
-.card-arrow {
+    padding: 13px 14px;
 
-    width: 32px;
+    background: #fafbfd;
 
-    height: 32px;
+    border:
+        1px solid #e5e9ef;
 
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #f4f7fb;
-
-    color: #9aa3b2;
-
-    font-size: 17px;
+    border-radius: 9px;
 
     transition:
+        border-color 0.2s ease,
         background 0.2s ease,
-        color 0.2s ease,
         transform 0.2s ease;
 
 }
 
 
-.link-card:hover .card-arrow {
+.organization-card:hover {
 
-    background: #edf4ff;
+    background: #ffffff;
 
-    color: #1677ff;
+    border-color: #cdd9e9;
 
     transform:
-        translateX(3px);
+        translateY(-2px);
 
 }
 
 
-
 /* =========================================
-   Footer
+   姓名
 ========================================= */
 
-footer {
+.organization-card .card-name {
 
-    max-width: 1050px;
+    font-size: 14px;
 
-    margin-top: 65px;
+    font-weight: 600;
 
-    padding-top: 20px;
+    color: #273142;
 
-    border-top:
-        1px solid #e8ecf1;
+}
 
-    color: #a0a8b4;
+
+/* =========================================
+   职位
+========================================= */
+
+.organization-card .card-role {
+
+    margin-top: 6px;
 
     font-size: 11px;
 
-}
-
-
-
-/* =========================================
-   平板
-========================================= */
-
-@media (max-width: 850px) {
-
-    .link-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .topbar {
-
-        align-items: flex-start;
-
-        flex-direction: column;
-
-    }
-
-
-    .search-box {
-
-        width: 100%;
-
-    }
+    color: #687385;
 
 }
 
 
-
 /* =========================================
-   手机
+   英文姓名
 ========================================= */
 
-@media (max-width: 650px) {
+.organization-card .card-en {
 
-    .sidebar {
+    margin-top: 5px;
 
-        position: relative;
+    font-size: 9px;
 
-        width: 100%;
+    line-height: 1.35;
 
-        height: auto;
+    color: #a0a8b4;
 
-        border-right: none;
+}
 
-        border-bottom:
-            1px solid #e5e9ef;
 
-        padding: 18px;
+/* =========================================
+   A/B/C/D 班
+========================================= */
+
+.shift-section {
+
+    margin-top: 18px;
+
+}
+
+
+.shift-title {
+
+    margin-bottom: 9px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #687385;
+
+}
+
+
+.shift-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 9px;
+
+}
+
+
+/* =========================================
+   技术人员
+========================================= */
+
+.technical-section {
+
+    margin-top: 20px;
+
+    padding:
+        20px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #e5e9ef;
+
+    border-radius: 13px;
+
+}
+
+
+.technical-heading {
+
+    margin-bottom: 15px;
+
+}
+
+
+.technical-heading h3 {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    color: #273142;
+
+}
+
+
+.technical-heading p {
+
+    margin:
+        6px 0 0;
+
+    font-size: 12px;
+
+    color: #9aa3b2;
+
+}
+
+
+.technical-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 10px;
+
+}
+
+
+/* =========================================
+   组织架构页面响应式
+========================================= */
+
+@media (max-width: 1100px) {
+
+    .organization-grid {
+
+        grid-template-columns:
+            1fr;
 
     }
 
 
-    .brand {
+    .technical-grid {
 
-        padding-bottom: 18px;
+        grid-template-columns:
+            repeat(3, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .organization-people {
+
+        grid-template-columns:
+            1fr;
 
     }
 
 
-    .menu {
+    .technical-grid {
 
-        margin-top: 15px;
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .organization-grid {
+
+        grid-template-columns:
+            1fr;
 
     }
 
 
-    .sidebar-footer {
+    .technical-grid {
 
-        display: none;
-
-    }
-
-
-    .main {
-
-        margin-left: 0;
-
-        padding:
-            28px 18px;
+        grid-template-columns:
+            1fr;
 
     }
 
 
-    .page-title h1 {
+    .organization-card {
 
-        font-size: 23px;
-
-    }
-
-
-    .link-grid {
-
-        grid-template-columns: 1fr;
+        min-height: 75px;
 
     }
 

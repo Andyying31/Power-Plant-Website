@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -16,7 +15,6 @@
         rel="stylesheet"
         href="style.css"
     >
-
 </head>
 
 
@@ -30,7 +28,7 @@
     <aside class="sidebar">
 
 
-        <!-- 公司名称 -->
+        <!-- 品牌 -->
 
         <div class="brand">
 
@@ -55,48 +53,51 @@
 
 
 
-        <!-- 导航菜单 -->
+        <!-- =====================================
+             左侧菜单
+        ====================================== -->
 
         <nav class="menu">
 
 
-            <!-- 目前只有会议 -->
-
             <button
                 class="menu-item active"
-                data-category="会议"
+                data-page="home"
             >
+                <span>
+                    主页
+                </span>
+            </button>
 
+
+            <button
+                class="menu-item"
+                data-page="meeting"
+            >
                 <span>
                     会议
                 </span>
-
             </button>
 
 
-            <!--
-            以后可以继续增加：
-
             <button
                 class="menu-item"
-                data-category="行政"
+                data-page="daily"
             >
                 <span>
-                    行政
+                    日报
                 </span>
             </button>
 
 
             <button
                 class="menu-item"
-                data-category="采购"
+                data-page="roster"
             >
                 <span>
-                    采购
+                    花名册
                 </span>
             </button>
-
-            -->
 
 
         </nav>
@@ -123,19 +124,22 @@
     <main class="main">
 
 
-        <!-- 顶部 -->
+        <!-- =====================================
+             顶部
+        ====================================== -->
 
         <header class="topbar">
 
 
             <div class="page-title">
 
-                <h1>
+                <h1 id="page-title">
                     沙巴光伏自备电厂导航
                 </h1>
 
-                <p>
-                    常用业务系统快捷入口
+
+                <p id="page-subtitle">
+                    部门常用业务入口
                 </p>
 
             </div>
@@ -149,6 +153,7 @@
                 <span class="search-symbol">
                     搜索
                 </span>
+
 
                 <input
                     type="text"
@@ -164,19 +169,142 @@
 
 
         <!-- =====================================
-             内容
+             主页
         ====================================== -->
 
-        <section class="content">
+        <section
+            class="content page-panel active-page"
+            id="home-page"
+        >
 
 
-            <!-- 模块标题 -->
+            <div class="section-heading">
+
+                <h2>
+                    主页
+                </h2>
+
+
+                <p>
+                    选择需要进入的功能模块
+                </p>
+
+            </div>
+
+
+
+            <div class="home-grid">
+
+
+                <!-- 会议 -->
+
+                <button
+                    class="home-card searchable"
+                    data-open-page="meeting"
+                >
+
+                    <div class="home-card-main">
+
+                        <h3>
+                            会议
+                        </h3>
+
+
+                        <p>
+                            月计划、消缺单、会议纪要及会议室预订
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-arrow">
+                        →
+                    </div>
+
+                </button>
+
+
+
+                <!-- 日报 -->
+
+                <button
+                    class="home-card searchable"
+                    data-open-page="daily"
+                >
+
+                    <div class="home-card-main">
+
+                        <h3>
+                            日报
+                        </h3>
+
+
+                        <p>
+                            进入日报相关内容
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-arrow">
+                        →
+                    </div>
+
+                </button>
+
+
+
+                <!-- 花名册 -->
+
+                <button
+                    class="home-card searchable"
+                    data-open-page="roster"
+                >
+
+                    <div class="home-card-main">
+
+                        <h3>
+                            花名册
+                        </h3>
+
+
+                        <p>
+                            查看人员花名册
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-arrow">
+                        →
+                    </div>
+
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================
+             会议
+        ====================================== -->
+
+        <section
+            class="content page-panel"
+            id="meeting-page"
+        >
+
 
             <div class="section-heading">
 
                 <h2>
                     会议
                 </h2>
+
 
                 <p>
                     会议相关业务快捷入口
@@ -186,25 +314,19 @@
 
 
 
-            <!-- =====================================
-                 会议链接
-            ====================================== -->
-
             <div
                 id="meeting-links"
                 class="link-grid"
             >
 
 
-                <!-- ===============================
-                     月计划
-                ================================ -->
+                <!-- 月计划 -->
 
                 <a
                     href="https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -212,6 +334,7 @@
                         <h3>
                             月计划
                         </h3>
+
 
                         <p>
                             月计划和周计划
@@ -228,15 +351,13 @@
 
 
 
-                <!-- ===============================
-                     消缺单
-                ================================ -->
+                <!-- 消缺单 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -244,6 +365,7 @@
                         <h3>
                             消缺单
                         </h3>
+
 
                         <p>
                             消缺单
@@ -260,15 +382,13 @@
 
 
 
-                <!-- ===============================
-                     会议纪要
-                ================================ -->
+                <!-- 会议纪要 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -276,6 +396,7 @@
                         <h3>
                             会议纪要
                         </h3>
+
 
                         <p>
                             查看及编辑会议纪要
@@ -292,15 +413,13 @@
 
 
 
-                <!-- ===============================
-                     会议室
-                ================================ -->
+                <!-- 会议室预订 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -308,6 +427,7 @@
                         <h3>
                             会议室预订
                         </h3>
+
 
                         <p>
                             查看会议室并进行预订
@@ -322,6 +442,92 @@
 
                 </a>
 
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================
+             日报
+        ====================================== -->
+
+        <section
+            class="content page-panel"
+            id="daily-page"
+        >
+
+
+            <div class="section-heading">
+
+                <h2>
+                    日报
+                </h2>
+
+
+                <p>
+                    日报相关业务入口
+                </p>
+
+            </div>
+
+
+
+            <div class="empty-state">
+
+                <h3>
+                    日报模块
+                </h3>
+
+
+                <p>
+                    这里已经预留好位置。后续可以把日报的 Lark 链接做成和会议一样的快捷卡片。
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================
+             花名册
+        ====================================== -->
+
+        <section
+            class="content page-panel"
+            id="roster-page"
+        >
+
+
+            <div class="section-heading">
+
+                <h2>
+                    花名册
+                </h2>
+
+
+                <p>
+                    人员信息查看入口
+                </p>
+
+            </div>
+
+
+
+            <div class="empty-state">
+
+                <h3>
+                    花名册模块
+                </h3>
+
+
+                <p>
+                    这里已经预留好位置。之后可以做成人员卡片、人员表格，或者直接连接 Lark 花名册。
+                </p>
 
             </div>
 

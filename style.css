@@ -6,16 +6,12 @@
     box-sizing: border-box;
 }
 
-
 html {
     scroll-behavior: smooth;
 }
 
-
 body {
-
     margin: 0;
-
     min-height: 100vh;
 
     font-family:
@@ -26,78 +22,56 @@ body {
         sans-serif;
 
     background: #f6f8fb;
-
     color: #1f2937;
-
 }
 
 
-
 /* =========================================
-   左侧导航
+   左侧
 ========================================= */
 
 .sidebar {
-
     position: fixed;
-
     left: 0;
-
     top: 0;
 
     width: 250px;
-
     height: 100vh;
 
     display: flex;
-
     flex-direction: column;
 
     padding: 28px 18px;
 
     background: #ffffff;
 
-    border-right:
-        1px solid #e5e9ef;
+    border-right: 1px solid #e5e9ef;
 
+    z-index: 100;
 }
 
 
-
-/* =========================================
-   品牌
-========================================= */
-
 .brand {
-
     display: flex;
-
     align-items: center;
 
     gap: 12px;
 
-    padding:
-        5px 8px 30px;
+    padding: 5px 8px 30px;
 
-    border-bottom:
-        1px solid #edf0f4;
-
+    border-bottom: 1px solid #edf0f4;
 }
 
 
 .brand-logo {
-
     width: 44px;
-
     height: 44px;
 
-    flex-shrink: 0;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
+
+    flex-shrink: 0;
 
     border-radius: 11px;
 
@@ -108,37 +82,28 @@ body {
             #4f46e5
         );
 
-    color: white;
+    color: #ffffff;
 
     font-size: 19px;
-
     font-weight: 700;
-
 }
 
 
 .brand-text h2 {
-
     margin: 0;
 
     font-size: 15px;
-
     font-weight: 600;
-
 }
 
 
 .brand-text p {
-
-    margin:
-        5px 0 0;
+    margin: 5px 0 0;
 
     color: #9aa3b2;
 
     font-size: 11px;
-
 }
-
 
 
 /* =========================================
@@ -146,27 +111,21 @@ body {
 ========================================= */
 
 .menu {
-
     margin-top: 25px;
 
     display: flex;
-
     flex-direction: column;
 
     gap: 5px;
-
 }
 
 
 .menu-item {
-
     width: 100%;
 
-    padding:
-        12px 15px;
+    padding: 12px 15px;
 
     border: none;
-
     border-radius: 9px;
 
     background: transparent;
@@ -174,7 +133,6 @@ body {
     color: #596273;
 
     font-family: inherit;
-
     font-size: 14px;
 
     text-align: left;
@@ -184,41 +142,32 @@ body {
     transition:
         background 0.2s ease,
         color 0.2s ease;
-
 }
 
 
 .menu-item:hover {
-
     background: #f4f7fb;
-
 }
 
 
 .menu-item.active {
-
     background: #edf4ff;
 
     color: #1677ff;
 
     font-weight: 600;
-
 }
 
 
 .sidebar-footer {
-
     margin-top: auto;
 
-    padding:
-        15px 8px 5px;
+    padding: 15px 8px 5px;
 
     color: #a4acb8;
 
     font-size: 11px;
-
 }
-
 
 
 /* =========================================
@@ -226,16 +175,12 @@ body {
 ========================================= */
 
 .main {
-
     margin-left: 250px;
 
     min-height: 100vh;
 
-    padding:
-        42px 50px;
-
+    padding: 42px 50px;
 }
-
 
 
 /* =========================================
@@ -243,103 +188,79 @@ body {
 ========================================= */
 
 .topbar {
-
-    max-width: 1180px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     gap: 30px;
 
-    margin-bottom: 42px;
-
+    margin-bottom: 36px;
 }
 
 
 .page-title h1 {
-
     margin: 0;
 
     font-size: 28px;
-
     font-weight: 650;
-
 }
 
 
 .page-title p {
-
-    margin:
-        8px 0 0;
+    margin: 8px 0 0;
 
     color: #929baa;
 
     font-size: 13px;
-
 }
 
 
-
 /* =========================================
-   搜索框
+   搜索
 ========================================= */
 
 .search-box {
-
     width: 330px;
-
     height: 44px;
 
     display: flex;
-
     align-items: center;
 
     gap: 10px;
 
-    padding:
-        0 15px;
+    padding: 0 15px;
 
     background: #ffffff;
 
-    border:
-        1px solid #e1e6ed;
+    border: 1px solid #e1e6ed;
 
     border-radius: 10px;
-
 }
 
 
 .search-box:focus-within {
-
     border-color: #1677ff;
 
     box-shadow:
         0 0 0 3px
         rgba(22,119,255,0.08);
-
 }
 
 
 .search-symbol {
-
     color: #9aa3b2;
 
     font-size: 12px;
 
+    flex-shrink: 0;
 }
 
 
 .search-box input {
-
     width: 100%;
-
     height: 100%;
 
     border: none;
-
     outline: none;
 
     background: transparent;
@@ -347,517 +268,406 @@ body {
     font-family: inherit;
 
     font-size: 13px;
-
 }
 
 
-
 /* =========================================
-   页面显示 / 隐藏
+   页面切换
 ========================================= */
 
 .page-section {
-
     display: none;
-
-    max-width: 1180px;
-
 }
 
 
 .page-section.active-page {
-
     display: block;
-
 }
 
 
 .search-hidden {
-
     display: none !important;
-
 }
 
 
-
 /* =========================================
-   主页介绍
+   组织结构横向区域
 ========================================= */
 
-.home-intro {
+.org-scroll {
+    width: 100%;
 
-    min-height: 125px;
+    overflow-x: auto;
+    overflow-y: hidden;
 
-    padding:
-        26px 30px;
+    padding-bottom: 15px;
+}
+
+
+/* 整张组织图 */
+
+.org-board {
+    position: relative;
+
+    min-width: 1500px;
+
+    padding: 24px 24px 45px;
+
+    background: #ffffff;
+
+    border: 1px solid #e1e6ed;
+
+    border-radius: 15px;
+}
+
+
+/* =========================================
+   顶部 LOGO + 标题
+========================================= */
+
+.org-board-header {
+    display: flex;
+
+    align-items: center;
+
+    gap: 45px;
+
+    margin-bottom: 15px;
+}
+
+
+.kibing-logo {
+    width: 310px;
 
     display: flex;
 
     align-items: center;
 
-    justify-content: space-between;
+    gap: 12px;
 
-    gap: 30px;
-
-    margin-bottom: 18px;
-
-    background: #ffffff;
-
-    border:
-        1px solid #e5e9ef;
-
-    border-radius: 14px;
-
+    padding-left: 35px;
 }
 
 
-.home-label {
+.kibing-mark {
+    color: #55a63c;
 
-    margin-bottom: 7px;
+    font-size: 42px;
 
-    color: #1677ff;
-
-    font-size: 10px;
-
-    font-weight: 600;
-
-    letter-spacing: 1.6px;
-
+    transform: rotate(45deg);
 }
 
 
-.home-intro h2 {
+.kibing-logo strong {
+    display: block;
 
-    margin: 0;
-
-    color: #273142;
+    color: #171717;
 
     font-size: 25px;
 
-    font-weight: 650;
-
+    font-weight: 700;
 }
 
 
-.home-intro p {
+.kibing-logo span {
+    display: block;
 
-    margin:
-        7px 0 0;
+    margin-top: 2px;
 
-    color: #9aa3b2;
+    color: #222222;
 
-    font-size: 11px;
-
-}
-
-
-.home-intro-side {
-
-    padding:
-        8px 13px;
-
-    border-radius: 7px;
-
-    background: #edf4ff;
-
-    color: #1677ff;
-
-    font-size: 11px;
+    font-size: 15px;
 
     font-weight: 600;
-
 }
 
 
+.org-title-box {
+    min-width: 710px;
 
-/* =========================================
-   组织架构整体
-========================================= */
+    padding: 7px 12px;
 
-.org-overview {
+    background: #0da8df;
 
-    padding:
-        27px 28px 32px;
+    color: #ffffff;
 
-    background: #ffffff;
-
-    border:
-        1px solid #e5e9ef;
-
-    border-radius: 14px;
-
+    line-height: 1.1;
 }
 
 
-.org-header {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding-bottom: 22px;
-
-    border-bottom:
-        1px solid #edf0f4;
-
+.org-title-box div {
+    font-size: 24px;
 }
 
 
-.org-header h3 {
+.org-title-box strong {
+    display: block;
 
-    margin: 0;
+    margin-top: 4px;
 
-    color: #273142;
+    font-size: 27px;
 
-    font-size: 17px;
-
-    font-weight: 600;
-
+    font-weight: 700;
 }
-
-
-.org-header p {
-
-    margin:
-        6px 0 0;
-
-    color: #9aa3b2;
-
-    font-size: 11px;
-
-}
-
-
-
-/* =========================================
-   查看花名册
-========================================= */
-
-.view-roster {
-
-    padding:
-        9px 13px;
-
-    border:
-        1px solid #dfe5ed;
-
-    border-radius: 8px;
-
-    background: #ffffff;
-
-    color: #667085;
-
-    font-family: inherit;
-
-    font-size: 11px;
-
-    cursor: pointer;
-
-    transition:
-        border-color 0.2s ease,
-        color 0.2s ease,
-        background 0.2s ease;
-
-}
-
-
-.view-roster span {
-
-    margin-left: 7px;
-
-}
-
-
-.view-roster:hover {
-
-    border-color: #bcd2f3;
-
-    background: #f8fbff;
-
-    color: #1677ff;
-
-}
-
 
 
 /* =========================================
    经理
 ========================================= */
 
-.manager-area {
-
+.director-row {
     display: flex;
-
     justify-content: center;
 
-    padding-top: 28px;
-
+    margin-top: 14px;
 }
 
 
-.manager-card {
+.director-card {
+    width: 205px;
 
-    width: 230px;
-
-    padding:
-        16px 20px;
+    padding: 9px 12px;
 
     text-align: center;
 
-    background: #f8fbff;
+    background: #f8be00;
 
-    border:
-        1px solid #cfe0f7;
-
-    border-radius: 10px;
-
+    color: #ffffff;
 }
 
 
-.org-role {
+.director-card span {
+    display: block;
 
-    margin-bottom: 6px;
+    font-size: 12px;
+}
 
-    color: #1677ff;
 
-    font-size: 10px;
+.director-card strong {
+    font-size: 14px;
+
+    margin-right: 4px;
+}
+
+
+.director-card small {
+    font-size: 11px;
 
     font-weight: 600;
-
 }
 
 
-.manager-name {
-
-    color: #273142;
-
-    font-size: 17px;
-
-    font-weight: 650;
-
-}
-
-
-.manager-en {
-
-    margin-top: 4px;
-
-    color: #929baa;
-
-    font-size: 9px;
-
-}
-
-
-
-/* =========================================
-   组织线
-========================================= */
-
-.org-main-line {
-
+.director-line {
     width: 1px;
-
-    height: 30px;
+    height: 22px;
 
     margin: 0 auto;
 
-    background: #cfd6df;
-
+    background: #303030;
 }
 
 
-
 /* =========================================
-   三大分支
+   三大分支连接线
 ========================================= */
 
-.org-branches {
-
+.main-branch-line {
     position: relative;
 
+    width: calc(100% - 110px);
+    height: 1px;
+
+    margin: 0 auto 13px;
+
+    background: #303030;
+}
+
+
+.main-branches {
     display: grid;
 
     grid-template-columns:
-        repeat(3, 1fr);
+        1fr
+        4fr
+        1fr;
 
-    gap: 18px;
+    align-items: start;
 
-    padding-top: 28px;
-
+    margin-bottom: 25px;
 }
 
 
-/* 横线 */
+.main-branch-card {
+    width: 150px;
 
-.org-branches::before {
-
-    content: "";
-
-    position: absolute;
-
-    left: 16.66%;
-
-    right: 16.66%;
-
-    top: 0;
-
-    height: 1px;
-
-    background: #cfd6df;
-
-}
-
-
-.org-branch {
-
-    position: relative;
-
-}
-
-
-.branch-top-line {
-
-    position: absolute;
-
-    left: 50%;
-
-    top: -28px;
-
-    width: 1px;
-
-    height: 28px;
-
-    background: #cfd6df;
-
-}
-
-
-
-/* =========================================
-   分支负责人卡
-========================================= */
-
-.branch-head {
-
-    min-height: 112px;
-
-    padding:
-        18px 16px;
+    padding: 8px 8px;
 
     text-align: center;
 
-    background: #ffffff;
+    justify-self: center;
 
-    border:
-        1px solid #dfe5ed;
+    background: #0da8df;
 
-    border-radius: 10px;
-
+    color: #ffffff;
 }
 
 
-.branch-title {
-
-    margin-bottom: 11px;
-
-    color: #1677ff;
+.main-branch-card span {
+    display: block;
 
     font-size: 12px;
 
     font-weight: 600;
-
 }
 
 
-.branch-person {
+.main-branch-card strong {
+    display: block;
 
-    color: #273142;
+    margin-top: 2px;
 
-    font-size: 15px;
-
-    font-weight: 600;
-
+    font-size: 12px;
 }
-
-
-.branch-position {
-
-    margin-top: 5px;
-
-    color: #9aa3b2;
-
-    font-size: 10px;
-
-}
-
 
 
 /* =========================================
-   下方岗位
+   九列人员
 ========================================= */
 
-.branch-list {
+.org-columns {
+    display: grid;
 
+    grid-template-columns:
+        repeat(9, minmax(130px, 1fr));
+
+    gap: 12px;
+
+    align-items: start;
+}
+
+
+.org-column {
     display: flex;
-
     flex-direction: column;
 
     gap: 8px;
-
-    margin-top: 10px;
-
 }
 
 
-.branch-item {
+/* =========================================
+   岗位标题
+========================================= */
 
-    min-height: 63px;
+.column-head {
+    min-height: 58px;
 
-    padding:
-        12px 13px;
+    padding: 7px 8px;
 
-    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
 
-    border:
-        1px solid #edf0f4;
+    align-items: center;
+    justify-content: center;
 
-    border-radius: 8px;
+    text-align: center;
 
+    background: #315aa8;
+
+    color: #ffffff;
 }
 
 
-.branch-item strong {
-
-    display: block;
-
-    color: #4b5563;
-
-    font-size: 11px;
+.column-head span {
+    font-size: 12px;
 
     font-weight: 600;
-
 }
 
 
-.branch-item span {
-
+.column-head strong {
     display: block;
 
-    margin-top: 5px;
+    font-size: 12px;
 
-    color: #9aa3b2;
+    line-height: 1.3;
+}
+
+
+.column-head small {
+    font-size: 10px;
+}
+
+
+/* =========================================
+   人员卡片
+========================================= */
+
+.person-card {
+    min-height: 43px;
+
+    padding: 6px 8px;
+
+    background: #89a9dd;
+
+    border: 1px solid #315aa8;
+
+    color: #ffffff;
+}
+
+
+.person-card strong {
+    display: inline;
 
     font-size: 9px;
 
-    line-height: 1.4;
-
+    font-weight: 600;
 }
 
+
+.person-card small {
+    display: inline;
+
+    margin-left: 2px;
+
+    font-size: 7px;
+
+    line-height: 1.15;
+}
+
+
+.person-card span {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 8px;
+}
+
+
+/* =========================================
+   鼠标经过
+========================================= */
+
+.person-card,
+.column-head,
+.main-branch-card,
+.director-card {
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.person-card:hover,
+.column-head:hover,
+.main-branch-card:hover,
+.director-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 12px
+        rgba(31,41,55,0.12);
+}
 
 
 /* =========================================
@@ -865,43 +675,34 @@ body {
 ========================================= */
 
 .section-heading {
-
     margin-bottom: 22px;
-
 }
 
 
 .section-heading h2 {
-
     margin: 0;
-
-    color: #273142;
 
     font-size: 21px;
 
     font-weight: 600;
-
 }
 
 
 .section-heading p {
-
-    margin:
-        7px 0 0;
+    margin: 7px 0 0;
 
     color: #9aa3b2;
 
     font-size: 13px;
-
 }
 
 
-
 /* =========================================
-   会议卡片
+   会议
 ========================================= */
 
 .link-grid {
+    max-width: 1050px;
 
     display: grid;
 
@@ -912,27 +713,22 @@ body {
         );
 
     gap: 16px;
-
 }
 
 
 .link-card {
-
     position: relative;
 
     min-height: 92px;
 
-    padding:
-        19px 22px;
+    padding: 19px 22px;
 
     display: flex;
-
     align-items: center;
 
     background: #ffffff;
 
-    border:
-        1px solid #e5e9ef;
+    border: 1px solid #e5e9ef;
 
     border-radius: 13px;
 
@@ -946,98 +742,73 @@ body {
         transform 0.2s ease,
         border-color 0.2s ease,
         box-shadow 0.2s ease;
-
 }
 
 
 .link-card::before {
-
     content: "";
 
     position: absolute;
 
     left: 0;
-
     top: 0;
 
     width: 3px;
-
     height: 100%;
 
     background: #1677ff;
 
     opacity: 0;
-
 }
 
 
 .link-card:hover {
-
-    transform:
-        translateY(-3px);
+    transform: translateY(-3px);
 
     border-color: #d5e2f7;
 
     box-shadow:
         0 9px 25px
         rgba(31,41,55,0.07);
-
 }
 
 
 .link-card:hover::before {
-
     opacity: 1;
-
 }
 
 
 .card-content {
-
     flex: 1;
 
     padding-right: 20px;
-
 }
 
 
 .card-content h3 {
-
     margin: 0;
-
-    color: #273142;
 
     font-size: 15px;
 
     font-weight: 600;
-
 }
 
 
 .card-content p {
-
-    margin:
-        7px 0 0;
+    margin: 7px 0 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
-
 }
 
 
 .card-arrow {
-
     width: 32px;
-
     height: 32px;
 
-    flex-shrink: 0;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
 
     border-radius: 50%;
@@ -1047,152 +818,77 @@ body {
     color: #9aa3b2;
 
     font-size: 17px;
-
 }
-
-
-.link-card:hover .card-arrow {
-
-    background: #edf4ff;
-
-    color: #1677ff;
-
-}
-
 
 
 /* =========================================
-   日报 / 花名册空白
+   日报 / 花名册
 ========================================= */
 
 .empty-panel {
+    max-width: 1050px;
 
     min-height: 180px;
 
-    padding:
-        32px;
+    padding: 32px;
 
     background: #ffffff;
 
-    border:
-        1px solid #e5e9ef;
+    border: 1px solid #e5e9ef;
 
     border-radius: 13px;
-
-}
-
-
-.empty-title {
-
-    color: #273142;
-
-    font-size: 15px;
-
-    font-weight: 600;
-
 }
 
 
 .empty-panel p {
-
-    margin:
-        9px 0 0;
+    margin: 9px 0 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
-
 }
 
 
-
 /* =========================================
-   Footer
+   footer
 ========================================= */
 
 footer {
+    margin-top: 55px;
 
-    max-width: 1180px;
+    padding-top: 18px;
 
-    margin-top: 65px;
-
-    padding-top: 20px;
-
-    border-top:
-        1px solid #e8ecf1;
+    border-top: 1px solid #e8ecf1;
 
     color: #a0a8b4;
 
     font-size: 11px;
-
 }
-
 
 
 /* =========================================
    平板
 ========================================= */
 
-@media (max-width: 950px) {
-
-    .org-branches {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
-    .org-branches::before {
-
-        display: none;
-
-    }
-
-
-    .branch-top-line {
-
-        display: none;
-
-    }
-
-
-    .org-main-line {
-
-        display: none;
-
-    }
-
-
-}
-
-
 @media (max-width: 850px) {
 
-    .link-grid {
-
-        grid-template-columns: 1fr;
-
-    }
-
-
     .topbar {
-
         flex-direction: column;
 
         align-items: flex-start;
-
     }
 
 
     .search-box {
-
         width: 100%;
-
     }
 
 
-}
+    .link-grid {
+        grid-template-columns: 1fr;
+    }
 
+}
 
 
 /* =========================================
@@ -1202,68 +898,31 @@ footer {
 @media (max-width: 650px) {
 
     .sidebar {
-
         position: relative;
 
         width: 100%;
-
         height: auto;
 
         border-right: none;
 
-        border-bottom:
-            1px solid #e5e9ef;
-
+        border-bottom: 1px solid #e5e9ef;
     }
 
 
     .sidebar-footer {
-
         display: none;
-
     }
 
 
     .main {
-
         margin-left: 0;
 
-        padding:
-            28px 18px;
-
+        padding: 28px 18px;
     }
 
 
     .page-title h1 {
-
         font-size: 23px;
-
     }
-
-
-    .home-intro {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
-    }
-
-
-    .org-header {
-
-        flex-direction: column;
-
-        align-items: flex-start;
-
-    }
-
-
-    .manager-card {
-
-        width: 100%;
-
-    }
-
 
 }

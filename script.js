@@ -4,7 +4,7 @@ document.addEventListener(
 
 
         // ========================================
-        // 找到网页元素
+        // 找到左边菜单
         // ========================================
 
         const menuItems =
@@ -13,23 +13,23 @@ document.addEventListener(
             );
 
 
-        const pageSections =
+        // 找到所有页面
+
+        const pages =
             document.querySelectorAll(
                 ".page-section"
             );
 
 
-        const openPageButtons =
-            document.querySelectorAll(
-                "[data-open-page]"
-            );
-
+        // 搜索框
 
         const searchInput =
             document.getElementById(
                 "search"
             );
 
+
+        // 顶部标题
 
         const pageTitle =
             document.getElementById(
@@ -45,7 +45,7 @@ document.addEventListener(
 
 
         // ========================================
-        // 每个页面标题
+        // 每个页面的标题
         // ========================================
 
         const pageInformation = {
@@ -57,10 +57,10 @@ document.addEventListener(
                     "沙巴光伏自备电厂导航",
 
                 subtitle:
-                    "部门常用业务统一入口",
+                    "自备电厂部组织结构",
 
                 search:
-                    "搜索人员或岗位..."
+                    "搜索姓名或岗位..."
 
             },
 
@@ -99,10 +99,10 @@ document.addEventListener(
                     "花名册",
 
                 subtitle:
-                    "自备电厂部人员及岗位信息",
+                    "部门人员信息",
 
                 search:
-                    "搜索人员或岗位..."
+                    "搜索人员..."
 
             }
 
@@ -125,16 +125,14 @@ document.addEventListener(
 
 
             if (!targetPage) {
-
                 return;
-
             }
 
 
 
-            // 隐藏所有页面
+            // 所有页面先隐藏
 
-            pageSections.forEach(
+            pages.forEach(
                 function (page) {
 
                     page.classList.remove(
@@ -146,7 +144,7 @@ document.addEventListener(
 
 
 
-            // 显示目标页面
+            // 显示当前页面
 
             targetPage.classList.add(
                 "active-page"
@@ -154,7 +152,7 @@ document.addEventListener(
 
 
 
-            // 左边菜单取消 active
+            // 左边所有按钮取消蓝色
 
             menuItems.forEach(
                 function (item) {
@@ -168,9 +166,9 @@ document.addEventListener(
 
 
 
-            // 找到当前菜单
+            // 当前按钮变蓝
 
-            const activeMenu =
+            const currentMenu =
                 document.querySelector(
                     '.menu-item[data-page="' +
                     pageName +
@@ -178,9 +176,9 @@ document.addEventListener(
                 );
 
 
-            if (activeMenu) {
+            if (currentMenu) {
 
-                activeMenu.classList.add(
+                currentMenu.classList.add(
                     "active"
                 );
 
@@ -190,26 +188,24 @@ document.addEventListener(
 
             // 修改顶部标题
 
-            const information =
+            const info =
                 pageInformation[
                     pageName
                 ];
 
 
-            if (information) {
-
+            if (info) {
 
                 pageTitle.textContent =
-                    information.title;
+                    info.title;
 
 
                 pageSubtitle.textContent =
-                    information.subtitle;
+                    info.subtitle;
 
 
                 searchInput.placeholder =
-                    information.search;
-
+                    info.search;
 
             }
 
@@ -230,13 +226,12 @@ document.addEventListener(
                 0
             );
 
-
         }
 
 
 
         // ========================================
-        // 左边菜单点击
+        // 左边按钮点击
         // ========================================
 
         menuItems.forEach(
@@ -251,40 +246,6 @@ document.addEventListener(
                         const pageName =
                             this.getAttribute(
                                 "data-page"
-                            );
-
-
-                        openPage(
-                            pageName
-                        );
-
-
-                    }
-                );
-
-
-            }
-        );
-
-
-
-        // ========================================
-        // 页面里面的跳转按钮
-        // 例如：查看完整花名册
-        // ========================================
-
-        openPageButtons.forEach(
-            function (button) {
-
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-
-                        const pageName =
-                            this.getAttribute(
-                                "data-open-page"
                             );
 
 
@@ -324,10 +285,9 @@ document.addEventListener(
 
 
                 if (!activePage) {
-
                     return;
-
                 }
+
 
 
                 const searchableItems =
@@ -352,19 +312,17 @@ document.addEventListener(
                             )
                         ) {
 
-
                             item.classList.remove(
                                 "search-hidden"
                             );
 
+                        }
 
-                        } else {
-
+                        else {
 
                             item.classList.add(
                                 "search-hidden"
                             );
-
 
                         }
 
@@ -379,7 +337,7 @@ document.addEventListener(
 
 
         // ========================================
-        // 清除搜索隐藏
+        // 清除搜索
         // ========================================
 
         function resetSearch() {
@@ -401,14 +359,12 @@ document.addEventListener(
                     }
                 );
 
-
         }
 
 
 
         // ========================================
-        // 第一次打开网站
-        // 默认主页
+        // 网站打开默认主页
         // ========================================
 
         openPage(

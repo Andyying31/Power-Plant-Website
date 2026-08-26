@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>沙巴光伏自备电厂导航</title>
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 
 <body>
@@ -147,6 +147,7 @@
                             <div class="person-card searchable"><strong>尼乔</strong><small>NEILTON JOEL VENEDDEY VENCENT</small><span>电气工程</span></div>
                             <div class="person-card searchable"><strong>李英杰</strong><small>BRANDON LEE ING JAK</small><span>电气工程</span></div>
                             <div class="person-card searchable"><strong>奈旻</strong><small>ABDUL NAIM BIN HENDRY</small><span>电气工程</span></div>
+                            <div class="person-card searchable"><strong>里祖安</strong><small>RIZUAN BIN AJAK</small><span>电气工程</span></div>
                         </div>
 
                         <div class="org-column">
@@ -162,6 +163,7 @@
                             <div class="person-card searchable"><strong>雷克斯</strong><small>LEX CORNARD LAWRENCE</small><span>电厂机械工</span></div>
                             <div class="person-card searchable"><strong>林志梁</strong><small>LIM ZHI LIANG</small><span>电厂助理工程师</span></div>
                             <div class="person-card searchable"><strong>张训豪</strong><small>CHONG SOON HAU</small><span>文员</span></div>
+                            <div class="person-card searchable"><strong>马哈迪</strong><small>MAHADHIR BIN ABD KARIM</small><span>机械工业</span></div>
                             <div class="person-card searchable"><strong>尔钻夏</strong><small>MOHAMMAD ELZUANSYAH</small><span>机械工业</span></div>
                             <div class="person-card searchable"><strong>安德仁</strong><small>ADRIAN FARHAN BIN FAIZAL</small><span>机械工业</span></div>
                         </div>
@@ -182,14 +184,14 @@
 
             <div class="link-grid">
 
-                <a href="https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd"
-                   target="_blank" rel="noopener noreferrer" class="link-card searchable">
+                <button type="button" id="month-plan-button"
+                        class="link-card month-plan-card searchable">
                     <div class="card-content">
                         <h3>月计划</h3>
-                        <p>月计划和周计划</p>
+                        <p>选择年份和月份后打开对应的 Lark 月计划</p>
                     </div>
                     <div class="card-arrow">→</div>
-                </a>
+                </button>
 
                 <a href="https://www.larksuite.com/" target="_blank"
                    rel="noopener noreferrer" class="link-card searchable">
@@ -400,6 +402,17 @@
             <td class="roster-position">电厂电工 POWER PLANT ELECTRICAL TECHNICIAN</td>
             <td>技术员</td>
             <td><span class="status-tag status-probation">试用</span></td>
+        </tr>
+    
+
+        <tr class="roster-row searchable" data-category="维护" data-status="离职">
+            <td class="col-no">9</td>
+            <td class="col-id">M44859</td>
+            <td class="roster-name">马哈迪 MAHADHIR BIN ABD KARIM</td>
+            <td><span class="category-tag cat-maintenance">维护</span></td>
+            <td class="roster-position">电厂机械工 POWER PLANT MECHANICAL TECHNICIAN</td>
+            <td>技术员</td>
+            <td><span class="status-tag status-left">离职</span></td>
         </tr>
     
 
@@ -620,6 +633,17 @@
             <td class="roster-position">电厂巡检员 POWER PLANT PATROL INSPECTOR</td>
             <td>技术员</td>
             <td><span class="status-tag status-official">正式</span></td>
+        </tr>
+    
+
+        <tr class="roster-row searchable" data-category="维护" data-status="离职">
+            <td class="col-no">30</td>
+            <td class="col-id">M45041</td>
+            <td class="roster-name">里祖安 Rizuan Bin Ajak</td>
+            <td><span class="category-tag cat-maintenance">维护</span></td>
+            <td class="roster-position">电厂电工 POWER PLANT ELECTRICAL TECHNICIAN</td>
+            <td>技术员</td>
+            <td><span class="status-tag status-left">离职</span></td>
         </tr>
     
 
@@ -855,7 +879,38 @@
         <footer>© 2026 沙巴光伏自备电厂</footer>
     </main>
 
-    <script src="script.js?v=8"></script>
+
+    <!-- ===================== 月计划年月选择窗口 ===================== -->
+    <div id="month-plan-modal" class="month-modal" aria-hidden="true">
+        <div class="month-modal-backdrop" data-month-modal-close></div>
+
+        <div class="month-modal-panel" role="dialog" aria-modal="true"
+             aria-labelledby="month-modal-title">
+
+            <div class="month-modal-header">
+                <div>
+                    <h2 id="month-modal-title">月计划</h2>
+                    <p>请选择需要查看的年份和月份</p>
+                </div>
+
+                <button type="button" class="month-modal-close"
+                        data-month-modal-close aria-label="关闭">×</button>
+            </div>
+
+            <div class="month-year-row">
+                <label for="month-plan-year">年份</label>
+                <select id="month-plan-year"></select>
+            </div>
+
+            <div id="month-plan-grid" class="month-grid"></div>
+
+            <div class="month-modal-note">
+                灰色月份表示暂未设置月计划链接。
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=9"></script>
 </body>
 
 </html>

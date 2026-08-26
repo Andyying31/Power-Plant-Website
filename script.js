@@ -174,5 +174,124 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
+
+    // ========================================
+    // 月计划：年份 / 月份选择
+    // ========================================
+
+    const monthPlanLinks = {
+        "2026-08": "https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd?sheet=0XXsMf"
+    };
+
+    const monthPlanButton = document.getElementById("month-plan-button");
+    const monthPlanModal = document.getElementById("month-plan-modal");
+    const monthPlanYear = document.getElementById("month-plan-year");
+    const monthPlanGrid = document.getElementById("month-plan-grid");
+    const monthModalCloseButtons = document.querySelectorAll("[data-month-modal-close]");
+
+    function getMonthPlanYears() {
+        const years = Object.keys(monthPlanLinks).map(function (key) {
+            return key.split("-")[0];
+        });
+
+        return Array.from(new Set(years)).sort(function (a, b) {
+            return Number(b) - Number(a);
+        });
+    }
+
+    function prepareMonthPlanYears() {
+        if (!monthPlanYear) return;
+
+        const years = getMonthPlanYears();
+        monthPlanYear.innerHTML = "";
+
+        years.forEach(function (year) {
+            const option = document.createElement("option");
+            option.value = year;
+            option.textContent = year + "年";
+            monthPlanYear.appendChild(option);
+        });
+
+        const currentYear = String(new Date().getFullYear());
+        if (years.includes(currentYear)) {
+            monthPlanYear.value = currentYear;
+        }
+    }
+
+    function renderMonthPlanMonths() {
+        if (!monthPlanGrid || !monthPlanYear) return;
+
+        const year = monthPlanYear.value;
+        monthPlanGrid.innerHTML = "";
+
+        for (let month = 1; month <= 12; month += 1) {
+            const monthText = String(month).padStart(2, "0");
+            const key = year + "-" + monthText;
+            const url = monthPlanLinks[key];
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "month-choice";
+
+            const monthName = document.createElement("strong");
+            monthName.textContent = month + "月";
+
+            const status = document.createElement("span");
+
+            if (url) {
+                button.classList.add("available");
+                status.textContent = "打开月计划";
+
+                button.addEventListener("click", function () {
+                    window.open(url, "_blank", "noopener,noreferrer");
+                    closeMonthPlanModal();
+                });
+            } else {
+                button.disabled = true;
+                status.textContent = "暂未设置";
+            }
+
+            button.appendChild(monthName);
+            button.appendChild(status);
+            monthPlanGrid.appendChild(button);
+        }
+    }
+
+    function openMonthPlanModal() {
+        if (!monthPlanModal) return;
+
+        prepareMonthPlanYears();
+        renderMonthPlanMonths();
+        monthPlanModal.classList.add("open");
+        monthPlanModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeMonthPlanModal() {
+        if (!monthPlanModal) return;
+
+        monthPlanModal.classList.remove("open");
+        monthPlanModal.setAttribute("aria-hidden", "true");
+    }
+
+    if (monthPlanButton) {
+        monthPlanButton.addEventListener("click", openMonthPlanModal);
+    }
+
+    if (monthPlanYear) {
+        monthPlanYear.addEventListener("change", renderMonthPlanMonths);
+    }
+
+    monthModalCloseButtons.forEach(function (button) {
+        button.addEventListener("click", closeMonthPlanModal);
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && monthPlanModal && monthPlanModal.classList.contains("open")) {
+            closeMonthPlanModal();
+        }
+    });
+
+
     openPage("home");
 });

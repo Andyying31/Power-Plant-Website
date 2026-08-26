@@ -2,20 +2,38 @@
 <html lang="zh-CN">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>沙巴光伏自备电厂导航</title>
 
-    <link rel="stylesheet" href="style.css?v=3">
+    <!--
+        ?v=4 是为了避免浏览器继续读取旧版 CSS
+    -->
+    <link
+        rel="stylesheet"
+        href="style.css?v=4"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- =========================
+
+    <!-- =========================================
          左侧导航
-    ========================== -->
+    ========================================== -->
+
     <aside class="sidebar">
+
+
+        <!-- 公司名称 -->
 
         <div class="brand">
 
@@ -23,15 +41,31 @@
                 光
             </div>
 
+
             <div class="brand-text">
-                <h2>沙巴光伏自备电厂</h2>
-                <p>系统导航</p>
+
+                <h2>
+                    沙巴光伏自备电厂
+                </h2>
+
+                <p>
+                    系统导航
+                </p>
+
             </div>
 
         </div>
 
 
+
+        <!-- =========================================
+             左侧菜单
+        ========================================== -->
+
         <nav class="menu">
+
+
+            <!-- 主页 -->
 
             <button
                 type="button"
@@ -41,6 +75,10 @@
                 主页
             </button>
 
+
+
+            <!-- 会议 -->
+
             <button
                 type="button"
                 class="menu-item"
@@ -48,6 +86,10 @@
             >
                 会议
             </button>
+
+
+
+            <!-- 日报 -->
 
             <button
                 type="button"
@@ -57,6 +99,10 @@
                 日报
             </button>
 
+
+
+            <!-- 花名册 -->
+
             <button
                 type="button"
                 class="menu-item"
@@ -65,30 +111,46 @@
                 花名册
             </button>
 
+
         </nav>
 
 
+
+        <!-- 左侧底部 -->
+
         <div class="sidebar-footer">
+
             内部业务导航
+
         </div>
+
 
     </aside>
 
 
 
-    <!-- =========================
-         主区域
-    ========================== -->
+    <!-- =========================================
+         右边主内容
+    ========================================== -->
+
     <main class="main">
 
-        <!-- 顶部 -->
+
+        <!-- =========================================
+             顶部
+        ========================================== -->
+
         <header class="topbar">
+
+
+            <!-- 标题 -->
 
             <div class="page-title">
 
                 <h1 id="page-title">
                     沙巴光伏自备电厂导航
                 </h1>
+
 
                 <p id="page-subtitle">
                     部门常用业务统一入口
@@ -97,11 +159,15 @@
             </div>
 
 
+
+            <!-- 搜索 -->
+
             <div class="search-box">
 
                 <span class="search-symbol">
                     搜索
                 </span>
+
 
                 <input
                     type="text"
@@ -111,172 +177,106 @@
 
             </div>
 
+
         </header>
 
 
 
-        <!-- ==================================================
+        <!-- =========================================
              主页
-        =================================================== -->
+
+             默认显示
+        ========================================== -->
+
         <section
             id="home-page"
             class="page-section active-page"
         >
 
-            <!-- 欢迎区域 -->
-            <div class="home-header">
 
-                <div class="home-header-text">
+            <div class="welcome-panel">
 
-                    <span class="home-label">
-                        POWER PLANT PORTAL
-                    </span>
 
-                    <h2>
-                        沙巴光伏自备电厂
-                    </h2>
+                <div class="welcome-small">
 
-                    <p>
-                        统一访问部门常用系统、业务资料及人员信息
-                    </p>
+                    POWER PLANT PORTAL
 
                 </div>
 
-            </div>
 
 
+                <h2>
 
-            <!-- 模块标题 -->
-            <div class="home-section-title">
+                    欢迎使用沙巴光伏自备电厂导航
 
-                <h3>
-                    常用模块
-                </h3>
+                </h2>
+
+
 
                 <p>
-                    选择需要进入的业务模块
+
+                    请从左侧导航栏选择需要进入的业务模块
+
                 </p>
 
+
+                <div class="welcome-line"></div>
+
+
+                <div class="welcome-info">
+
+                    <div>
+
+                        <span>
+                            系统
+                        </span>
+
+                        <strong>
+                            内部业务导航
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            部门
+                        </span>
+
+                        <strong>
+                            沙巴光伏自备电厂
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
             </div>
 
-
-
-            <!-- 首页模块 -->
-            <div class="module-grid">
-
-                <!-- 会议 -->
-                <button
-                    type="button"
-                    class="module-card searchable"
-                    data-open-page="meeting"
-                >
-
-                    <div class="module-number">
-                        01
-                    </div>
-
-                    <div class="module-content">
-
-                        <h3>
-                            会议
-                        </h3>
-
-                        <p>
-                            月计划、消缺单、会议纪要等
-                        </p>
-
-                    </div>
-
-                    <div class="module-enter">
-                        进入
-                        <span>→</span>
-                    </div>
-
-                </button>
-
-
-
-                <!-- 日报 -->
-                <button
-                    type="button"
-                    class="module-card searchable"
-                    data-open-page="daily"
-                >
-
-                    <div class="module-number">
-                        02
-                    </div>
-
-                    <div class="module-content">
-
-                        <h3>
-                            日报
-                        </h3>
-
-                        <p>
-                            日常运行及生产日报相关资料
-                        </p>
-
-                    </div>
-
-                    <div class="module-enter">
-                        进入
-                        <span>→</span>
-                    </div>
-
-                </button>
-
-
-
-                <!-- 花名册 -->
-                <button
-                    type="button"
-                    class="module-card searchable"
-                    data-open-page="roster"
-                >
-
-                    <div class="module-number">
-                        03
-                    </div>
-
-                    <div class="module-content">
-
-                        <h3>
-                            花名册
-                        </h3>
-
-                        <p>
-                            查看部门人员及岗位信息
-                        </p>
-
-                    </div>
-
-                    <div class="module-enter">
-                        进入
-                        <span>→</span>
-                    </div>
-
-                </button>
-
-            </div>
 
         </section>
 
 
 
-        <!-- ==================================================
+        <!-- =========================================
              会议
-        =================================================== -->
+        ========================================== -->
+
         <section
             id="meeting-page"
             class="page-section"
         >
+
 
             <div class="section-heading">
 
                 <h2>
                     会议
                 </h2>
+
 
                 <p>
                     会议相关业务快捷入口
@@ -285,10 +285,17 @@
             </div>
 
 
-            <div class="link-grid">
+
+            <div
+                id="meeting-links"
+                class="link-grid"
+            >
 
 
-                <!-- 月计划 -->
+                <!-- =================================
+                     月计划
+                ================================== -->
+
                 <a
                     href="https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd"
                     target="_blank"
@@ -296,11 +303,13 @@
                     class="link-card searchable"
                 >
 
+
                     <div class="card-content">
 
                         <h3>
                             月计划
                         </h3>
+
 
                         <p>
                             月计划和周计划
@@ -308,21 +317,27 @@
 
                     </div>
 
+
                     <div class="card-arrow">
                         →
                     </div>
+
 
                 </a>
 
 
 
-                <!-- 消缺单 -->
+                <!-- =================================
+                     消缺单
+                ================================== -->
+
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="link-card searchable"
                 >
+
 
                     <div class="card-content">
 
@@ -330,27 +345,34 @@
                             消缺单
                         </h3>
 
+
                         <p>
                             消缺单
                         </p>
 
                     </div>
 
+
                     <div class="card-arrow">
                         →
                     </div>
+
 
                 </a>
 
 
 
-                <!-- 会议纪要 -->
+                <!-- =================================
+                     会议纪要
+                ================================== -->
+
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
                     class="link-card searchable"
                 >
+
 
                     <div class="card-content">
 
@@ -358,21 +380,27 @@
                             会议纪要
                         </h3>
 
+
                         <p>
                             查看及编辑会议纪要
                         </p>
 
                     </div>
 
+
                     <div class="card-arrow">
                         →
                     </div>
+
 
                 </a>
 
 
 
-                <!-- 会议室预订 -->
+                <!-- =================================
+                     会议室预订
+                ================================== -->
+
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
@@ -380,11 +408,13 @@
                     class="link-card searchable"
                 >
 
+
                     <div class="card-content">
 
                         <h3>
                             会议室预订
                         </h3>
+
 
                         <p>
                             查看会议室并进行预订
@@ -392,31 +422,38 @@
 
                     </div>
 
+
                     <div class="card-arrow">
                         →
                     </div>
 
+
                 </a>
 
+
             </div>
+
 
         </section>
 
 
 
-        <!-- ==================================================
+        <!-- =========================================
              日报
-        =================================================== -->
+        ========================================== -->
+
         <section
             id="daily-page"
             class="page-section"
         >
+
 
             <div class="section-heading">
 
                 <h2>
                     日报
                 </h2>
+
 
                 <p>
                     日报相关业务入口
@@ -425,35 +462,43 @@
             </div>
 
 
-            <div class="placeholder-box">
 
-                <div class="placeholder-title">
+            <div class="empty-panel">
+
+
+                <div class="empty-title">
                     日报
                 </div>
 
+
                 <p>
-                    日报相关链接将在这里显示。
+                    日报内容暂未添加。
                 </p>
 
+
             </div>
+
 
         </section>
 
 
 
-        <!-- ==================================================
+        <!-- =========================================
              花名册
-        =================================================== -->
+        ========================================== -->
+
         <section
             id="roster-page"
             class="page-section"
         >
+
 
             <div class="section-heading">
 
                 <h2>
                     花名册
                 </h2>
+
 
                 <p>
                     部门人员及岗位信息
@@ -462,31 +507,49 @@
             </div>
 
 
-            <div class="placeholder-box">
 
-                <div class="placeholder-title">
+            <div class="empty-panel">
+
+
+                <div class="empty-title">
                     花名册
                 </div>
 
+
                 <p>
-                    人员花名册将在这里显示。
+                    花名册内容暂未添加。
                 </p>
 
+
             </div>
+
 
         </section>
 
 
 
+        <!-- =========================================
+             页脚
+        ========================================== -->
+
         <footer>
+
             © 2026 沙巴光伏自备电厂
+
         </footer>
+
 
     </main>
 
 
-    <!-- 加 ?v=3 防止继续读取旧 JS -->
-    <script src="script.js?v=3"></script>
+
+    <!--
+        ?v=4 是为了避免浏览器继续读取旧版 JS
+    -->
+
+    <script src="script.js?v=4"></script>
+
 
 </body>
+
 </html>

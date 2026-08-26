@@ -1,16 +1,23 @@
 /* =========================================
-   基础
+   全局设置
 ========================================= */
 
 * {
+
     box-sizing: border-box;
+
 }
+
 
 html {
+
     scroll-behavior: smooth;
+
 }
 
+
 body {
+
     margin: 0;
 
     min-height: 100vh;
@@ -25,38 +32,48 @@ body {
     background: #f6f8fb;
 
     color: #1f2937;
+
 }
 
 
+
 /* =========================================
-   左侧
+   左侧导航栏
 ========================================= */
 
 .sidebar {
+
     position: fixed;
 
     left: 0;
+
     top: 0;
 
     width: 250px;
-    height: 100vh;
 
-    padding: 28px 18px;
+    height: 100vh;
 
     display: flex;
 
     flex-direction: column;
 
+    padding: 28px 18px;
+
     background: #ffffff;
 
     border-right:
         1px solid #e5e9ef;
+
 }
 
 
-/* 品牌 */
+
+/* =========================================
+   公司名称
+========================================= */
 
 .brand {
+
     display: flex;
 
     align-items: center;
@@ -68,11 +85,15 @@ body {
 
     border-bottom:
         1px solid #edf0f4;
+
 }
 
 
+
 .brand-logo {
+
     width: 44px;
+
     height: 44px;
 
     flex-shrink: 0;
@@ -80,6 +101,7 @@ body {
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     border-radius: 11px;
@@ -96,33 +118,44 @@ body {
     font-size: 19px;
 
     font-weight: 700;
+
 }
 
 
+
 .brand-text h2 {
+
     margin: 0;
 
     font-size: 15px;
 
     font-weight: 600;
+
+    color: #1f2937;
+
 }
 
 
+
 .brand-text p {
+
     margin:
         5px 0 0;
 
     color: #9aa3b2;
 
     font-size: 11px;
+
 }
 
 
+
 /* =========================================
-   菜单
+   左侧菜单
 ========================================= */
 
 .menu {
+
     margin-top: 25px;
 
     display: flex;
@@ -130,10 +163,13 @@ body {
     flex-direction: column;
 
     gap: 5px;
+
 }
 
 
+
 .menu-item {
+
     width: 100%;
 
     padding:
@@ -158,24 +194,37 @@ body {
     transition:
         background 0.2s ease,
         color 0.2s ease;
+
 }
+
 
 
 .menu-item:hover {
+
     background: #f4f7fb;
+
 }
 
 
+
 .menu-item.active {
+
     background: #edf4ff;
 
     color: #1677ff;
 
     font-weight: 600;
+
 }
 
 
+
+/* =========================================
+   左侧最下面
+========================================= */
+
 .sidebar-footer {
+
     margin-top: auto;
 
     padding:
@@ -184,21 +233,26 @@ body {
     color: #a4acb8;
 
     font-size: 11px;
+
 }
 
 
+
 /* =========================================
-   主区域
+   右边主内容
 ========================================= */
 
 .main {
+
     margin-left: 250px;
 
     min-height: 100vh;
 
     padding:
         42px 50px;
+
 }
+
 
 
 /* =========================================
@@ -206,7 +260,8 @@ body {
 ========================================= */
 
 .topbar {
-    max-width: 1120px;
+
+    max-width: 1100px;
 
     display: flex;
 
@@ -216,39 +271,48 @@ body {
 
     gap: 30px;
 
-    margin-bottom: 42px;
+    margin-bottom: 45px;
+
 }
 
 
+
 .page-title h1 {
+
     margin: 0;
 
     font-size: 28px;
 
     font-weight: 650;
+
+    letter-spacing: 0.2px;
+
 }
 
 
+
 .page-title p {
+
     margin:
         8px 0 0;
 
     color: #929baa;
 
     font-size: 13px;
+
 }
 
 
+
 /* =========================================
-   搜索
+   搜索框
 ========================================= */
 
 .search-box {
-    width: 330px;
-    height: 44px;
 
-    padding:
-        0 15px;
+    width: 330px;
+
+    height: 44px;
 
     display: flex;
 
@@ -256,33 +320,52 @@ body {
 
     gap: 10px;
 
+    padding:
+        0 15px;
+
     background: #ffffff;
 
     border:
         1px solid #e1e6ed;
 
     border-radius: 10px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+
 }
 
 
+
 .search-box:focus-within {
+
     border-color: #1677ff;
 
     box-shadow:
         0 0 0 3px
         rgba(22,119,255,0.08);
+
 }
+
 
 
 .search-symbol {
+
+    flex-shrink: 0;
+
     color: #9aa3b2;
 
     font-size: 12px;
+
 }
 
 
+
 .search-box input {
+
     width: 100%;
+
     height: 100%;
 
     border: none;
@@ -293,252 +376,246 @@ body {
 
     font-family: inherit;
 
+    color: #374151;
+
     font-size: 13px;
 
-    color: #374151;
 }
 
 
+
+.search-box input::placeholder {
+
+    color: #a3abb7;
+
+}
+
+
+
 /* =========================================
-   页面切换
+   非常重要
+
+   所有页面默认隐藏
 ========================================= */
 
 .page-section {
+
     display: none;
 
     max-width: 1050px;
+
 }
 
+
+
+/* =========================================
+   只有当前页面才显示
+========================================= */
 
 .page-section.active-page {
+
     display: block;
+
 }
 
+
+
+/* =========================================
+   搜索隐藏
+========================================= */
 
 .search-hidden {
+
     display: none !important;
+
 }
 
 
+
 /* =========================================
-   首页顶部
+   主页
 ========================================= */
 
-.home-header {
-    min-height: 180px;
+.welcome-panel {
 
-    display: flex;
+    position: relative;
 
-    align-items: center;
+    min-height: 350px;
 
     padding:
-        34px 38px;
-
-    background: #ffffff;
-
-    border:
-        1px solid #e5e9ef;
-
-    border-radius: 15px;
-
-    margin-bottom: 34px;
-}
-
-
-.home-label {
-    display: block;
-
-    margin-bottom: 12px;
-
-    color: #1677ff;
-
-    font-size: 10px;
-
-    font-weight: 600;
-
-    letter-spacing: 1.6px;
-}
-
-
-.home-header h2 {
-    margin: 0;
-
-    font-size: 25px;
-
-    font-weight: 650;
-}
-
-
-.home-header p {
-    margin:
-        10px 0 0;
-
-    color: #8993a3;
-
-    font-size: 13px;
-}
-
-
-/* =========================================
-   首页模块标题
-========================================= */
-
-.home-section-title {
-    margin-bottom: 16px;
-}
-
-
-.home-section-title h3 {
-    margin: 0;
-
-    font-size: 17px;
-
-    font-weight: 600;
-}
-
-
-.home-section-title p {
-    margin:
-        6px 0 0;
-
-    font-size: 12px;
-
-    color: #9aa3b2;
-}
-
-
-/* =========================================
-   首页模块
-========================================= */
-
-.module-grid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 14px;
-}
-
-
-.module-card {
-    min-height: 175px;
-
-    padding:
-        20px 21px;
+        58px 55px;
 
     display: flex;
 
     flex-direction: column;
 
-    align-items: flex-start;
+    justify-content: center;
+
+    background: #ffffff;
 
     border:
         1px solid #e5e9ef;
 
-    border-radius: 13px;
+    border-radius: 16px;
 
-    background: #ffffff;
+    overflow: hidden;
 
-    font-family: inherit;
-
-    text-align: left;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
 }
 
 
-.module-card:hover {
-    transform:
-        translateY(-3px);
 
-    border-color: #ccdaf0;
+/* 主页右上角装饰 */
 
-    box-shadow:
-        0 10px 25px
-        rgba(31,41,55,0.06);
+.welcome-panel::after {
+
+    content: "";
+
+    position: absolute;
+
+    right: -100px;
+
+    top: -130px;
+
+    width: 330px;
+
+    height: 330px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(
+            22,
+            119,
+            255,
+            0.035
+        );
+
 }
 
 
-.module-number {
-    margin-bottom: 25px;
 
-    color: #a1aab7;
+.welcome-small {
+
+    position: relative;
+
+    z-index: 1;
+
+    margin-bottom: 16px;
+
+    color: #1677ff;
 
     font-size: 10px;
 
     font-weight: 600;
 
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+
 }
 
 
-.module-content {
-    flex: 1;
-}
 
+.welcome-panel h2 {
 
-.module-content h3 {
+    position: relative;
+
+    z-index: 1;
+
     margin: 0;
+
+    max-width: 650px;
 
     color: #273142;
 
-    font-size: 17px;
+    font-size: 29px;
 
-    font-weight: 600;
+    font-weight: 650;
+
 }
 
 
-.module-content p {
+
+.welcome-panel > p {
+
+    position: relative;
+
+    z-index: 1;
+
     margin:
-        8px 0 0;
+        14px 0 0;
 
     color: #929baa;
 
-    font-size: 11px;
+    font-size: 14px;
 
-    line-height: 1.6;
 }
 
 
-.module-enter {
+
+.welcome-line {
+
+    position: relative;
+
+    z-index: 1;
+
     width: 100%;
 
-    padding-top: 14px;
+    height: 1px;
 
-    border-top:
-        1px solid #edf0f4;
+    margin:
+        45px 0 24px;
+
+    background: #edf0f4;
+
+}
+
+
+
+.welcome-info {
+
+    position: relative;
+
+    z-index: 1;
 
     display: flex;
 
-    justify-content: space-between;
+    gap: 55px;
 
-    color: #7b8594;
-
-    font-size: 11px;
 }
 
 
-.module-enter span {
-    font-size: 15px;
 
-    transition:
-        transform 0.2s ease,
-        color 0.2s ease;
+.welcome-info div {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
 }
 
 
-.module-card:hover .module-enter span {
-    transform:
-        translateX(3px);
 
-    color: #1677ff;
+.welcome-info span {
+
+    color: #9aa3b2;
+
+    font-size: 10px;
+
 }
+
+
+
+.welcome-info strong {
+
+    color: #4b5563;
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+}
+
 
 
 /* =========================================
@@ -546,34 +623,46 @@ body {
 ========================================= */
 
 .section-heading {
+
     margin-bottom: 22px;
+
 }
 
 
+
 .section-heading h2 {
+
     margin: 0;
+
+    color: #273142;
 
     font-size: 21px;
 
     font-weight: 600;
+
 }
 
 
+
 .section-heading p {
+
     margin:
         7px 0 0;
 
     color: #9aa3b2;
 
     font-size: 13px;
+
 }
 
 
+
 /* =========================================
-   会议
+   会议卡片排列
 ========================================= */
 
 .link-grid {
+
     display: grid;
 
     grid-template-columns:
@@ -583,10 +672,17 @@ body {
         );
 
     gap: 16px;
+
 }
 
 
+
+/* =========================================
+   会议卡片
+========================================= */
+
 .link-card {
+
     position: relative;
 
     min-height: 92px;
@@ -615,76 +711,124 @@ body {
         transform 0.2s ease,
         border-color 0.2s ease,
         box-shadow 0.2s ease;
+
 }
 
 
+
+/* 卡片左边蓝色线 */
+
 .link-card::before {
+
     content: "";
 
     position: absolute;
 
     left: 0;
+
     top: 0;
 
     width: 3px;
+
     height: 100%;
 
     background: #1677ff;
 
     opacity: 0;
+
+    transition:
+        opacity 0.2s ease;
+
 }
+
 
 
 .link-card:hover {
+
     transform:
         translateY(-3px);
 
-    border-color: #d5e2f7;
+    border-color:
+        #d5e2f7;
 
     box-shadow:
         0 9px 25px
-        rgba(31,41,55,0.07);
+        rgba(
+            31,
+            41,
+            55,
+            0.07
+        );
+
 }
+
 
 
 .link-card:hover::before {
+
     opacity: 1;
+
 }
 
 
+
+/* =========================================
+   卡片文字
+========================================= */
+
 .card-content {
+
     flex: 1;
 
     padding-right: 20px;
+
 }
 
 
+
 .card-content h3 {
+
     margin: 0;
+
+    color: #273142;
 
     font-size: 15px;
 
     font-weight: 600;
+
 }
 
 
+
 .card-content p {
+
     margin:
         7px 0 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
+
 }
 
 
+
+/* =========================================
+   卡片箭头
+========================================= */
+
 .card-arrow {
+
     width: 32px;
+
     height: 32px;
+
+    flex-shrink: 0;
 
     display: flex;
 
     align-items: center;
+
     justify-content: center;
 
     border-radius: 50%;
@@ -694,23 +838,39 @@ body {
     color: #9aa3b2;
 
     font-size: 17px;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+
 }
+
 
 
 .link-card:hover .card-arrow {
+
     background: #edf4ff;
 
     color: #1677ff;
+
+    transform:
+        translateX(3px);
+
 }
 
 
+
 /* =========================================
-   暂未配置
+   日报 / 花名册暂时空白区域
 ========================================= */
 
-.placeholder-box {
+.empty-panel {
+
+    min-height: 180px;
+
     padding:
-        34px 30px;
+        32px;
 
     background: #ffffff;
 
@@ -718,31 +878,42 @@ body {
         1px solid #e5e9ef;
 
     border-radius: 13px;
+
 }
 
 
-.placeholder-title {
+
+.empty-title {
+
+    color: #273142;
+
     font-size: 15px;
 
     font-weight: 600;
+
 }
 
 
-.placeholder-box p {
+
+.empty-panel p {
+
     margin:
-        8px 0 0;
+        9px 0 0;
 
     color: #9aa3b2;
 
     font-size: 12px;
+
 }
 
 
+
 /* =========================================
-   Footer
+   页脚
 ========================================= */
 
 footer {
+
     max-width: 1050px;
 
     margin-top: 65px;
@@ -755,41 +926,43 @@ footer {
     color: #a0a8b4;
 
     font-size: 11px;
+
 }
+
 
 
 /* =========================================
    平板
 ========================================= */
 
-@media (max-width: 950px) {
-
-    .module-grid {
-        grid-template-columns: 1fr;
-    }
-
-}
-
-
 @media (max-width: 850px) {
 
+
     .link-grid {
+
         grid-template-columns: 1fr;
+
     }
 
 
     .topbar {
+
         align-items: flex-start;
 
         flex-direction: column;
+
     }
 
 
     .search-box {
+
         width: 100%;
+
     }
 
+
 }
+
 
 
 /* =========================================
@@ -798,48 +971,94 @@ footer {
 
 @media (max-width: 650px) {
 
+
     .sidebar {
+
         position: relative;
 
         width: 100%;
 
         height: auto;
 
+        padding: 18px;
+
         border-right: none;
 
         border-bottom:
             1px solid #e5e9ef;
+
+    }
+
+
+    .brand {
+
+        padding-bottom: 18px;
+
+    }
+
+
+    .menu {
+
+        margin-top: 15px;
+
     }
 
 
     .sidebar-footer {
+
         display: none;
+
     }
 
 
     .main {
+
         margin-left: 0;
 
         padding:
             28px 18px;
+
     }
 
 
     .page-title h1 {
+
         font-size: 23px;
+
     }
 
 
-    .home-header {
-        min-height: auto;
+    .welcome-panel {
+
+        min-height: 280px;
 
         padding:
-            28px 24px;
+            38px 28px;
+
     }
 
 
-    .module-grid {
+    .welcome-panel h2 {
+
+        font-size: 23px;
+
+    }
+
+
+    .welcome-info {
+
+        flex-direction: column;
+
+        gap: 18px;
+
+    }
+
+
+    .link-grid {
+
         grid-template-columns: 1fr;
+
     }
+
 
 }

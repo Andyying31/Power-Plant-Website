@@ -38,7 +38,6 @@
                 光
             </div>
 
-
             <div class="brand-text">
 
                 <h2>
@@ -55,55 +54,30 @@
 
 
 
-        <!-- 导航菜单 -->
+        <!-- 左侧菜单 -->
 
         <nav class="menu">
 
 
-            <!-- 目前只有会议 -->
-
             <button
                 class="menu-item active"
-                data-category="会议"
+                data-page="meeting"
             >
-
-                <span>
-                    会议
-                </span>
-
-            </button>
-
-
-            <!--
-            以后可以继续增加：
-
-            <button
-                class="menu-item"
-                data-category="行政"
-            >
-                <span>
-                    行政
-                </span>
+                会议
             </button>
 
 
             <button
                 class="menu-item"
-                data-category="采购"
+                data-page="organization"
             >
-                <span>
-                    采购
-                </span>
+                组织架构
             </button>
-
-            -->
 
 
         </nav>
 
 
-
-        <!-- 左侧底部 -->
 
         <div class="sidebar-footer">
 
@@ -142,18 +116,18 @@
 
 
 
-            <!-- 搜索框 -->
+            <!-- 搜索 -->
 
             <div class="search-box">
 
-                <span class="search-symbol">
+                <span class="search-label">
                     搜索
                 </span>
 
                 <input
                     type="text"
                     id="search"
-                    placeholder="搜索功能..."
+                    placeholder="搜索功能或人员..."
                 >
 
             </div>
@@ -164,61 +138,56 @@
 
 
         <!-- =====================================
-             内容
+             会议页面
         ====================================== -->
 
-        <section class="content">
+        <section
+            id="meeting-page"
+            class="page-section"
+        >
 
-
-            <!-- 模块标题 -->
 
             <div class="section-heading">
 
-                <h2>
-                    会议
-                </h2>
+                <div>
 
-                <p>
-                    会议相关业务快捷入口
-                </p>
+                    <h2>
+                        会议
+                    </h2>
+
+                    <p>
+                        会议相关业务快捷入口
+                    </p>
+
+                </div>
 
             </div>
 
 
 
-            <!-- =====================================
-                 会议链接
-            ====================================== -->
-
-            <div
-                id="meeting-links"
-                class="link-grid"
-            >
+            <div class="link-grid">
 
 
-                <!-- ===============================
-                     月计划
-                ================================ -->
+                <!-- 会议申请 -->
 
                 <a
-                    href="https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd"
+                    href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
 
                         <h3>
-                            月计划
+                            会议申请
                         </h3>
 
                         <p>
-                            月计划和周计划
+                            提交会议申请及相关信息
                         </p>
 
                     </div>
-
 
                     <div class="card-arrow">
                         →
@@ -228,29 +197,26 @@
 
 
 
-                <!-- ===============================
-                     消缺单
-                ================================ -->
+                <!-- 会议安排 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
 
                         <h3>
-                            消缺单
+                            会议安排
                         </h3>
 
                         <p>
-                            消缺单
+                            查看会议时间及相关安排
                         </p>
 
                     </div>
-
 
                     <div class="card-arrow">
                         →
@@ -260,15 +226,13 @@
 
 
 
-                <!-- ===============================
-                     会议纪要
-                ================================ -->
+                <!-- 会议纪要 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -283,7 +247,6 @@
 
                     </div>
 
-
                     <div class="card-arrow">
                         →
                     </div>
@@ -292,15 +255,13 @@
 
 
 
-                <!-- ===============================
-                     会议室
-                ================================ -->
+                <!-- 会议室 -->
 
                 <a
                     href="https://www.larksuite.com/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="link-card"
+                    class="link-card searchable"
                 >
 
                     <div class="card-content">
@@ -314,7 +275,6 @@
                         </p>
 
                     </div>
-
 
                     <div class="card-arrow">
                         →
@@ -331,8 +291,707 @@
 
 
         <!-- =====================================
-             页脚
+             组织架构页面
         ====================================== -->
+
+        <section
+            id="organization-page"
+            class="page-section hidden"
+        >
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <h2>
+                        组织架构
+                    </h2>
+
+                    <p>
+                        自备电厂部组织结构图
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================
+                 组织架构主体
+            ================================== -->
+
+            <div class="organization-container">
+
+
+                <div class="organization-title">
+
+                    <h2>
+                        自备电厂部组织结构图
+                    </h2>
+
+                    <p>
+                        POWER PLANT DEPARTMENT ORGANISATION CHART
+                    </p>
+
+                </div>
+
+
+
+                <!-- =================================
+                     第一层：经理
+                ================================== -->
+
+                <div class="org-level manager-level">
+
+                    <div class="person-card manager">
+
+                        <div class="person-name">
+                            卢彦廷
+                        </div>
+
+                        <div class="person-name-en">
+                            LU YANTING
+                        </div>
+
+                        <div class="person-position">
+                            经理
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="org-line vertical"></div>
+
+
+
+                <!-- =================================
+                     第二层
+                ================================== -->
+
+                <div class="org-columns">
+
+
+                    <!-- =============================
+                         维护相关
+                    ============================== -->
+
+                    <div class="org-column">
+
+
+                        <div class="department-title">
+                            维护
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                李健全
+                            </div>
+
+                            <div class="person-position">
+                                内燃机维护专家
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                徐洁
+                            </div>
+
+                            <div class="person-position">
+                                维护技师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                邓启雄
+                            </div>
+
+                            <div class="person-name-en">
+                                DENG QIXIONG
+                            </div>
+
+                            <div class="person-position">
+                                维修技师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                何伟雄
+                            </div>
+
+                            <div class="person-name-en">
+                                HE WEIXIONG
+                            </div>
+
+                            <div class="person-position">
+                                运行值班长
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                张建兴
+                            </div>
+
+                            <div class="person-name-en">
+                                CHONG KHEN HIN
+                            </div>
+
+                            <div class="person-position">
+                                机械技师
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =============================
+                         安全运行
+                    ============================== -->
+
+                    <div class="org-column">
+
+
+                        <div class="department-title">
+                            安全运行管理
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                冯亮
+                            </div>
+
+                            <div class="person-position">
+                                安全运行管理
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="sub-title">
+                            A班值长 / 主值
+                        </div>
+
+                        <div class="person-card small-card">
+
+                            <div class="person-name">
+                                刘岑宇
+                            </div>
+
+                            <div class="person-name">
+                                高龙
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="sub-title">
+                            B班值长 / 主值
+                        </div>
+
+                        <div class="person-card small-card">
+
+                            <div class="person-name">
+                                郭峰
+                            </div>
+
+                            <div class="person-name">
+                                陈艺
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="sub-title">
+                            C班值长 / 主值
+                        </div>
+
+                        <div class="person-card small-card">
+
+                            <div class="person-name">
+                                伍俊
+                            </div>
+
+                            <div class="person-name">
+                                杜同磊
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="sub-title">
+                            D班值长 / 主值
+                        </div>
+
+                        <div class="person-card small-card">
+
+                            <div class="person-name">
+                                马衍振
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =============================
+                         工程技术
+                    ============================== -->
+
+                    <div class="org-column">
+
+
+                        <div class="department-title">
+                            工程技术
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                陈浩
+                            </div>
+
+                            <div class="person-position">
+                                汽机工程师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                夏宇索
+                            </div>
+
+                            <div class="person-name-en">
+                                SYAH
+                            </div>
+
+                            <div class="person-position">
+                                汽机工程师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                路永飞
+                            </div>
+
+                            <div class="person-position">
+                                电气工程师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                路永飞
+                            </div>
+
+                            <div class="person-position">
+                                仪表工程师
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =============================
+                         设备维护
+                    ============================== -->
+
+                    <div class="org-column">
+
+
+                        <div class="department-title">
+                            设备维护
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                樊军辉
+                            </div>
+
+                            <div class="person-position">
+                                设备维护主任
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                佰瓦特
+                            </div>
+
+                            <div class="person-name-en">
+                                BAIWAT WATSON BIN ELIN
+                            </div>
+
+                            <div class="person-position">
+                                电机械技师
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                瑞安
+                            </div>
+
+                            <div class="person-name-en">
+                                RYAN SCHILLARY LOBIUN
+                            </div>
+
+                            <div class="person-position">
+                                电厂机械工
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                迈泽安
+                            </div>
+
+                            <div class="person-name-en">
+                                MOHD MAIRZAM BIN YASIR
+                            </div>
+
+                            <div class="person-position">
+                                电厂机械工
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                雷克斯
+                            </div>
+
+                            <div class="person-name-en">
+                                LEX CORNARD LAWRENCE
+                            </div>
+
+                            <div class="person-position">
+                                电厂机械工
+                            </div>
+
+                        </div>
+
+
+                        <div class="person-card">
+
+                            <div class="person-name">
+                                林志梁
+                            </div>
+
+                            <div class="person-name-en">
+                                LIM ZHI LIANG
+                            </div>
+
+                            <div class="person-position">
+                                电厂助理工程师
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================
+                     其他人员
+                ================================== -->
+
+                <div class="other-section">
+
+
+                    <div class="department-title">
+                        专业技术人员
+                    </div>
+
+
+                    <div class="staff-grid">
+
+
+                        <div class="person-card">
+                            <div class="person-name">史健伟</div>
+                            <div class="person-name-en">CLEMENT SHIH CHEN VUI</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">阿子湾</div>
+                            <div class="person-name-en">AZIWAN BIN TAMIN</div>
+                            <div class="person-position">仪器仪表工程技术员</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">思安</div>
+                            <div class="person-name-en">SEBASTIAN LESLIE JOE</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">奈旻</div>
+                            <div class="person-name-en">ABDUL NAIM BIN HENDRY</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">李英杰</div>
+                            <div class="person-name-en">BRANDON LEE ING JAK</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">尼乔</div>
+                            <div class="person-name-en">NEILTON JOEL VENEDDEY VENCENT</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">里祖安</div>
+                            <div class="person-name-en">RIZUAN BIN AJAK</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">纳斯鲁尔</div>
+                            <div class="person-name-en">Nasrul Alsyahfee</div>
+                            <div class="person-position">土木工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">罗伊玛尼</div>
+                            <div class="person-name-en">ROYMAXNE BESANTI</div>
+                            <div class="person-position">仪器仪表工程技术员</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">谢佳宏</div>
+                            <div class="person-name-en">CHIA JIA HONG</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">王孙勇</div>
+                            <div class="person-name-en">TONIE WONG SUN YUNG</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">阿兹里</div>
+                            <div class="person-name-en">Mohd Azley Bin Mustapha</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">卡马鲁丁</div>
+                            <div class="person-name-en">Kamarudin Bin Abdul Pani</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">黄素雯</div>
+                            <div class="person-name-en">MOHAMAD SHAFIZUL WONG SUE VUN</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">介维泽</div>
+                            <div class="person-name-en">JAYVERST JASTERN JUSTINUS</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">嘉维霖</div>
+                            <div class="person-name-en">JAVILIN @ JABILIN BIN SIYU</div>
+                            <div class="person-position">锅炉工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">田志伟</div>
+                            <div class="person-name-en">AARON THIAN JIA VUI</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">哈启明</div>
+                            <div class="person-name-en">AFIQ HAIKAL HAKIMI BIN AZMAN</div>
+                            <div class="person-position">工艺技术员</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">志安丁</div>
+                            <div class="person-name-en">MOHD AZAMUDDIN BIN HASANAL</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">穆宇然</div>
+                            <div class="person-name-en">MUHAMAD YUZRAN BIN MASRAN</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">陈玉雄</div>
+                            <div class="person-name-en">CHIN NYUK HIUNG</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">拉尤斯</div>
+                            <div class="person-name-en">MOHAMMAD RAJUS BIN SHUKOR</div>
+                            <div class="person-position">工艺技术员</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">柯文深</div>
+                            <div class="person-name-en">KEVIN SHERN JERRY</div>
+                            <div class="person-position">电气工程</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">张训豪</div>
+                            <div class="person-name-en">CHONG SOON HAU</div>
+                            <div class="person-position">文员</div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================
+                     其他机械人员
+                ================================== -->
+
+                <div class="other-section">
+
+
+                    <div class="department-title">
+                        机械工业
+                    </div>
+
+
+                    <div class="staff-grid">
+
+
+                        <div class="person-card">
+                            <div class="person-name">安德仁</div>
+                            <div class="person-name-en">ADRIAN FARHAN BIN FAIZAL</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">尔钻夏</div>
+                            <div class="person-name-en">MOHAMMAD ELZUANSYAH</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                        <div class="person-card">
+                            <div class="person-name">马哈迪</div>
+                            <div class="person-name-en">MAHADHIR BIN ABD KARIM</div>
+                            <div class="person-position">机械工业</div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+        </section>
+
+
 
         <footer>
 

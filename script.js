@@ -181,7 +181,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // ========================================
 
     const monthPlanLinks = {
-        "2026-08": "https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd?sheet=0XXsMf"
+        "2026-08": "https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd?sheet=0XXsMf",
+        "2026-09": "https://rjpl4x6x1094.jp.larksuite.com/sheets/AXnlsAgqAhenTJtks6sjnAOXpBc"
     };
 
     const monthPlanButton = document.getElementById("month-plan-button");

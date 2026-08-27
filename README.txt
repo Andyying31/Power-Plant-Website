@@ -1,22 +1,42 @@
-沙巴光伏自备电厂网站 v11 - Cloudflare 共享公告正式版
+沙巴光伏自备电厂网站 v12
 
-本版本已写入 Workers KV：
-Namespace: power-plant-shared-board
-Namespace ID: fcae3bdfe7424fa9bde0c071d38ae177
-Binding: SHARED_BOARD
+本版本新增：
+1. 共享公告历史版本
+   - 自动保存公告
+   - 最多保留 20 个历史版本
+   - 大量删除时优先自动留档
+   - 管理员可恢复旧版本
 
-文件结构：
-public/index.html
-public/style.css
-public/script.js
-src/index.js
-wrangler.jsonc
+2. 月计划链接网页管理
+   - 管理后台选择年份 / 月份
+   - 粘贴 Lark 链接后保存
+   - 前台自动读取，不需要再修改 script.js
 
-共享公告工作方式：
-1. 网页通过 /api/shared-note 读取共享文字。
-2. 停止输入约 1.2 秒后自动保存。
-3. Worker 使用 SHARED_BOARD binding 写入 Cloudflare KV。
-4. 其他人访问同一网站即可读取同一份内容。
+3. 花名册网页管理
+   - 新增 / 编辑 / 删除人员
+   - 自动计算总人数、管理、运行、维护、正式、试用、离职
+   - 前台自动读取，不需要再修改 index.html
 
-注意：
-wrangler.jsonc 已经是 Cloudflare Worker 的配置来源，请不要删除其中的 kv_namespaces 配置。
+Cloudflare：
+- 继续使用原来的 KV Namespace
+- Binding: SHARED_BOARD
+- Namespace ID: fcae3bdfe7424fa9bde0c071d38ae177
+
+重要：启用管理后台前，需要在 Cloudflare Worker 中设置 Secret：
+Variable name: ADMIN_PASSWORD
+Value: 你自己设置的管理员密码
+
+Cloudflare 路径：
+Workers & Pages
+→ power-plant-website
+→ Settings
+→ Variables and Secrets
+→ Add
+→ Type: Secret
+→ Variable name: ADMIN_PASSWORD
+→ Value: 自己的管理员密码
+→ Deploy
+
+部署：
+把 public、src、wrangler.jsonc、README.txt 上传到 GitHub 仓库根目录，
+Commit 后 Cloudflare 会自动执行 npx wrangler deploy。

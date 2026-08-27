@@ -1,3 +1,465 @@
+const DEFAULT_MONTH_PLANS = {
+    "2026-08": "https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd?sheet=0XXsMf"
+};
+
+const DEFAULT_ROSTER = [
+    {
+        "uid": "seed-001",
+        "employeeId": "L30033",
+        "name": "卢彦廷 LU YANTING",
+        "category": "管理",
+        "position": "自备电厂部经理 POWER PLANT MANAGER",
+        "title": "经理",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-002",
+        "employeeId": "L30056",
+        "name": "樊军辉 FAN JUNHUI",
+        "category": "维护",
+        "position": "电厂设备主任 POWER PLANT FACILITY MANAGER",
+        "title": "主任",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-003",
+        "employeeId": "M40898",
+        "name": "佰瓦特 BAIWAT WATSON BIN ELIN",
+        "category": "维护",
+        "position": "机械技师 MECHANICAL TECHNICIAN II",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-004",
+        "employeeId": "M41853",
+        "name": "史健伟 CLEMENT SHIH CHEN VUI",
+        "category": "维护",
+        "position": "电厂助理工程师. POWER PLANT ASSISTANT ENGINEER",
+        "title": "助理工程师",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-005",
+        "employeeId": "M42192",
+        "name": "阿子湾 AZIWAN BIN TAMIN",
+        "category": "维护",
+        "position": "机械技师 MECHANICAL TECHNICIAN II",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-006",
+        "employeeId": "M42808",
+        "name": "张建兴 CHONG KHEN HIN",
+        "category": "维护",
+        "position": "机械技师 MECHANICAL TECHNICIAN II",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-007",
+        "employeeId": "M44491",
+        "name": "李建全 LI JIANQUAN",
+        "category": "管理",
+        "position": "双内燃机主任工程师 Chief Engineer, Dual Internal Combustion Engines",
+        "title": "主任工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-008",
+        "employeeId": "M44860",
+        "name": "思安 SEBASTIAN LESLIE JOE",
+        "category": "维护",
+        "position": "电厂电工 POWER PLANT ELECTRICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-009",
+        "employeeId": "M44859",
+        "name": "马哈迪 MAHADHIR BIN ABD KARIM",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "离职"
+    },
+    {
+        "uid": "seed-010",
+        "employeeId": "M44884",
+        "name": "尼乔 NEILTON JOEL VENEDDEY VENCENT",
+        "category": "维护",
+        "position": "电厂电工 POWER PLANT ELECTRICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-011",
+        "employeeId": "M44903",
+        "name": "冯亮 FENG LIANG",
+        "category": "管理",
+        "position": "双内燃机主任工程师 Chief Engineer, Dual Internal Combustion Engines",
+        "title": "主任工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-012",
+        "employeeId": "M45040",
+        "name": "路永飞 LU YUNGFEI",
+        "category": "管理",
+        "position": "电仪资深技师 SENIOR E&I TECHNICIAN",
+        "title": "主任工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-013",
+        "employeeId": "M44915",
+        "name": "柯文深 KEVIN SHERN JERRY",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-014",
+        "employeeId": "M44912",
+        "name": "尔钻夏 MOHAMMAD ELZUANSYAH",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-015",
+        "employeeId": "M44913",
+        "name": "穆宇然 MUHAMAD YUZRAN BIN MASRAN",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-016",
+        "employeeId": "M44914",
+        "name": "李英杰 BRANDON LEE ING JAK",
+        "category": "维护",
+        "position": "电厂电工 POWER PLANT ELECTRICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-017",
+        "employeeId": "M42086",
+        "name": "罗伊玛尼 ROYMAXNE BESANTI",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-018",
+        "employeeId": "M44918",
+        "name": "奈旻 ABDUL NA IM BIN HENDRY",
+        "category": "维护",
+        "position": "电厂电工 POWER PLANT ELECTRICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-019",
+        "employeeId": "M44935",
+        "name": "哈启明 AFIQ HAIKAL HAKIMI BIN AZMAN",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-020",
+        "employeeId": "M44909",
+        "name": "刘岑宇 LIU CENYU",
+        "category": "运行",
+        "position": "运行值班长 OPERATION SHIFT SUPERVISOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-021",
+        "employeeId": "M44938",
+        "name": "王孙勇 TONIE WONG SUN YUNG",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-022",
+        "employeeId": "M44942",
+        "name": "志安丁 MOHD AZAMUDDIN BIN HASANAL",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-023",
+        "employeeId": "M44939",
+        "name": "安德仁 ADRIAN FARHAN BIN FAIZAL",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-024",
+        "employeeId": "M44937",
+        "name": "介维泽 JAYVERST JASTERN JUSTINUS",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-025",
+        "employeeId": "M42720",
+        "name": "拉尤斯 MOHAMMAD RAJUS BIN SHUKOR",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-026",
+        "employeeId": "M44992",
+        "name": "瑞安 RYAN SCHILLARY LOBIUN",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-027",
+        "employeeId": "M42779",
+        "name": "纳斯鲁尔 Nasrul Alsyahfee",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-028",
+        "employeeId": "M40253",
+        "name": "阿兹里 Mohd Azley Bin Mustapha",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-029",
+        "employeeId": "M42141",
+        "name": "卡马鲁丁 Kamarudin Bin Abdul Pani",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "正式"
+    },
+    {
+        "uid": "seed-030",
+        "employeeId": "M45041",
+        "name": "里祖安 Rizuan Bin Ajak",
+        "category": "维护",
+        "position": "电厂电工 POWER PLANT ELECTRICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "离职"
+    },
+    {
+        "uid": "seed-031",
+        "employeeId": "M45055",
+        "name": "夏宇索 MOHAMMAD SYAH YUSSOF",
+        "category": "运行",
+        "position": "余热发电工程师 STEAM ENGINEER",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-032",
+        "employeeId": "M45065",
+        "name": "嘉维霖 JAVILIN @ JABILIN BIN SIYU",
+        "category": "运行",
+        "position": "锅炉工 BOILERMAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-033",
+        "employeeId": "M45094",
+        "name": "雷克斯 LEX CORNARD LAWRENCE",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-034",
+        "employeeId": "M45056",
+        "name": "迈泽安 MOHD MAIRZAM BIN YASIR",
+        "category": "维护",
+        "position": "电厂机械工 POWER PLANT MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-035",
+        "employeeId": "M45111",
+        "name": "伍俊 WU JUN",
+        "category": "运行",
+        "position": "运行值班长 OPERATION SHIFT SUPERVISOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-036",
+        "employeeId": "M45112",
+        "name": "徐洁 XU JIE",
+        "category": "维护",
+        "position": "机务资深技师 SENIOR MECHANICAL TECHNICIAN",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-037",
+        "employeeId": "M45113",
+        "name": "何伟雄 HE WEIXIONG",
+        "category": "维护",
+        "position": "运行值班长 OPERATION SHIFT SUPERVISOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-038",
+        "employeeId": "M45150",
+        "name": "谢佳宏 CHIA JIA HONG",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-039",
+        "employeeId": "M45179",
+        "name": "林志梁 LIM ZHI LIANG",
+        "category": "维护",
+        "position": "电厂助理工程师 POWER PLANT ASSISTANT ENGINEER",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-040",
+        "employeeId": "M45201",
+        "name": "黄素雯 MOHAMAD SHAFIZUL WONG SUE VUN",
+        "category": "运行",
+        "position": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-041",
+        "employeeId": "M45067",
+        "name": "郭峰 GUO FENG",
+        "category": "运行",
+        "position": "运行值班长 OPERATION SHIFT SUPERVISOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-042",
+        "employeeId": "M45149",
+        "name": "马衍振 MA YANZHEN",
+        "category": "运行",
+        "position": "运行值班长 OPERATION SHIFT SUPERVISOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-043",
+        "employeeId": "M45134",
+        "name": "邓启雄 DENG QIXIONG",
+        "category": "维护",
+        "position": "维修技师 MAINTENANCE TECHNICIAN",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-044",
+        "employeeId": "M45207",
+        "name": "高龙 GAO LONG",
+        "category": "运行",
+        "position": "主值 CHIEF OPERATOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-045",
+        "employeeId": "M45208",
+        "name": "陈艺 CHEN YI",
+        "category": "运行",
+        "position": "主值 CHIEF OPERATOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-046",
+        "employeeId": "M45249",
+        "name": "陈浩 CHEN HAO",
+        "category": "运行",
+        "position": "主值 CHIEF OPERATOR",
+        "title": "工程师",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-047",
+        "employeeId": "M45298",
+        "name": "田志伟 AARON THIAN JIA VUI",
+        "category": "运行",
+        "position": "机械工业 MECHANICAL ENGINERING",
+        "title": "技术员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-048",
+        "employeeId": "M45300",
+        "name": "JESON CHIN NYUK HIUNG",
+        "category": "运行",
+        "position": "机械工业 MECHANICAL ENGINERING",
+        "title": "电厂巡检员 POWER PLANT PATROL INSPECTOR",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-049",
+        "employeeId": "M50268",
+        "name": "张训豪 CHONG SOON HAU",
+        "category": "维护",
+        "position": "自备电厂文员",
+        "title": "自备电厂文员",
+        "status": "试用"
+    },
+    {
+        "uid": "seed-050",
+        "employeeId": "M45299",
+        "name": "杜同磊_DU TONGLEI",
+        "category": "运行",
+        "position": "主值 CHIEF OPERATOR",
+        "title": "",
+        "status": "试用"
+    }
+];
+
+const NOTE_KEY = "shared-note";
+const NOTE_HISTORY_KEY = "shared-note-history";
+const MONTH_PLAN_KEY = "month-plan-links";
+const ROSTER_KEY = "roster-data";
+
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -6,23 +468,45 @@ export default {
             return handleSharedNote(request, env);
         }
 
+        if (url.pathname === "/api/shared-note/history") {
+            return handleSharedNoteHistory(request, env);
+        }
+
+        if (url.pathname === "/api/shared-note/restore") {
+            return handleSharedNoteRestore(request, env);
+        }
+
+        if (url.pathname === "/api/month-plans") {
+            return handleMonthPlans(request, env);
+        }
+
+        if (url.pathname === "/api/roster") {
+            return handleRoster(request, env);
+        }
+
+        if (url.pathname === "/api/admin/verify") {
+            return handleAdminVerify(request, env);
+        }
+
         return env.ASSETS.fetch(request);
     }
 };
 
-async function handleSharedNote(request, env) {
+async function ensureKv(env) {
     if (!env.SHARED_BOARD) {
-        return jsonResponse(
-            {
-                ok: false,
-                error: "SHARED_BOARD KV binding is not configured."
-            },
-            503
-        );
+        throw new Error("SHARED_BOARD KV binding is not configured.");
+    }
+}
+
+async function handleSharedNote(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
     }
 
     if (request.method === "GET") {
-        const stored = await env.SHARED_BOARD.get("shared-note", "json");
+        const stored = await env.SHARED_BOARD.get(NOTE_KEY, "json");
 
         return jsonResponse({
             ok: true,
@@ -37,34 +521,24 @@ async function handleSharedNote(request, env) {
         try {
             body = await request.json();
         } catch {
-            return jsonResponse(
-                {
-                    ok: false,
-                    error: "Invalid JSON body."
-                },
-                400
-            );
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
         }
 
-        const content =
-            typeof body.content === "string"
-                ? body.content
-                : "";
+        const content = typeof body.content === "string" ? body.content : "";
 
         if (content.length > 100000) {
-            return jsonResponse(
-                {
-                    ok: false,
-                    error: "Shared note is too large."
-                },
-                413
-            );
+            return jsonResponse({ ok: false, error: "Shared note is too large." }, 413);
         }
 
+        const current = await env.SHARED_BOARD.get(NOTE_KEY, "json");
         const updatedAt = new Date().toISOString();
 
+        if (current && current.content !== content && current.content) {
+            await maybeSaveHistorySnapshot(env, current, content);
+        }
+
         await env.SHARED_BOARD.put(
-            "shared-note",
+            NOTE_KEY,
             JSON.stringify({
                 content,
                 updatedAt
@@ -77,10 +551,374 @@ async function handleSharedNote(request, env) {
         });
     }
 
+    return methodNotAllowed("GET, PUT");
+}
+
+async function maybeSaveHistorySnapshot(env, current, newContent) {
+    let history = await env.SHARED_BOARD.get(NOTE_HISTORY_KEY, "json");
+
+    if (!Array.isArray(history)) {
+        history = [];
+    }
+
+    const now = Date.now();
+    const latestSnapshotAt = history[0]?.snapshotAt
+        ? Date.parse(history[0].snapshotAt)
+        : 0;
+
+    const oldLength = current.content?.length || 0;
+    const newLength = newContent.length;
+
+    const majorDeletion =
+        oldLength >= 20 &&
+        newLength < oldLength * 0.75;
+
+    const fiveMinutesPassed =
+        !latestSnapshotAt ||
+        now - latestSnapshotAt >= 5 * 60 * 1000;
+
+    if (!majorDeletion && !fiveMinutesPassed) {
+        return;
+    }
+
+    history.unshift({
+        id: crypto.randomUUID(),
+        content: current.content || "",
+        savedAt: current.updatedAt || new Date(now).toISOString(),
+        snapshotAt: new Date(now).toISOString(),
+        reason: majorDeletion ? "large-change" : "checkpoint"
+    });
+
+    history = history.slice(0, 20);
+
+    await env.SHARED_BOARD.put(
+        NOTE_HISTORY_KEY,
+        JSON.stringify(history)
+    );
+}
+
+async function handleSharedNoteHistory(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method !== "GET") {
+        return methodNotAllowed("GET");
+    }
+
+    let history = await env.SHARED_BOARD.get(NOTE_HISTORY_KEY, "json");
+    const current = await env.SHARED_BOARD.get(NOTE_KEY, "json");
+
+    if (!Array.isArray(history)) {
+        history = [];
+    }
+
+    return jsonResponse({
+        ok: true,
+        current: current || null,
+        history
+    });
+}
+
+async function handleSharedNoteRestore(request, env) {
+    const auth = checkAdmin(request, env);
+    if (!auth.ok) return auth.response;
+
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method !== "POST") {
+        return methodNotAllowed("POST");
+    }
+
+    let body;
+
+    try {
+        body = await request.json();
+    } catch {
+        return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+    }
+
+    const id = typeof body.id === "string" ? body.id : "";
+    let history = await env.SHARED_BOARD.get(NOTE_HISTORY_KEY, "json");
+
+    if (!Array.isArray(history)) {
+        history = [];
+    }
+
+    const target = history.find((item) => item.id === id);
+
+    if (!target) {
+        return jsonResponse({ ok: false, error: "History version not found." }, 404);
+    }
+
+    const current = await env.SHARED_BOARD.get(NOTE_KEY, "json");
+    const now = new Date().toISOString();
+
+    if (current && current.content !== target.content) {
+        history.unshift({
+            id: crypto.randomUUID(),
+            content: current.content || "",
+            savedAt: current.updatedAt || now,
+            snapshotAt: now,
+            reason: "before-restore"
+        });
+
+        history = history.slice(0, 20);
+
+        await env.SHARED_BOARD.put(
+            NOTE_HISTORY_KEY,
+            JSON.stringify(history)
+        );
+    }
+
+    await env.SHARED_BOARD.put(
+        NOTE_KEY,
+        JSON.stringify({
+            content: target.content || "",
+            updatedAt: now
+        })
+    );
+
+    return jsonResponse({
+        ok: true,
+        content: target.content || "",
+        updatedAt: now
+    });
+}
+
+async function handleMonthPlans(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        let plans = await env.SHARED_BOARD.get(MONTH_PLAN_KEY, "json");
+
+        if (!plans || typeof plans !== "object" || Array.isArray(plans)) {
+            plans = DEFAULT_MONTH_PLANS;
+            await env.SHARED_BOARD.put(MONTH_PLAN_KEY, JSON.stringify(plans));
+        }
+
+        return jsonResponse({
+            ok: true,
+            plans
+        });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        const source = body?.plans;
+
+        if (!source || typeof source !== "object" || Array.isArray(source)) {
+            return jsonResponse({ ok: false, error: "Invalid month plan data." }, 400);
+        }
+
+        const plans = {};
+
+        for (const [key, value] of Object.entries(source)) {
+            if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(key)) {
+                continue;
+            }
+
+            if (typeof value !== "string") {
+                continue;
+            }
+
+            const trimmed = value.trim();
+
+            if (trimmed && !/^https:\/\//i.test(trimmed)) {
+                return jsonResponse({ ok: false, error: `${key} 的链接必须以 https:// 开头。` }, 400);
+            }
+
+            if (trimmed) {
+                plans[key] = trimmed;
+            }
+        }
+
+        await env.SHARED_BOARD.put(MONTH_PLAN_KEY, JSON.stringify(plans));
+
+        return jsonResponse({
+            ok: true,
+            plans
+        });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+async function handleRoster(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        const roster = await getRoster(env);
+
+        return jsonResponse({
+            ok: true,
+            roster
+        });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        if (!Array.isArray(body?.roster)) {
+            return jsonResponse({ ok: false, error: "Invalid roster data." }, 400);
+        }
+
+        if (body.roster.length > 500) {
+            return jsonResponse({ ok: false, error: "Roster is too large." }, 413);
+        }
+
+        const roster = body.roster.map((item) => normalizeRosterItem(item));
+
+        await env.SHARED_BOARD.put(
+            ROSTER_KEY,
+            JSON.stringify(roster)
+        );
+
+        return jsonResponse({
+            ok: true,
+            roster
+        });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+async function getRoster(env) {
+    let roster = await env.SHARED_BOARD.get(ROSTER_KEY, "json");
+
+    if (!Array.isArray(roster)) {
+        roster = DEFAULT_ROSTER;
+        await env.SHARED_BOARD.put(ROSTER_KEY, JSON.stringify(roster));
+    }
+
+    return roster.map((item) => normalizeRosterItem(item));
+}
+
+function normalizeRosterItem(item) {
+    const categories = new Set(["管理", "运行", "维护"]);
+    const statuses = new Set(["正式", "试用", "离职"]);
+
+    return {
+        uid:
+            typeof item?.uid === "string" && item.uid.trim()
+                ? item.uid.trim()
+                : crypto.randomUUID(),
+        employeeId:
+            typeof item?.employeeId === "string"
+                ? item.employeeId.trim().slice(0, 50)
+                : "",
+        name:
+            typeof item?.name === "string"
+                ? item.name.trim().slice(0, 200)
+                : "",
+        category:
+            categories.has(item?.category)
+                ? item.category
+                : "运行",
+        position:
+            typeof item?.position === "string"
+                ? item.position.trim().slice(0, 300)
+                : "",
+        title:
+            typeof item?.title === "string"
+                ? item.title.trim().slice(0, 200)
+                : "",
+        status:
+            statuses.has(item?.status)
+                ? item.status
+                : "试用"
+    };
+}
+
+async function handleAdminVerify(request, env) {
+    if (request.method !== "POST") {
+        return methodNotAllowed("POST");
+    }
+
+    const auth = checkAdmin(request, env);
+
+    if (!auth.ok) {
+        return auth.response;
+    }
+
+    return jsonResponse({
+        ok: true
+    });
+}
+
+function checkAdmin(request, env) {
+    if (!env.ADMIN_PASSWORD) {
+        return {
+            ok: false,
+            response: jsonResponse(
+                {
+                    ok: false,
+                    error: "ADMIN_PASSWORD is not configured."
+                },
+                503
+            )
+        };
+    }
+
+    const supplied = request.headers.get("X-Admin-Password") || "";
+
+    if (supplied !== env.ADMIN_PASSWORD) {
+        return {
+            ok: false,
+            response: jsonResponse(
+                {
+                    ok: false,
+                    error: "管理员密码不正确。"
+                },
+                401
+            )
+        };
+    }
+
+    return {
+        ok: true
+    };
+}
+
+function methodNotAllowed(allow) {
     return new Response("Method Not Allowed", {
         status: 405,
         headers: {
-            "Allow": "GET, PUT"
+            "Allow": allow,
+            "Cache-Control": "no-store"
         }
     });
 }

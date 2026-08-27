@@ -648,3 +648,597 @@ footer {
         font-size: 16px;
     }
 }
+
+
+/* =========================================================
+   v12：共享公告历史 + 管理后台
+========================================================= */
+
+.shared-note-heading-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+}
+
+.secondary-action-btn,
+.primary-action-btn,
+.danger-action-btn {
+    min-height: 38px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.secondary-action-btn {
+    border: 1px solid #dfe5ed;
+    background: #ffffff;
+    color: #596273;
+}
+
+.secondary-action-btn:hover {
+    border-color: #bfd4f1;
+    background: #f8fbff;
+    color: #1677ff;
+}
+
+.primary-action-btn {
+    border: 1px solid #1677ff;
+    background: #1677ff;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.primary-action-btn:hover {
+    background: #0f6ce5;
+    border-color: #0f6ce5;
+}
+
+.danger-action-btn {
+    border: 1px solid #f0d2d0;
+    background: #fffafa;
+    color: #b42318;
+}
+
+.danger-action-btn:hover {
+    border-color: #e6b9b6;
+    background: #fff5f4;
+}
+
+.secondary-action-btn.mini,
+.danger-action-btn.mini {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 10px;
+}
+
+.history-modal-panel,
+.roster-editor-panel {
+    position: relative;
+    z-index: 2;
+    width: min(760px, calc(100vw - 34px));
+    max-height: calc(100vh - 60px);
+    overflow: auto;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 14px;
+    box-shadow: 0 20px 55px rgba(31, 41, 55, 0.16);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 14px 15px;
+    background: #f8fafc;
+    border: 1px solid #edf0f4;
+    border-radius: 9px;
+}
+
+.history-item-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.history-item-info strong {
+    display: block;
+    color: #273142;
+    font-size: 12px;
+}
+
+.history-item-info span {
+    display: block;
+    margin-top: 3px;
+    color: #9aa3b2;
+    font-size: 10px;
+}
+
+.history-item-info p {
+    margin: 7px 0 0;
+    color: #667085;
+    font-size: 11px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.history-empty {
+    padding: 24px;
+    text-align: center;
+    color: #9aa3b2;
+    font-size: 12px;
+    background: #f8fafc;
+    border: 1px dashed #dfe5ed;
+    border-radius: 9px;
+}
+
+
+/* ================= 管理后台登录 ================= */
+
+.admin-login-card {
+    max-width: 720px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 16px 18px;
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 14px;
+}
+
+.admin-login-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #edf4ff;
+    color: #1677ff;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.admin-login-copy h3 {
+    margin: 2px 0 0;
+    color: #273142;
+    font-size: 16px;
+}
+
+.admin-login-copy p {
+    margin: 7px 0 0;
+    color: #929baa;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.admin-login-form {
+    grid-column: 2;
+}
+
+.admin-login-form label,
+.field-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #667085;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.admin-login-row {
+    display: flex;
+    gap: 8px;
+}
+
+.admin-login-row input,
+.field-group input,
+.field-group select,
+.admin-search-row input {
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 1px solid #dfe5ed;
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    color: #273142;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.admin-login-row input {
+    flex: 1;
+}
+
+.admin-login-row input:focus,
+.field-group input:focus,
+.field-group select:focus,
+.admin-search-row input:focus {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.07);
+}
+
+.form-message {
+    min-height: 18px;
+    margin-top: 8px;
+    font-size: 11px;
+}
+
+.form-message.is-error {
+    color: #b42318;
+}
+
+.form-message.is-success {
+    color: #287346;
+}
+
+.form-message.is-info {
+    color: #667085;
+}
+
+
+/* ================= 管理后台主体 ================= */
+
+.admin-dashboard {
+    max-width: 1180px;
+}
+
+.admin-dashboard-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 14px;
+    padding: 15px 17px;
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 11px;
+}
+
+.admin-dashboard-top strong {
+    display: block;
+    color: #273142;
+    font-size: 12px;
+}
+
+.admin-dashboard-top span {
+    display: block;
+    margin-top: 4px;
+    color: #9aa3b2;
+    font-size: 10px;
+}
+
+.admin-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 6px;
+    background: #eef2f6;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.admin-tab {
+    min-height: 36px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #667085;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.admin-tab.active {
+    background: #ffffff;
+    color: #1677ff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(31, 41, 55, 0.06);
+}
+
+.admin-tab-panel {
+    display: none;
+}
+
+.admin-tab-panel.active {
+    display: block;
+}
+
+.admin-card {
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 13px;
+}
+
+.admin-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.admin-card-heading h3 {
+    margin: 0;
+    color: #273142;
+    font-size: 15px;
+}
+
+.admin-card-heading p {
+    margin: 6px 0 0;
+    color: #929baa;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.month-admin-form {
+    display: grid;
+    grid-template-columns: 130px 130px minmax(280px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    padding: 15px;
+    background: #f8fafc;
+    border: 1px solid #edf0f4;
+    border-radius: 10px;
+}
+
+.field-group {
+    min-width: 0;
+}
+
+.field-group input,
+.field-group select {
+    width: 100%;
+}
+
+.field-grow {
+    min-width: 220px;
+}
+
+.admin-form-button {
+    white-space: nowrap;
+}
+
+.admin-list {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 13px;
+    border: 1px solid #edf0f4;
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.admin-list-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.admin-list-info strong {
+    display: block;
+    color: #273142;
+    font-size: 11px;
+}
+
+.admin-list-info span {
+    display: block;
+    margin-top: 4px;
+    color: #8b95a4;
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-list-actions {
+    display: flex;
+    gap: 6px;
+}
+
+
+/* ================= 管理后台花名册 ================= */
+
+.admin-search-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.admin-search-row input {
+    width: min(480px, 100%);
+}
+
+.admin-search-row span {
+    color: #9aa3b2;
+    font-size: 10px;
+}
+
+.admin-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e5e9ef;
+    border-radius: 10px;
+}
+
+.admin-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 10px 11px;
+    border-bottom: 1px solid #edf0f4;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.admin-table th {
+    background: #f8fafc;
+    color: #667085;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    color: #4b5563;
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-actions-col {
+    width: 110px;
+}
+
+.admin-row-actions {
+    display: flex;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+
+/* ================= 人员编辑弹窗 ================= */
+
+.roster-editor-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+    margin-top: 18px;
+}
+
+.roster-editor-form .field-group:nth-of-type(2),
+.roster-editor-form .field-group:nth-of-type(4),
+.roster-editor-form .field-group:nth-of-type(5) {
+    grid-column: 1 / -1;
+}
+
+.roster-editor-form .form-message,
+.modal-form-actions {
+    grid-column: 1 / -1;
+}
+
+.modal-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+
+/* ================= 小屏幕 ================= */
+
+@media (max-width: 850px) {
+    .shared-note-heading-actions {
+        align-items: flex-start;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .month-admin-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .field-grow {
+        grid-column: 1 / -1;
+    }
+
+    .admin-form-button {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+
+@media (max-width: 650px) {
+    .admin-login-card {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .admin-login-form {
+        grid-column: 1;
+    }
+
+    .admin-login-row {
+        flex-direction: column;
+    }
+
+    .admin-dashboard-top,
+    .admin-card-heading,
+    .admin-list-row,
+    .history-item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .admin-tabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .admin-tab {
+        flex: 0 0 auto;
+    }
+
+    .month-admin-form {
+        grid-template-columns: 1fr;
+    }
+
+    .field-grow,
+    .admin-form-button {
+        grid-column: auto;
+    }
+
+    .admin-search-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .roster-editor-form {
+        grid-template-columns: 1fr;
+    }
+
+    .roster-editor-form .field-group:nth-of-type(2),
+    .roster-editor-form .field-group:nth-of-type(4),
+    .roster-editor-form .field-group:nth-of-type(5) {
+        grid-column: auto;
+    }
+
+    .roster-editor-form .form-message,
+    .modal-form-actions {
+        grid-column: auto;
+    }
+
+    .history-modal-panel,
+    .roster-editor-panel {
+        padding: 20px;
+    }
+}

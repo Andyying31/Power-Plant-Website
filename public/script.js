@@ -16,6 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let rosterLoaded = false;
     let monthPlanLinks = {};
     let monthPlansLoaded = false;
+    let meetingButtons = [];
+    let meetingButtonsLoaded = false;
 
     let adminPassword = sessionStorage.getItem("powerPlantAdminPassword") || "";
     let adminVerified = false;
@@ -48,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         admin: {
             title: "管理后台",
-            subtitle: "月计划、花名册及公告历史管理",
+            subtitle: "会议链接、花名册及公告历史管理",
             search: ""
         }
     };
@@ -92,6 +94,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         searchInput.value = "";
         resetSearch();
+
+        if (pageName === "meeting") {
+            await loadMeetingButtons();
+            renderMeetingButtons();
+        }
 
         if (pageName === "roster") {
             await loadRoster();
@@ -354,11 +361,100 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ========================================
+    // 会议按钮：完全由云端资料生成
+    // ========================================
+
+    const meetingLinksContainer = document.getElementById("meeting-links");
+    const meetingEmpty = document.getElementById("meeting-empty");
+
+    async function loadMeetingButtons(force) {
+        if (meetingButtonsLoaded && !force) return meetingButtons;
+
+        try {
+            const response = await fetch("/api/meeting-buttons", {
+                cache: "no-store",
+                headers: { "Accept": "application/json" }
+            });
+
+            if (!response.ok) {
+                throw new Error("无法读取会议按钮");
+            }
+
+            const data = await response.json();
+            meetingButtons = Array.isArray(data.buttons) ? data.buttons : [];
+            meetingButtonsLoaded = true;
+            return meetingButtons;
+        } catch (error) {
+            meetingButtons = [];
+            meetingButtonsLoaded = true;
+            return meetingButtons;
+        }
+    }
+
+    function renderMeetingButtons() {
+        if (!meetingLinksContainer) return;
+
+        meetingLinksContainer.innerHTML = "";
+
+        const visibleButtons = meetingButtons.filter(function (item) {
+            return item && item.visible !== false;
+        });
+
+        if (meetingEmpty) {
+            meetingEmpty.hidden = visibleButtons.length !== 0;
+        }
+
+        visibleButtons.forEach(function (item) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "link-card searchable";
+
+            const content = document.createElement("div");
+            content.className = "card-content";
+
+            const title = document.createElement("h3");
+            title.textContent = item.name || "未命名按钮";
+
+            const description = document.createElement("p");
+            description.textContent = item.description || (item.type === "month-plan" ? "选择年份和月份" : "打开链接");
+
+            const arrow = document.createElement("div");
+            arrow.className = "card-arrow";
+            arrow.textContent = "→";
+
+            content.appendChild(title);
+            content.appendChild(description);
+            button.appendChild(content);
+            button.appendChild(arrow);
+
+            button.addEventListener("click", function () {
+                if (item.type === "month-plan") {
+                    openMonthPlanModal(item.name || "月计划");
+                    return;
+                }
+
+                const url = String(item.url || "").trim();
+
+                if (!/^https:\/\//i.test(url)) {
+                    alert((item.name || "这个按钮") + "的链接暂未设置，请联系管理员。");
+                    return;
+                }
+
+                window.open(url, "_blank", "noopener,noreferrer");
+            });
+
+            meetingLinksContainer.appendChild(button);
+        });
+    }
+
+
+    // ========================================
     // 月计划：云端链接
     // ========================================
 
     const monthPlanButton = document.getElementById("month-plan-button");
     const monthPlanModal = document.getElementById("month-plan-modal");
+    const monthPlanModalTitle = document.getElementById("month-modal-title");
     const monthPlanYear = document.getElementById("month-plan-year");
     const monthPlanGrid = document.getElementById("month-plan-grid");
     const monthModalCloseButtons = document.querySelectorAll("[data-month-modal-close]");
@@ -474,8 +570,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    async function openMonthPlanModal() {
+    async function openMonthPlanModal(customTitle) {
         if (!monthPlanModal) return;
+
+        if (monthPlanModalTitle) {
+            monthPlanModalTitle.textContent = customTitle || "月计划";
+        }
 
         await loadMonthPlans(true);
         prepareMonthPlanYears();
@@ -891,10 +991,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (adminDashboard) adminDashboard.hidden = false;
 
         await Promise.all([
+            loadMeetingButtons(true),
             loadMonthPlans(true),
             loadRoster(true)
         ]);
 
+        renderAdminMeetingButtons();
         renderAdminMonthPlans();
         renderAdminRoster();
         renderHistoryList(document.getElementById("admin-history-list"), true);
@@ -1018,6 +1120,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             if (name === "month") {
+                renderAdminMeetingButtons();
                 renderAdminMonthPlans();
             }
 
@@ -1030,6 +1133,295 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+
+    // ========================================
+    // 管理后台：会议按钮完全管理
+    // ========================================
+
+    const adminMeetingAdd = document.getElementById("admin-meeting-add");
+    const adminMeetingButtonList = document.getElementById("admin-meeting-button-list");
+    const adminMeetingButtonMessage = document.getElementById("admin-meeting-button-message");
+
+    const meetingButtonEditorModal = document.getElementById("meeting-button-editor-modal");
+    const meetingButtonEditorTitle = document.getElementById("meeting-button-editor-title");
+    const meetingButtonEditorSubtitle = document.getElementById("meeting-button-editor-subtitle");
+    const meetingButtonEditorForm = document.getElementById("meeting-button-editor-form");
+    const meetingButtonEditId = document.getElementById("meeting-button-edit-id");
+    const meetingButtonEditType = document.getElementById("meeting-button-edit-type");
+    const meetingButtonEditName = document.getElementById("meeting-button-edit-name");
+    const meetingButtonEditDescription = document.getElementById("meeting-button-edit-description");
+    const meetingButtonEditUrl = document.getElementById("meeting-button-edit-url");
+    const meetingButtonEditVisible = document.getElementById("meeting-button-edit-visible");
+    const meetingButtonUrlGroup = document.getElementById("meeting-button-url-group");
+    const meetingButtonTypeNote = document.getElementById("meeting-button-type-note");
+    const meetingButtonEditorMessage = document.getElementById("meeting-button-editor-message");
+    const meetingButtonModalCloseButtons = document.querySelectorAll("[data-meeting-button-modal-close]");
+
+    function createMeetingButtonId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            return window.crypto.randomUUID();
+        }
+
+        return "meeting-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+    }
+
+    function openMeetingButtonEditor(item) {
+        if (!meetingButtonEditorModal) return;
+
+        const editing = item || null;
+        const type = editing && editing.type === "month-plan" ? "month-plan" : "link";
+
+        meetingButtonEditId.value = editing ? editing.id : "";
+        meetingButtonEditType.value = type;
+        meetingButtonEditName.value = editing ? editing.name || "" : "";
+        meetingButtonEditDescription.value = editing ? editing.description || "" : "";
+        meetingButtonEditUrl.value = editing && type === "link" ? editing.url || "" : "";
+        meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
+
+        meetingButtonEditorTitle.textContent = editing ? "编辑会议按钮" : "新增会议按钮";
+        meetingButtonEditorSubtitle.textContent = type === "month-plan"
+            ? "这是年月选择按钮，可以改名称和说明，也可以隐藏或调整顺序。"
+            : "保存后会直接更新会议页面。";
+
+        if (meetingButtonUrlGroup) {
+            meetingButtonUrlGroup.hidden = type === "month-plan";
+        }
+
+        if (meetingButtonTypeNote) {
+            meetingButtonTypeNote.textContent = type === "month-plan"
+                ? "按钮类型：年月选择（月计划）"
+                : "按钮类型：普通链接";
+        }
+
+        setFormMessage(meetingButtonEditorMessage, "", "");
+        meetingButtonEditorModal.classList.add("open");
+        meetingButtonEditorModal.setAttribute("aria-hidden", "false");
+
+        setTimeout(function () {
+            meetingButtonEditName.focus();
+        }, 0);
+    }
+
+    function closeMeetingButtonEditor() {
+        if (!meetingButtonEditorModal) return;
+        meetingButtonEditorModal.classList.remove("open");
+        meetingButtonEditorModal.setAttribute("aria-hidden", "true");
+    }
+
+    meetingButtonModalCloseButtons.forEach(function (button) {
+        button.addEventListener("click", closeMeetingButtonEditor);
+    });
+
+    if (adminMeetingAdd) {
+        adminMeetingAdd.addEventListener("click", function () {
+            openMeetingButtonEditor(null);
+        });
+    }
+
+    async function saveMeetingButtons(next, successMessage) {
+        try {
+            const response = await adminFetch("/api/meeting-buttons", {
+                method: "PUT",
+                body: JSON.stringify({ buttons: next })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "保存失败");
+            }
+
+            meetingButtons = Array.isArray(data.buttons) ? data.buttons : [];
+            meetingButtonsLoaded = true;
+            renderAdminMeetingButtons();
+            renderMeetingButtons();
+            setFormMessage(adminMeetingButtonMessage, successMessage || "会议按钮已保存。", "success");
+            return true;
+        } catch (error) {
+            setFormMessage(adminMeetingButtonMessage, error.message || "保存失败", "error");
+            return false;
+        }
+    }
+
+    if (meetingButtonEditorForm) {
+        meetingButtonEditorForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const id = String(meetingButtonEditId.value || "").trim();
+            const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : "link";
+            const name = meetingButtonEditName.value.trim();
+            const description = meetingButtonEditDescription.value.trim();
+            const url = meetingButtonEditUrl.value.trim();
+
+            if (!name) {
+                setFormMessage(meetingButtonEditorMessage, "请输入按钮名称。", "error");
+                return;
+            }
+
+            if (type === "link" && url && !/^https:\/\//i.test(url)) {
+                setFormMessage(meetingButtonEditorMessage, "网址必须以 https:// 开头。", "error");
+                return;
+            }
+
+            const next = meetingButtons.map(function (item) {
+                return Object.assign({}, item);
+            });
+
+            const savedItem = {
+                id: id || createMeetingButtonId(),
+                name: name,
+                description: description,
+                type: type,
+                url: type === "link" ? url : "",
+                visible: meetingButtonEditVisible.checked
+            };
+
+            if (id) {
+                const index = next.findIndex(function (item) {
+                    return item.id === id;
+                });
+
+                if (index >= 0) {
+                    next[index] = savedItem;
+                }
+            } else {
+                next.push(savedItem);
+            }
+
+            const ok = await saveMeetingButtons(next, id ? "按钮已更新。" : "按钮已新增。");
+
+            if (ok) {
+                closeMeetingButtonEditor();
+            } else {
+                setFormMessage(meetingButtonEditorMessage, "保存失败，请检查后再试。", "error");
+            }
+        });
+    }
+
+    function renderAdminMeetingButtons() {
+        if (!adminMeetingButtonList) return;
+
+        adminMeetingButtonList.innerHTML = "";
+
+        if (!meetingButtons.length) {
+            adminMeetingButtonList.innerHTML = '<div class="history-empty">目前没有会议按钮。</div>';
+            return;
+        }
+
+        meetingButtons.forEach(function (item, index) {
+            const row = document.createElement("div");
+            row.className = "meeting-button-admin-row" + (item.visible === false ? " is-hidden-item" : "");
+
+            const info = document.createElement("div");
+            info.className = "meeting-button-admin-info";
+
+            const titleLine = document.createElement("div");
+            titleLine.className = "meeting-button-title-line";
+
+            const title = document.createElement("strong");
+            title.textContent = item.name || "未命名按钮";
+
+            const typeBadge = document.createElement("span");
+            typeBadge.className = "meeting-button-type-badge";
+            typeBadge.textContent = item.type === "month-plan" ? "年月选择" : "普通链接";
+
+            const statusBadge = document.createElement("span");
+            statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
+            statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
+
+            titleLine.appendChild(title);
+            titleLine.appendChild(typeBadge);
+            titleLine.appendChild(statusBadge);
+
+            const detail = document.createElement("span");
+            const description = item.description || "无说明";
+            detail.textContent = item.type === "month-plan"
+                ? description
+                : description + (item.url ? " · " + item.url : " · 暂未设置链接");
+
+            info.appendChild(titleLine);
+            info.appendChild(detail);
+
+            const actions = document.createElement("div");
+            actions.className = "meeting-button-admin-actions";
+
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.className = "secondary-action-btn mini";
+            edit.textContent = "编辑";
+            edit.addEventListener("click", function () {
+                openMeetingButtonEditor(item);
+            });
+
+            const up = document.createElement("button");
+            up.type = "button";
+            up.className = "secondary-action-btn mini";
+            up.textContent = "↑ 上移";
+            up.disabled = index === 0;
+            up.addEventListener("click", async function () {
+                if (index === 0) return;
+                const next = meetingButtons.slice();
+                const temp = next[index - 1];
+                next[index - 1] = next[index];
+                next[index] = temp;
+                await saveMeetingButtons(next, "按钮顺序已更新。");
+            });
+
+            const down = document.createElement("button");
+            down.type = "button";
+            down.className = "secondary-action-btn mini";
+            down.textContent = "↓ 下移";
+            down.disabled = index === meetingButtons.length - 1;
+            down.addEventListener("click", async function () {
+                if (index >= meetingButtons.length - 1) return;
+                const next = meetingButtons.slice();
+                const temp = next[index + 1];
+                next[index + 1] = next[index];
+                next[index] = temp;
+                await saveMeetingButtons(next, "按钮顺序已更新。");
+            });
+
+            const toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "secondary-action-btn mini";
+            toggle.textContent = item.visible === false ? "显示" : "隐藏";
+            toggle.addEventListener("click", async function () {
+                const next = meetingButtons.map(function (buttonItem) {
+                    if (buttonItem.id !== item.id) return buttonItem;
+                    return Object.assign({}, buttonItem, { visible: buttonItem.visible === false });
+                });
+                await saveMeetingButtons(next, item.visible === false ? "按钮已显示。" : "按钮已隐藏。");
+            });
+
+            actions.appendChild(edit);
+            actions.appendChild(up);
+            actions.appendChild(down);
+            actions.appendChild(toggle);
+
+            if (item.type !== "month-plan") {
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.className = "danger-action-btn mini";
+                remove.textContent = "删除";
+                remove.addEventListener("click", async function () {
+                    const confirmed = confirm("确定删除“" + (item.name || "这个按钮") + "”吗？");
+                    if (!confirmed) return;
+
+                    const next = meetingButtons.filter(function (buttonItem) {
+                        return buttonItem.id !== item.id;
+                    });
+
+                    await saveMeetingButtons(next, "按钮已删除。");
+                });
+                actions.appendChild(remove);
+            }
+
+            row.appendChild(info);
+            row.appendChild(actions);
+            adminMeetingButtonList.appendChild(row);
+        });
+    }
 
 
     // ========================================
@@ -1440,6 +1832,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         closeMonthPlanModal();
         closeHistoryModal();
+        closeMeetingButtonEditor();
         closeRosterEditor();
     });
 

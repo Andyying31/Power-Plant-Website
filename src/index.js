@@ -2,6 +2,12 @@ const DEFAULT_MONTH_PLANS = {
     "2026-08": "https://rjpl4x6x1094.jp.larksuite.com/sheets/Nj8msYUuWhUPQwt4bBWjKUkJpRd?sheet=0XXsMf"
 };
 
+const DEFAULT_MEETING_LINKS = {
+    defect: "https://www.larksuite.com/",
+    minutes: "https://www.larksuite.com/",
+    room: "https://www.larksuite.com/"
+};
+
 const DEFAULT_ROSTER = [
     {
         "uid": "seed-001",
@@ -458,6 +464,8 @@ const DEFAULT_ROSTER = [
 const NOTE_KEY = "shared-note";
 const NOTE_HISTORY_KEY = "shared-note-history";
 const MONTH_PLAN_KEY = "month-plan-links";
+const MEETING_LINK_KEY = "meeting-links";
+const MEETING_BUTTON_KEY = "meeting-buttons-v2";
 const ROSTER_KEY = "roster-data";
 
 export default {
@@ -478,6 +486,14 @@ export default {
 
         if (url.pathname === "/api/month-plans") {
             return handleMonthPlans(request, env);
+        }
+
+        if (url.pathname === "/api/meeting-buttons") {
+            return handleMeetingButtons(request, env);
+        }
+
+        if (url.pathname === "/api/meeting-links") {
+            return handleMeetingLinks(request, env);
         }
 
         if (url.pathname === "/api/roster") {
@@ -690,6 +706,251 @@ async function handleSharedNoteRestore(request, env) {
         content: target.content || "",
         updatedAt: now
     });
+}
+
+async function handleMeetingButtons(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        const buttons = await getMeetingButtons(env);
+
+        return jsonResponse({
+            ok: true,
+            buttons
+        });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        if (!Array.isArray(body?.buttons)) {
+            return jsonResponse({ ok: false, error: "Invalid meeting button data." }, 400);
+        }
+
+        if (body.buttons.length > 100) {
+            return jsonResponse({ ok: false, error: "会议按钮数量不能超过 100 个。" }, 400);
+        }
+
+        let buttons;
+
+        try {
+            buttons = normalizeMeetingButtons(body.buttons, true);
+        } catch (error) {
+            return jsonResponse({ ok: false, error: error.message }, 400);
+        }
+
+        await env.SHARED_BOARD.put(
+            MEETING_BUTTON_KEY,
+            JSON.stringify(buttons)
+        );
+
+        return jsonResponse({
+            ok: true,
+            buttons
+        });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+async function getMeetingButtons(env) {
+    let stored = await env.SHARED_BOARD.get(MEETING_BUTTON_KEY, "json");
+
+    if (Array.isArray(stored)) {
+        const normalized = normalizeMeetingButtons(stored, false);
+        if (normalized.length) {
+            return normalized;
+        }
+    }
+
+    // 第一次升级到 v14 时，从 v13 的旧会议链接自动迁移，避免原有网址丢失。
+    let legacyLinks = await env.SHARED_BOARD.get(MEETING_LINK_KEY, "json");
+
+    if (!legacyLinks || typeof legacyLinks !== "object" || Array.isArray(legacyLinks)) {
+        legacyLinks = DEFAULT_MEETING_LINKS;
+    }
+
+    const buttons = [
+        {
+            id: "month-plan",
+            name: "月计划",
+            description: "选择年份和月份后打开对应的 Lark 月计划",
+            type: "month-plan",
+            url: "",
+            visible: true
+        },
+        {
+            id: "defect",
+            name: "消缺单",
+            description: "打开消缺单",
+            type: "link",
+            url: typeof legacyLinks.defect === "string" ? legacyLinks.defect.trim() : "",
+            visible: true
+        },
+        {
+            id: "minutes",
+            name: "会议纪要",
+            description: "查看及编辑会议纪要",
+            type: "link",
+            url: typeof legacyLinks.minutes === "string" ? legacyLinks.minutes.trim() : "",
+            visible: true
+        },
+        {
+            id: "room",
+            name: "会议室预订",
+            description: "查看会议室并进行预订",
+            type: "link",
+            url: typeof legacyLinks.room === "string" ? legacyLinks.room.trim() : "",
+            visible: true
+        }
+    ];
+
+    await env.SHARED_BOARD.put(
+        MEETING_BUTTON_KEY,
+        JSON.stringify(buttons)
+    );
+
+    return buttons;
+}
+
+function normalizeMeetingButtons(source, strict) {
+    const input = Array.isArray(source) ? source : [];
+    const result = [];
+    const ids = new Set();
+    let monthPlanCount = 0;
+
+    for (let index = 0; index < input.length; index += 1) {
+        const item = input[index] && typeof input[index] === "object" ? input[index] : {};
+        const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
+        const name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
+        const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
+        const type = item.type === "month-plan" ? "month-plan" : "link";
+        const url = type === "link" && typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
+        const visible = item.visible !== false;
+
+        if (!id || !name) {
+            if (strict) {
+                throw new Error("每个会议按钮都必须有名称和有效 ID。");
+            }
+            continue;
+        }
+
+        if (ids.has(id)) {
+            if (strict) {
+                throw new Error("会议按钮 ID 重复，请重新操作。 ");
+            }
+            continue;
+        }
+
+        if (type === "link" && url && !/^https:\/\//i.test(url)) {
+            if (strict) {
+                throw new Error(`“${name}”的网址必须以 https:// 开头。`);
+            }
+            continue;
+        }
+
+        if (type === "month-plan") {
+            monthPlanCount += 1;
+
+            if (monthPlanCount > 1) {
+                if (strict) {
+                    throw new Error("只能保留一个年月选择（月计划）按钮。 ");
+                }
+                continue;
+            }
+        }
+
+        ids.add(id);
+        result.push({
+            id,
+            name,
+            description,
+            type,
+            url,
+            visible
+        });
+    }
+
+    return result;
+}
+
+async function handleMeetingLinks(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        let links = await env.SHARED_BOARD.get(MEETING_LINK_KEY, "json");
+
+        if (!links || typeof links !== "object" || Array.isArray(links)) {
+            links = DEFAULT_MEETING_LINKS;
+            await env.SHARED_BOARD.put(MEETING_LINK_KEY, JSON.stringify(links));
+        }
+
+        return jsonResponse({
+            ok: true,
+            links: normalizeMeetingLinks(links)
+        });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        if (!body?.links || typeof body.links !== "object" || Array.isArray(body.links)) {
+            return jsonResponse({ ok: false, error: "Invalid meeting link data." }, 400);
+        }
+
+        const links = normalizeMeetingLinks(body.links);
+
+        for (const [key, value] of Object.entries(links)) {
+            if (value && !/^https:\/\//i.test(value)) {
+                return jsonResponse({ ok: false, error: `${key} 的链接必须以 https:// 开头。` }, 400);
+            }
+        }
+
+        await env.SHARED_BOARD.put(MEETING_LINK_KEY, JSON.stringify(links));
+
+        return jsonResponse({
+            ok: true,
+            links
+        });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+function normalizeMeetingLinks(source) {
+    const safe = source && typeof source === "object" ? source : {};
+
+    return {
+        defect: typeof safe.defect === "string" ? safe.defect.trim() : "",
+        minutes: typeof safe.minutes === "string" ? safe.minutes.trim() : "",
+        room: typeof safe.room === "string" ? safe.room.trim() : ""
+    };
 }
 
 async function handleMonthPlans(request, env) {

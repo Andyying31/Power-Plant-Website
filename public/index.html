@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>沙巴光伏自备电厂导航</title>
-<link href="style.css?v=12" rel="stylesheet"/>
+<link href="style.css?v=14" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -152,36 +152,8 @@
 <h2>会议</h2>
 <p>会议相关业务快捷入口</p>
 </div>
-<div class="link-grid">
-<button class="link-card month-plan-card searchable" id="month-plan-button" type="button">
-<div class="card-content">
-<h3>月计划</h3>
-<p>选择年份和月份后打开对应的 Lark 月计划</p>
-</div>
-<div class="card-arrow">→</div>
-</button>
-<a class="link-card searchable" href="https://www.larksuite.com/" rel="noopener noreferrer" target="_blank">
-<div class="card-content">
-<h3>消缺单</h3>
-<p>消缺单</p>
-</div>
-<div class="card-arrow">→</div>
-</a>
-<a class="link-card searchable" href="https://www.larksuite.com/" rel="noopener noreferrer" target="_blank">
-<div class="card-content">
-<h3>会议纪要</h3>
-<p>查看及编辑会议纪要</p>
-</div>
-<div class="card-arrow">→</div>
-</a>
-<a class="link-card searchable" href="https://www.larksuite.com/" rel="noopener noreferrer" target="_blank">
-<div class="card-content">
-<h3>会议室预订</h3>
-<p>查看会议室并进行预订</p>
-</div>
-<div class="card-arrow">→</div>
-</a>
-</div>
+<div class="link-grid" id="meeting-links"></div>
+<div class="meeting-empty" id="meeting-empty" hidden>目前没有可显示的会议按钮。</div>
 </section>
 <!-- ===================== 日报 ===================== -->
 <section class="page-section" id="daily-page">
@@ -303,7 +275,7 @@
 <button class="secondary-action-btn" id="admin-logout-button" type="button">退出登录</button>
 </div>
 <div class="admin-tabs">
-<button class="admin-tab active" data-admin-tab="month" type="button">月计划链接</button>
+<button class="admin-tab active" data-admin-tab="month" type="button">会议按钮</button>
 <button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button>
 <button class="admin-tab" data-admin-tab="history" type="button">公告历史</button>
 </div>
@@ -311,8 +283,19 @@
 <div class="admin-card">
 <div class="admin-card-heading">
 <div>
+<h3>会议按钮管理</h3>
+<p>可以修改名称、说明和链接，也可以新增、删除、隐藏或调整按钮顺序。月计划按钮会继续使用年份 / 月份选择功能。</p>
+</div>
+<button class="primary-action-btn" id="admin-meeting-add" type="button">+ 新增按钮</button>
+</div>
+<div class="meeting-button-admin-list" id="admin-meeting-button-list"></div>
+<div class="form-message" id="admin-meeting-button-message"></div>
+</div>
+<div class="admin-card">
+<div class="admin-card-heading">
+<div>
 <h3>月计划链接管理</h3>
-<p>选择年份和月份，粘贴 Lark 链接后保存。前台月计划会自动更新。</p>
+<p>这里管理“月计划”年月对应的 Lark 链接；月计划按钮的名称、说明、显示状态和排序在上面的会议按钮管理中修改。</p>
 </div>
 </div>
 <div class="month-admin-form">
@@ -409,6 +392,43 @@
 <div class="history-list" id="public-history-list"></div>
 <div class="month-modal-note">恢复历史版本需要先在“管理后台”登录。</div>
 </div>
+</div><div aria-hidden="true" class="month-modal" id="meeting-button-editor-modal">
+<div class="month-modal-backdrop" data-meeting-button-modal-close=""></div>
+<div aria-labelledby="meeting-button-editor-title" aria-modal="true" class="meeting-button-editor-panel" role="dialog">
+<div class="month-modal-header">
+<div>
+<h2 id="meeting-button-editor-title">新增会议按钮</h2>
+<p id="meeting-button-editor-subtitle">新增后会直接显示在会议页面。</p>
+</div>
+<button aria-label="关闭" class="month-modal-close" data-meeting-button-modal-close="" type="button">×</button>
+</div>
+<form class="meeting-button-editor-form" id="meeting-button-editor-form">
+<input id="meeting-button-edit-id" type="hidden"/>
+<input id="meeting-button-edit-type" type="hidden" value="link"/>
+<div class="field-group">
+<label for="meeting-button-edit-name">按钮名称</label>
+<input id="meeting-button-edit-name" maxlength="80" placeholder="例如：工作联系单" required type="text"/>
+</div>
+<div class="field-group">
+<label for="meeting-button-edit-description">说明</label>
+<input id="meeting-button-edit-description" maxlength="200" placeholder="例如：查看及填写工作联系单" type="text"/>
+</div>
+<div class="field-group" id="meeting-button-url-group">
+<label for="meeting-button-edit-url">网址</label>
+<input id="meeting-button-edit-url" maxlength="2000" placeholder="https://..." type="url"/>
+</div>
+<div class="meeting-button-type-note" id="meeting-button-type-note">普通链接按钮</div>
+<label class="meeting-visible-check">
+<input id="meeting-button-edit-visible" type="checkbox" checked/>
+<span>在会议页面显示这个按钮</span>
+</label>
+<div class="form-message" id="meeting-button-editor-message"></div>
+<div class="editor-actions">
+<button class="secondary-action-btn" data-meeting-button-modal-close="" type="button">取消</button>
+<button class="primary-action-btn" type="submit">保存</button>
+</div>
+</form>
+</div>
 </div><div aria-hidden="true" class="month-modal" id="roster-editor-modal">
 <div class="month-modal-backdrop" data-roster-modal-close=""></div>
 <div aria-labelledby="roster-editor-title" aria-modal="true" class="roster-editor-panel" role="dialog">
@@ -480,6 +500,6 @@
             </div>
 </div>
 </div>
-<script src="script.js?v=12"></script>
+<script src="script.js?v=14"></script>
 </body>
 </html>

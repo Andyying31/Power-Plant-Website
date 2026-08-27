@@ -3,6 +3,9 @@
   "name": "power-plant-website",
   "compatibility_date": "2026-08-27",
   "main": "src/index.js",
+  "secrets": {
+    "required": ["ADMIN_PASSWORD"]
+  },
   "kv_namespaces": [
     {
       "binding": "SHARED_BOARD",

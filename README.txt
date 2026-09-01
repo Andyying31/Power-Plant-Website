@@ -19,3 +19,6 @@
 
 Cloudflare KV binding：SHARED_BOARD
 Namespace ID：fcae3bdfe7424fa9bde0c071d38ae177
+
+
+v15 更新：导航栏移到顶部。电脑端为紧凑横向导航；手机端为顶部横向滑动导航。点击菜单会短暂放大后恢复，当前菜单自动滚动到可视区域中间。后台、KV、花名册、会议按钮和公告数据逻辑保持不变。

@@ -75,6 +75,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (currentMenu) {
             currentMenu.classList.add("active");
+
+            if (typeof currentMenu.scrollIntoView === "function") {
+                currentMenu.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center"
+                });
+            }
         }
 
         const info = pageInformation[pageName];
@@ -118,7 +126,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     menuItems.forEach(function (item) {
         item.addEventListener("click", function () {
-            openPage(this.getAttribute("data-page"));
+            const clickedItem = this;
+
+            clickedItem.classList.remove("tap-pop");
+            void clickedItem.offsetWidth;
+            clickedItem.classList.add("tap-pop");
+
+            window.setTimeout(function () {
+                clickedItem.classList.remove("tap-pop");
+            }, 260);
+
+            openPage(clickedItem.getAttribute("data-page"));
         });
     });
 

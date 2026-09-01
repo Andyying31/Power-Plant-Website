@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>沙巴光伏自备电厂导航</title>
-<link href="style.css?v=15" rel="stylesheet"/>
+<link href="style.css?v=16" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -28,15 +28,138 @@
 <header class="topbar">
 <div class="page-title">
 <h1 id="page-title">沙巴光伏自备电厂导航</h1>
-<p id="page-subtitle">自备电厂部组织结构</p>
+<p id="page-subtitle">部门业务总览</p>
 </div>
 <div class="search-box">
 <span class="search-symbol">搜索</span>
 <input id="search" placeholder="搜索姓名或岗位..." type="text"/>
 </div>
 </header>
-<!-- ===================== 主页：组织架构 ===================== -->
+<!-- ===================== 主页：Dashboard ===================== -->
 <section class="page-section active-page" id="home-page">
+<div class="home-dashboard">
+<div class="dashboard-welcome">
+<div class="dashboard-welcome-copy">
+<div class="dashboard-kicker">POWER PLANT PORTAL</div>
+<h2>沙巴光伏自备电厂</h2>
+<p>请选择需要进入的业务模块</p>
+</div>
+<div class="dashboard-badge">部门业务总览</div>
+</div>
+<div class="dashboard-grid">
+<button class="dashboard-card" data-dashboard-page="meeting" type="button">
+<div class="dashboard-card-mark">会</div>
+<div class="dashboard-card-copy"><h3>会议</h3><p>月计划及其他会议业务入口</p></div>
+<span class="dashboard-card-arrow">→</span>
+</button>
+<button class="dashboard-card" data-dashboard-page="daily" type="button">
+<div class="dashboard-card-mark">日</div>
+<div class="dashboard-card-copy"><h3>日报</h3><p>查看部门日报相关资料</p></div>
+<span class="dashboard-card-arrow">→</span>
+</button>
+<button class="dashboard-card" data-dashboard-page="roster" type="button">
+<div class="dashboard-card-mark">人</div>
+<div class="dashboard-card-copy"><h3>花名册</h3><p>人员资料及部门组织结构</p></div>
+<span class="dashboard-card-arrow">→</span>
+</button>
+<button class="dashboard-card" data-dashboard-page="notice" type="button">
+<div class="dashboard-card-mark">公</div>
+<div class="dashboard-card-copy"><h3>共享公告</h3><p>直接查看及编辑部门共享内容</p></div>
+<span class="dashboard-card-arrow">→</span>
+</button>
+</div>
+</div>
+</section>
+<!-- ===================== 会议 ===================== -->
+<section class="page-section" id="meeting-page">
+<div class="section-heading">
+<h2>会议</h2>
+<p>会议相关业务快捷入口</p>
+</div>
+<div class="link-grid" id="meeting-links"></div>
+<div class="meeting-empty" hidden="" id="meeting-empty">目前没有可显示的会议按钮。</div>
+</section>
+<!-- ===================== 日报 ===================== -->
+<section class="page-section" id="daily-page">
+<div class="section-heading">
+<h2>日报</h2>
+<p>日报相关业务入口</p>
+</div>
+<div class="empty-panel">
+<strong>日报</strong>
+<p>日报内容暂未添加。</p>
+</div>
+</section>
+<!-- ===================== 花名册 ===================== -->
+<section class="page-section" id="roster-page">
+<div class="roster-page-toolbar">
+<div>
+<h2>花名册</h2>
+<p id="roster-view-subtitle">查看部门人员花名册或组织结构图</p>
+</div>
+<div aria-label="花名册视图" class="roster-view-tabs" role="tablist">
+<button class="roster-view-tab active" data-roster-view="list" type="button">花名册</button>
+<button class="roster-view-tab" data-roster-view="org" type="button">结构图</button>
+</div>
+</div>
+<div class="roster-view active" id="roster-list-view">
+<div class="section-heading roster-heading">
+<div>
+<h2>人员花名册</h2>
+<p>人员资料由管理后台维护，人数统计会自动计算。</p>
+</div>
+<div class="roster-result-count">
+            显示 <strong id="visible-count">0</strong> / <strong id="roster-total-inline">0</strong> 人
+        </div>
+</div>
+<div class="roster-summary">
+<div class="summary-card"><span>总人数</span><strong id="roster-total">0</strong></div>
+<div class="summary-card"><span>管理</span><strong id="roster-management">0</strong></div>
+<div class="summary-card"><span>运行</span><strong id="roster-operation">0</strong></div>
+<div class="summary-card"><span>维护</span><strong id="roster-maintenance">0</strong></div>
+<div class="summary-card"><span>正式</span><strong id="roster-official">0</strong></div>
+<div class="summary-card"><span>试用</span><strong id="roster-probation">0</strong></div>
+<div class="summary-card"><span>离职</span><strong id="roster-left">0</strong></div>
+</div>
+<div class="roster-controls">
+<div class="filter-group">
+<span class="filter-label">类别</span>
+<button class="filter-btn active" data-category-filter="全部" type="button">全部</button>
+<button class="filter-btn" data-category-filter="管理" type="button">管理</button>
+<button class="filter-btn" data-category-filter="运行" type="button">运行</button>
+<button class="filter-btn" data-category-filter="维护" type="button">维护</button>
+</div>
+<div class="filter-group">
+<span class="filter-label">状态</span>
+<button class="filter-btn active" data-status-filter="全部" type="button">全部</button>
+<button class="filter-btn" data-status-filter="正式" type="button">正式</button>
+<button class="filter-btn" data-status-filter="试用" type="button">试用</button>
+<button class="filter-btn" data-status-filter="离职" type="button">离职</button>
+</div>
+</div>
+<div class="privacy-note">
+        网页版显示工号、姓名、类别、岗位、职衔和人员状态。手机号、入职日期及照片暂未放到网页中。
+    </div>
+<div class="roster-table-wrap">
+<table class="roster-table">
+<thead>
+<tr>
+<th class="col-no">序号</th>
+<th class="col-id">工号</th>
+<th>姓名</th>
+<th>类别</th>
+<th>岗位</th>
+<th>职衔</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody id="roster-body"></tbody>
+</table>
+</div>
+<div class="roster-empty" id="roster-loading">正在读取花名册...</div>
+<div class="roster-empty" id="roster-empty" style="display:none;">没有找到符合条件的人员。</div>
+</div>
+<div class="roster-view" id="roster-org-view">
 <div class="org-scroll">
 <div class="org-board">
 <div class="org-board-header">
@@ -144,84 +267,7 @@
 </div>
 </div>
 </div>
-</section>
-<!-- ===================== 会议 ===================== -->
-<section class="page-section" id="meeting-page">
-<div class="section-heading">
-<h2>会议</h2>
-<p>会议相关业务快捷入口</p>
 </div>
-<div class="link-grid" id="meeting-links"></div>
-<div class="meeting-empty" id="meeting-empty" hidden>目前没有可显示的会议按钮。</div>
-</section>
-<!-- ===================== 日报 ===================== -->
-<section class="page-section" id="daily-page">
-<div class="section-heading">
-<h2>日报</h2>
-<p>日报相关业务入口</p>
-</div>
-<div class="empty-panel">
-<strong>日报</strong>
-<p>日报内容暂未添加。</p>
-</div>
-</section>
-<!-- ===================== 花名册 ===================== -->
-<section class="page-section" id="roster-page">
-<div class="section-heading roster-heading">
-<div>
-<h2>自备电厂部总名册</h2>
-<p>人员资料由管理后台维护，人数统计会自动计算。</p>
-</div>
-<div class="roster-result-count">
-            显示 <strong id="visible-count">0</strong> / <strong id="roster-total-inline">0</strong> 人
-        </div>
-</div>
-<div class="roster-summary">
-<div class="summary-card"><span>总人数</span><strong id="roster-total">0</strong></div>
-<div class="summary-card"><span>管理</span><strong id="roster-management">0</strong></div>
-<div class="summary-card"><span>运行</span><strong id="roster-operation">0</strong></div>
-<div class="summary-card"><span>维护</span><strong id="roster-maintenance">0</strong></div>
-<div class="summary-card"><span>正式</span><strong id="roster-official">0</strong></div>
-<div class="summary-card"><span>试用</span><strong id="roster-probation">0</strong></div>
-<div class="summary-card"><span>离职</span><strong id="roster-left">0</strong></div>
-</div>
-<div class="roster-controls">
-<div class="filter-group">
-<span class="filter-label">类别</span>
-<button class="filter-btn active" data-category-filter="全部" type="button">全部</button>
-<button class="filter-btn" data-category-filter="管理" type="button">管理</button>
-<button class="filter-btn" data-category-filter="运行" type="button">运行</button>
-<button class="filter-btn" data-category-filter="维护" type="button">维护</button>
-</div>
-<div class="filter-group">
-<span class="filter-label">状态</span>
-<button class="filter-btn active" data-status-filter="全部" type="button">全部</button>
-<button class="filter-btn" data-status-filter="正式" type="button">正式</button>
-<button class="filter-btn" data-status-filter="试用" type="button">试用</button>
-<button class="filter-btn" data-status-filter="离职" type="button">离职</button>
-</div>
-</div>
-<div class="privacy-note">
-        网页版显示工号、姓名、类别、岗位、职衔和人员状态。手机号、入职日期及照片暂未放到网页中。
-    </div>
-<div class="roster-table-wrap">
-<table class="roster-table">
-<thead>
-<tr>
-<th class="col-no">序号</th>
-<th class="col-id">工号</th>
-<th>姓名</th>
-<th>类别</th>
-<th>岗位</th>
-<th>职衔</th>
-<th>状态</th>
-</tr>
-</thead>
-<tbody id="roster-body"></tbody>
-</table>
-</div>
-<div class="roster-empty" id="roster-loading">正在读取花名册...</div>
-<div class="roster-empty" id="roster-empty" style="display:none;">没有找到符合条件的人员。</div>
 </section>
 <!-- ===================== 共享公告 ===================== -->
 <section class="page-section" id="notice-page">
@@ -406,7 +452,7 @@
 <input id="meeting-button-edit-type" type="hidden" value="link"/>
 <div class="field-group">
 <label for="meeting-button-edit-name">按钮名称</label>
-<input id="meeting-button-edit-name" maxlength="80" placeholder="例如：工作联系单" required type="text"/>
+<input id="meeting-button-edit-name" maxlength="80" placeholder="例如：工作联系单" required="" type="text"/>
 </div>
 <div class="field-group">
 <label for="meeting-button-edit-description">说明</label>
@@ -418,7 +464,7 @@
 </div>
 <div class="meeting-button-type-note" id="meeting-button-type-note">普通链接按钮</div>
 <label class="meeting-visible-check">
-<input id="meeting-button-edit-visible" type="checkbox" checked/>
+<input checked="" id="meeting-button-edit-visible" type="checkbox"/>
 <span>在会议页面显示这个按钮</span>
 </label>
 <div class="form-message" id="meeting-button-editor-message"></div>
@@ -499,6 +545,6 @@
             </div>
 </div>
 </div>
-<script src="script.js?v=15"></script>
+<script src="script.js?v=16"></script>
 </body>
 </html>

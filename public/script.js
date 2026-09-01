@@ -7,11 +7,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const pageTitle = document.getElementById("page-title");
     const pageSubtitle = document.getElementById("page-subtitle");
 
+    const dashboardCards = document.querySelectorAll("[data-dashboard-page]");
+    const rosterViewTabs = document.querySelectorAll("[data-roster-view]");
+    const rosterListView = document.getElementById("roster-list-view");
+    const rosterOrgView = document.getElementById("roster-org-view");
+    const rosterViewSubtitle = document.getElementById("roster-view-subtitle");
+
     const categoryButtons = document.querySelectorAll("[data-category-filter]");
     const statusButtons = document.querySelectorAll("[data-status-filter]");
 
     let currentCategory = "全部";
     let currentStatus = "全部";
+    let currentRosterView = "list";
     let rosterData = [];
     let rosterLoaded = false;
     let monthPlanLinks = {};
@@ -25,8 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const pageInformation = {
         home: {
             title: "沙巴光伏自备电厂导航",
-            subtitle: "自备电厂部组织结构",
-            search: "搜索姓名或岗位..."
+            subtitle: "部门业务总览",
+            search: ""
         },
         meeting: {
             title: "会议",
@@ -40,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         roster: {
             title: "花名册",
-            subtitle: "自备电厂部总名册",
+            subtitle: "人员花名册与组织结构",
             search: "搜索工号、姓名、岗位、职衔..."
         },
         notice: {
@@ -95,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (searchBox) {
             searchBox.style.display =
-                pageName === "notice" || pageName === "admin"
+                pageName === "home" || pageName === "notice" || pageName === "admin"
                     ? "none"
                     : "flex";
         }
@@ -109,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (pageName === "roster") {
+            switchRosterView("list");
             await loadRoster();
             applyRosterFilters();
         }
@@ -140,12 +148,40 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    dashboardCards.forEach(function (card) {
+        card.addEventListener("click", function () {
+            const pageName = this.getAttribute("data-dashboard-page");
+            if (pageName) {
+                openPage(pageName);
+            }
+        });
+    });
+
+    rosterViewTabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            switchRosterView(this.getAttribute("data-roster-view"));
+        });
+    });
+
     searchInput.addEventListener("input", function () {
         const activePage = document.querySelector(".page-section.active-page");
         if (!activePage) return;
 
-        if (activePage.id === "roster-page") {
+        if (activePage.id === "roster-page" && currentRosterView === "list") {
             applyRosterFilters();
+            return;
+        }
+
+        if (activePage.id === "roster-page" && currentRosterView === "org") {
+            const keyword = this.value.trim().toLowerCase();
+            const searchableItems = rosterOrgView
+                ? rosterOrgView.querySelectorAll(".searchable")
+                : [];
+
+            searchableItems.forEach(function (item) {
+                const text = item.textContent.toLowerCase();
+                item.classList.toggle("search-hidden", !text.includes(keyword));
+            });
             return;
         }
 
@@ -167,6 +203,45 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".search-hidden").forEach(function (item) {
             item.classList.remove("search-hidden");
         });
+    }
+
+    function switchRosterView(viewName) {
+        currentRosterView = viewName === "org" ? "org" : "list";
+
+        rosterViewTabs.forEach(function (tab) {
+            tab.classList.toggle(
+                "active",
+                tab.getAttribute("data-roster-view") === currentRosterView
+            );
+        });
+
+        if (rosterListView) {
+            rosterListView.classList.toggle("active", currentRosterView === "list");
+        }
+
+        if (rosterOrgView) {
+            rosterOrgView.classList.toggle("active", currentRosterView === "org");
+        }
+
+        resetSearch();
+        searchInput.value = "";
+
+        if (currentRosterView === "org") {
+            pageSubtitle.textContent = "自备电厂部组织结构图";
+            searchInput.placeholder = "搜索姓名或岗位...";
+            if (rosterViewSubtitle) {
+                rosterViewSubtitle.textContent = "当前查看：自备电厂部组织结构图";
+            }
+        } else {
+            pageSubtitle.textContent = "人员花名册与组织结构";
+            searchInput.placeholder = "搜索工号、姓名、岗位、职衔...";
+            if (rosterViewSubtitle) {
+                rosterViewSubtitle.textContent = "查看部门人员花名册或组织结构图";
+            }
+            if (rosterLoaded) {
+                applyRosterFilters();
+            }
+        }
     }
 
 

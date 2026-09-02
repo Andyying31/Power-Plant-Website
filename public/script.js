@@ -1932,6 +1932,137 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+
+    // ========================================
+    // 管理后台：完整数据备份 / 恢复
+    // ========================================
+
+    const adminBackupDownload = document.getElementById("admin-backup-download");
+    const adminBackupMessage = document.getElementById("admin-backup-message");
+    const adminRestoreFile = document.getElementById("admin-restore-file");
+    const adminRestoreButton = document.getElementById("admin-restore-button");
+    const adminRestoreMessage = document.getElementById("admin-restore-message");
+    const adminBackupFileSummary = document.getElementById("admin-backup-file-summary");
+    let selectedBackupData = null;
+
+    function formatBackupDate(value) {
+        if (!value) return "未知";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return String(value);
+        return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    if (adminBackupDownload) {
+        adminBackupDownload.addEventListener("click", async function () {
+            setFormMessage(adminBackupMessage, "正在整理全部云端数据...", "info");
+            adminBackupDownload.disabled = true;
+
+            try {
+                const response = await adminFetch("/api/admin/backup", { method: "GET" });
+
+                if (!response.ok) {
+                    const data = await response.json().catch(function () { return {}; });
+                    throw new Error(data.error || "备份失败。");
+                }
+
+                const blob = await response.blob();
+                const disposition = response.headers.get("Content-Disposition") || "";
+                const match = disposition.match(/filename="([^"]+)"/i);
+                const today = new Date().toISOString().slice(0, 10);
+                const filename = match ? match[1] : ("power-plant-backup-" + today + ".json");
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+
+                setFormMessage(adminBackupMessage, "完整备份已下载，请妥善保存这个 JSON 文件。", "success");
+            } catch (error) {
+                setFormMessage(adminBackupMessage, error.message || "备份失败。", "error");
+            } finally {
+                adminBackupDownload.disabled = false;
+            }
+        });
+    }
+
+    if (adminRestoreFile) {
+        adminRestoreFile.addEventListener("change", async function () {
+            selectedBackupData = null;
+            if (adminRestoreButton) adminRestoreButton.disabled = true;
+            if (adminBackupFileSummary) {
+                adminBackupFileSummary.hidden = true;
+                adminBackupFileSummary.textContent = "";
+            }
+            setFormMessage(adminRestoreMessage, "", "");
+
+            const file = adminRestoreFile.files && adminRestoreFile.files[0];
+            if (!file) return;
+
+            try {
+                if (file.size > 8 * 1024 * 1024) {
+                    throw new Error("备份文件太大，无法导入。");
+                }
+
+                const data = JSON.parse(await file.text());
+                if (!data || data.format !== "power-plant-site-backup" || Number(data.version) !== 1 || !Array.isArray(data.entries)) {
+                    throw new Error("这不是本网站导出的完整备份文件。");
+                }
+
+                selectedBackupData = data;
+                if (adminRestoreButton) adminRestoreButton.disabled = false;
+                if (adminBackupFileSummary) {
+                    adminBackupFileSummary.hidden = false;
+                    adminBackupFileSummary.textContent =
+                        "备份时间：" + formatBackupDate(data.exportedAt) +
+                        "　｜　数据项：" + data.entries.length + " 项";
+                }
+            } catch (error) {
+                selectedBackupData = null;
+                if (adminRestoreButton) adminRestoreButton.disabled = true;
+                setFormMessage(adminRestoreMessage, error.message || "无法读取备份文件。", "error");
+            }
+        });
+    }
+
+    if (adminRestoreButton) {
+        adminRestoreButton.addEventListener("click", async function () {
+            if (!selectedBackupData) {
+                setFormMessage(adminRestoreMessage, "请先选择一个完整备份文件。", "error");
+                return;
+            }
+
+            const confirmed = window.confirm(
+                "确定要恢复这个备份吗？\n\n备份中的同名云端数据会覆盖当前资料。建议恢复前先点一次“导出完整备份”保存当前状态。"
+            );
+            if (!confirmed) return;
+
+            adminRestoreButton.disabled = true;
+            setFormMessage(adminRestoreMessage, "正在恢复全部数据，请不要关闭页面...", "info");
+
+            try {
+                const response = await adminFetch("/api/admin/restore", {
+                    method: "POST",
+                    body: JSON.stringify({ backup: selectedBackupData })
+                });
+                const data = await response.json().catch(function () { return {}; });
+
+                if (!response.ok) {
+                    throw new Error(data.error || "恢复失败。");
+                }
+
+                setFormMessage(adminRestoreMessage, "恢复完成，共恢复 " + (data.restored || 0) + " 项数据。", "success");
+                window.alert("完整备份已经恢复。网站将重新载入最新资料。");
+                window.location.reload();
+            } catch (error) {
+                setFormMessage(adminRestoreMessage, error.message || "恢复失败。", "error");
+                adminRestoreButton.disabled = false;
+            }
+        });
+    }
+
     // ========================================
     // 管理后台：月计划
     // ========================================

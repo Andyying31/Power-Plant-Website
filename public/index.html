@@ -293,7 +293,7 @@ try {
 </div>
 <button class="secondary-action-btn" id="admin-logout-button" type="button">退出登录</button>
 </div>
-<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button></div>
+<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button><button class="admin-tab" data-admin-tab="backup" type="button">数据备份</button></div>
 <div class="admin-tab-panel active" id="admin-modules-tab">
 <div class="admin-card">
 <div class="admin-card-heading">
@@ -373,6 +373,33 @@ try {
 </div>
 <div class="history-list" id="admin-history-list"></div>
 <div class="form-message" id="admin-history-message"></div>
+</div>
+</div>
+<div class="admin-tab-panel" id="admin-backup-tab">
+<div class="admin-card">
+<div class="admin-card-heading">
+<div>
+<h3>完整数据备份</h3>
+<p>导出当前 Cloudflare KV 中的全部网站数据。包含花名册、主页模块、内部按钮、月计划、共享公告及历史版本等；不包含网站密码和管理员密码。</p>
+</div>
+<button class="primary-action-btn" id="admin-backup-download" type="button">导出完整备份</button>
+</div>
+<div class="backup-info-box">备份文件是一个 JSON 文件，请妥善保存。以后更换 Cloudflare、重建 KV 或迁移服务器时，可以用它恢复网站资料。</div>
+<div class="form-message" id="admin-backup-message"></div>
+</div>
+<div class="admin-card">
+<div class="admin-card-heading">
+<div>
+<h3>恢复完整备份</h3>
+<p>选择之前导出的备份文件。恢复会覆盖备份文件中同名的云端数据，恢复完成后网站会自动刷新。</p>
+</div>
+</div>
+<div class="backup-restore-row">
+<input accept="application/json,.json" id="admin-restore-file" type="file"/>
+<button class="primary-action-btn" disabled id="admin-restore-button" type="button">恢复备份</button>
+</div>
+<div class="backup-file-summary" hidden id="admin-backup-file-summary"></div>
+<div class="form-message" id="admin-restore-message"></div>
 </div>
 </div>
 </div>

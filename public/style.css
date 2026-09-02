@@ -1920,3 +1920,60 @@ footer {
     .module-quick-links { padding: 14px; margin-bottom: 18px; }
     .dashboard-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
+
+
+/* ================= v21 完整数据备份 / 恢复 ================= */
+.backup-info-box {
+    margin: 2px 0 14px;
+    padding: 11px 13px;
+    border: 1px solid #e6ebf2;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #667085;
+    font-size: 10px;
+    line-height: 1.65;
+}
+
+.backup-restore-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.backup-restore-row input[type="file"] {
+    min-width: 280px;
+    max-width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #dfe5ed;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #475467;
+    font-family: inherit;
+    font-size: 11px;
+}
+
+.backup-file-summary {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: #edf4ff;
+    color: #2767bd;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.backup-file-summary[hidden] { display: none !important; }
+
+@media (max-width: 650px) {
+    .backup-restore-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .backup-restore-row input[type="file"],
+    .backup-restore-row .primary-action-btn {
+        width: 100%;
+        min-width: 0;
+    }
+}

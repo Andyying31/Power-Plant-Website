@@ -25,3 +25,10 @@ Cloudflare 会按现有 Worker / KV 配置自动部署。
 
 
 v20 更新：仅优化电脑与手机顶部导航栏视觉和交互，不修改后台数据结构与原有业务功能。
+
+
+v21 新增：管理后台“数据备份”功能。
+- 导出完整备份：导出 SHARED_BOARD KV 中全部网站数据为 JSON。
+- 恢复完整备份：选择 JSON 后一键恢复。
+- SITE_PASSWORD 与 ADMIN_PASSWORD 属于 Cloudflare Secret，不会写入备份文件。
+- 恢复会覆盖备份中同名 KV 数据，不删除备份中没有的其它键。

@@ -562,6 +562,14 @@ export default {
             return handleRoster(request, env);
         }
 
+        if (url.pathname === "/api/admin/backup") {
+            return handleAdminBackup(request, env);
+        }
+
+        if (url.pathname === "/api/admin/restore") {
+            return handleAdminRestore(request, env);
+        }
+
         if (url.pathname === "/api/admin/verify") {
             return handleAdminVerify(request, env);
         }
@@ -1730,6 +1738,166 @@ function normalizeRosterItem(item) {
                 ? item.status
                 : "试用"
     };
+}
+
+const BACKUP_FORMAT = "power-plant-site-backup";
+const BACKUP_VERSION = 1;
+const MAX_BACKUP_KEYS = 5000;
+const MAX_BACKUP_VALUE_CHARS = 5 * 1024 * 1024;
+
+async function listAllKvKeys(namespace) {
+    const keys = [];
+    let cursor;
+
+    while (true) {
+        const options = { limit: 1000 };
+        if (cursor) options.cursor = cursor;
+
+        const page = await namespace.list(options);
+        if (Array.isArray(page.keys)) {
+            keys.push(...page.keys);
+        }
+
+        if (keys.length > MAX_BACKUP_KEYS) {
+            throw new Error("KV 数据数量超过备份上限，请联系管理员处理。");
+        }
+
+        if (page.list_complete || !page.cursor) break;
+        cursor = page.cursor;
+    }
+
+    return keys;
+}
+
+async function handleAdminBackup(request, env) {
+    if (request.method !== "GET") {
+        return methodNotAllowed("GET");
+    }
+
+    const auth = checkAdmin(request, env);
+    if (!auth.ok) return auth.response;
+
+    try {
+        await ensureKv(env);
+        const keys = await listAllKvKeys(env.SHARED_BOARD);
+        const entries = [];
+        let totalChars = 0;
+
+        for (const keyInfo of keys) {
+            const value = await env.SHARED_BOARD.get(keyInfo.name, "text");
+            if (value === null) continue;
+
+            totalChars += value.length;
+            if (totalChars > MAX_BACKUP_VALUE_CHARS) {
+                throw new Error("备份数据超过 5MB 上限，请联系管理员处理。");
+            }
+
+            entries.push({
+                name: keyInfo.name,
+                value,
+                expiration: Number.isFinite(keyInfo.expiration) ? keyInfo.expiration : null,
+                metadata: keyInfo.metadata === undefined ? null : keyInfo.metadata
+            });
+        }
+
+        const backup = {
+            format: BACKUP_FORMAT,
+            version: BACKUP_VERSION,
+            exportedAt: new Date().toISOString(),
+            source: "Cloudflare Workers KV / SHARED_BOARD",
+            keyCount: entries.length,
+            note: "This backup contains website data only. SITE_PASSWORD and ADMIN_PASSWORD are not included.",
+            entries
+        };
+
+        const date = backup.exportedAt.slice(0, 10);
+        return new Response(JSON.stringify(backup, null, 2), {
+            status: 200,
+            headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                "Content-Disposition": `attachment; filename="power-plant-backup-${date}.json"`,
+                "Cache-Control": "no-store"
+            }
+        });
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message || "备份失败。" }, 500);
+    }
+}
+
+async function handleAdminRestore(request, env) {
+    if (request.method !== "POST") {
+        return methodNotAllowed("POST");
+    }
+
+    const auth = checkAdmin(request, env);
+    if (!auth.ok) return auth.response;
+
+    try {
+        await ensureKv(env);
+
+        let body;
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "备份文件格式不正确。" }, 400);
+        }
+
+        const backup = body?.backup;
+        if (!backup || backup.format !== BACKUP_FORMAT || Number(backup.version) !== BACKUP_VERSION) {
+            return jsonResponse({ ok: false, error: "这不是本网站支持的完整备份文件。" }, 400);
+        }
+
+        if (!Array.isArray(backup.entries) || backup.entries.length > MAX_BACKUP_KEYS) {
+            return jsonResponse({ ok: false, error: "备份内容不完整或数据数量异常。" }, 400);
+        }
+
+        let totalChars = 0;
+        const entries = [];
+        const seen = new Set();
+
+        for (const raw of backup.entries) {
+            const name = typeof raw?.name === "string" ? raw.name.trim() : "";
+            const value = typeof raw?.value === "string" ? raw.value : null;
+
+            if (!name || name.length > 512 || value === null || seen.has(name)) {
+                return jsonResponse({ ok: false, error: "备份文件中存在无效或重复的数据项。" }, 400);
+            }
+
+            totalChars += value.length;
+            if (totalChars > MAX_BACKUP_VALUE_CHARS) {
+                return jsonResponse({ ok: false, error: "备份数据超过 5MB 上限。" }, 413);
+            }
+
+            seen.add(name);
+            entries.push({
+                name,
+                value,
+                expiration: Number.isFinite(raw.expiration) ? raw.expiration : null,
+                metadata: raw.metadata === undefined ? null : raw.metadata
+            });
+        }
+
+        const nowSeconds = Math.floor(Date.now() / 1000);
+        for (const entry of entries) {
+            const options = {};
+            if (entry.expiration && entry.expiration > nowSeconds + 60) {
+                options.expiration = entry.expiration;
+            }
+            if (entry.metadata !== null) {
+                options.metadata = entry.metadata;
+            }
+
+            await env.SHARED_BOARD.put(entry.name, entry.value, options);
+        }
+
+        return jsonResponse({
+            ok: true,
+            restored: entries.length,
+            exportedAt: typeof backup.exportedAt === "string" ? backup.exportedAt : null
+        });
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message || "恢复失败。" }, 500);
+    }
 }
 
 async function handleAdminVerify(request, env) {

@@ -1349,6 +1349,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    async function readJsonResponse(response, fallbackMessage) {
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        if (!contentType.includes("application/json")) {
+            const text = await response.text().catch(function () { return ""; });
+            if (text.includes("Worker exceeded resource limits") || response.status === 1102) {
+                throw new Error("服务器运算超过免费版限制，请稍后再试。");
+            }
+            throw new Error(fallbackMessage || "服务器返回了异常内容，请刷新后重试。");
+        }
+        return response.json();
+    }
+
     // ========================================
     // 管理后台标签
     // ========================================
@@ -1403,7 +1415,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (adminUsersLoaded && !force) return adminUsers;
         try {
             const response = await adminFetch("/api/admin/users", { method: "GET" });
-            const data = await response.json();
+            const data = await readJsonResponse(response, "用户账号服务暂时异常，请刷新后重试。");
             if (!response.ok) throw new Error(data.error || "无法读取用户账号。");
             adminUsers = Array.isArray(data.users) ? data.users : [];
             adminUsersLoaded = true;
@@ -1446,7 +1458,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!confirm("确定删除用户 “" + user.username + "” 吗？删除后该账号将不能再登录。")) return;
                 try {
                     const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "delete", username: user.username }) });
-                    const data = await response.json();
+                    const data = await readJsonResponse(response, "用户账号服务暂时异常，请刷新后重试。");
                     if (!response.ok) throw new Error(data.error || "删除失败。");
                     adminUsers = Array.isArray(data.users) ? data.users : [];
                     renderAdminUsers();
@@ -1471,7 +1483,7 @@ document.addEventListener("DOMContentLoaded", function () {
             setFormMessage(adminUserMessage, "正在创建账号...", "info");
             try {
                 const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "create", username, displayName, password }) });
-                const data = await response.json();
+                const data = await readJsonResponse(response, "用户账号服务暂时异常，请刷新后重试。");
                 if (!response.ok) throw new Error(data.error || "创建失败。");
                 adminUsers = Array.isArray(data.users) ? data.users : [];
                 adminUserCreateForm.reset();

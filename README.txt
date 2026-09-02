@@ -1,3 +1,10 @@
+v23 修正版
+
+- 修复 Cloudflare Workers Free 创建用户时可能出现的 JSON / HTML 错误。
+- 用户密码仍使用 PBKDF2-SHA256 + 独立随机盐保存。
+- 针对 Workers Free 每次请求 10ms CPU 限制，将新账号默认 PBKDF2 迭代次数调整为 20,000。
+- 用户账号、权限、操作日志、系统设置、备份恢复等 v22 功能全部保留。
+
 沙巴光伏自备电厂内部业务系统 v22｜用户账号 + 权限 + Audit Log + 系统设置
 
 本版基于 v21，保留原有 Cloudflare KV 数据和功能，并新增：

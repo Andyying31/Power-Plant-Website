@@ -488,7 +488,7 @@ const SITE_SESSION_SECONDS = 30 * 60;
 const USER_ACCOUNTS_KEY = "user-accounts-v1";
 const AUDIT_LOG_KEY = "audit-log-v1";
 const SYSTEM_SETTINGS_KEY = "system-settings-v1";
-const PASSWORD_ITERATIONS = 120000;
+const PASSWORD_ITERATIONS = 20000;
 const MAX_USERS = 300;
 const MAX_AUDIT_LOGS = 500;
 

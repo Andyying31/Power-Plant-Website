@@ -1996,15 +1996,19 @@ footer {
     color: #566275;
     font-weight: 600;
 }
-.user-session a {
+.user-session a,
+.user-session-action {
     padding: 7px 9px;
     border: 1px solid #e1e7ef;
     border-radius: 9px;
     background: #fff;
     color: #667386;
     text-decoration: none;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
 }
-.user-session a:hover { color: #1677ff; border-color: #cdddf2; }
+.user-session a:hover, .user-session-action:hover { color: #1677ff; border-color: #cdddf2; }
 .account-admin-note {
     margin: 0 0 18px;
     padding: 12px 14px;
@@ -2016,7 +2020,7 @@ footer {
 }
 .account-create-form {
     display: grid;
-    grid-template-columns: minmax(150px,.8fr) minmax(180px,1fr) minmax(180px,1fr) auto;
+    grid-template-columns: minmax(140px,.75fr) minmax(170px,1fr) minmax(170px,1fr) minmax(190px,.9fr) auto;
     gap: 12px;
     align-items: end;
     margin-bottom: 18px;
@@ -2039,6 +2043,6 @@ footer {
 @media (max-width: 720px) {
     .sidebar { gap: 10px; padding-left: 12px; padding-right: 12px; }
     .user-session-name { display: none; }
-    .user-session a { padding: 7px 8px; }
+    .user-session a, .user-session-action { padding: 7px 8px; }
     .account-create-form { grid-template-columns: 1fr; }
 }

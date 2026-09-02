@@ -534,11 +534,15 @@ export default {
             return redirectResponse(`/login?next=${encodeURIComponent(next)}`);
         }
 
-        if (siteAuth.user.role === "user" && url.pathname.startsWith("/api/")) {
-            const active = await isActiveUserAccount(env, siteAuth.user.username);
-            if (!active) {
+        if (siteAuth.user.username !== "admin" && url.pathname.startsWith("/api/")) {
+            const account = await getUserAccount(env, siteAuth.user.username);
+            if (!account || account.active === false) {
                 return jsonResponse({ ok: false, loginRequired: true, error: "账号已停用或不存在，请联系管理员。" }, 401);
             }
+            if (account.role !== siteAuth.user.role) {
+                return jsonResponse({ ok: false, loginRequired: true, error: "账号权限已更新，请重新登录。" }, 401);
+            }
+            siteAuth.user.displayName = account.displayName || account.username;
         }
 
         const routedRequest = attachAuthContext(request, siteAuth.user);
@@ -557,7 +561,13 @@ export default {
             return handleSiteSessionTouch(routedRequest, env, siteAuth.user);
         }
 
-        if (url.pathname === "/api/shared-note") {
+        if (url.pathname === "/api/account/password") {
+            response = await handleOwnPasswordChange(routedRequest, env);
+            if (request.method === "POST") {
+                auditAction = "修改自己的密码";
+                auditTarget = "用户账号";
+            }
+        } else if (url.pathname === "/api/shared-note") {
             response = await handleSharedNote(routedRequest, env);
             if (request.method === "PUT") {
                 auditAction = "更新共享公告";
@@ -720,7 +730,7 @@ async function handleSiteLogin(request, env) {
                 user = {
                     username: account.username,
                     displayName: account.displayName || account.username,
-                    role: "user"
+                    role: account.role === "admin" ? "admin" : "user"
                 };
             }
         } catch (error) {
@@ -821,7 +831,7 @@ async function checkSiteAccess(request, env) {
 
     const username = normalizeUsername(payload?.u);
     const role = payload?.r === "admin" ? "admin" : "user";
-    if (!username || (role === "admin" && username !== "admin")) {
+    if (!username) {
         return { ok: false, configMissing: false };
     }
 
@@ -999,6 +1009,7 @@ async function ensureKv(env) {
 
 function buildAuditDetail(pathname, method, body) {
     if (!body || typeof body !== "object") return "";
+    if (pathname === "/api/account/password") return "用户自行修改登录密码";
     if (pathname === "/api/admin/users") {
         const actionMap = { create: "创建", update: "更新", delete: "删除" };
         const action = actionMap[body.action] || String(body.action || "操作");
@@ -1076,11 +1087,18 @@ async function handleAdminAudit(request, env) {
 
 async function isActiveUserAccount(env, username) {
     try {
-        const accounts = await getUserAccounts(env);
-        return accounts.some((item) => item.username === username && item.active !== false);
+        const account = await getUserAccount(env, username);
+        return !!account && account.active !== false;
     } catch {
         return false;
     }
+}
+
+async function getUserAccount(env, username) {
+    const normalized = normalizeUsername(username);
+    if (!normalized || normalized === "admin") return null;
+    const accounts = await getUserAccounts(env);
+    return accounts.find((item) => item.username === normalized) || null;
 }
 
 async function getUserAccounts(env) {
@@ -1097,7 +1115,7 @@ function normalizeStoredAccount(item) {
         id: typeof item?.id === "string" && item.id ? item.id : crypto.randomUUID(),
         username,
         displayName: typeof item?.displayName === "string" && item.displayName.trim() ? item.displayName.trim().slice(0, 80) : username,
-        role: "user",
+        role: item?.role === "admin" ? "admin" : "user",
         active: item?.active !== false,
         salt: typeof item?.salt === "string" ? item.salt : "",
         hash: typeof item?.hash === "string" ? item.hash : "",
@@ -1147,7 +1165,7 @@ function sanitizeAccountForAdmin(account) {
         id: account.id,
         username: account.username,
         displayName: account.displayName,
-        role: "user",
+        role: account.role === "admin" ? "admin" : "user",
         active: account.active !== false,
         createdAt: account.createdAt,
         updatedAt: account.updatedAt
@@ -1182,13 +1200,14 @@ async function handleAdminUsers(request, env) {
         const username = normalizeUsername(body?.username);
         const displayName = String(body?.displayName || "").trim().slice(0, 80);
         const password = String(body?.password || "");
+        const role = body?.role === "admin" ? "admin" : "user";
         if (!username || username === "admin") return jsonResponse({ ok: false, error: "用户名只能使用 3-32 位英文字母、数字、点、下划线或短横线，且不能使用 admin。" }, 400);
         if (accounts.some((item) => item.username === username)) return jsonResponse({ ok: false, error: "这个用户名已经存在。" }, 409);
         if (password.length < 8 || password.length > 128) return jsonResponse({ ok: false, error: "密码必须为 8-128 个字符。" }, 400);
         const record = await createPasswordRecord(password);
         const now = new Date().toISOString();
         accounts.push({
-            id: crypto.randomUUID(), username, displayName: displayName || username, role: "user", active: true,
+            id: crypto.randomUUID(), username, displayName: displayName || username, role, active: true,
             ...record, createdAt: now, updatedAt: now
         });
         await env.SHARED_BOARD.put(USER_ACCOUNTS_KEY, JSON.stringify(accounts));
@@ -1202,6 +1221,7 @@ async function handleAdminUsers(request, env) {
     if (action === "update") {
         const displayName = String(body?.displayName || "").trim().slice(0, 80);
         accounts[index].displayName = displayName || accounts[index].username;
+        if (body?.role === "admin" || body?.role === "user") accounts[index].role = body.role;
         if (typeof body?.active === "boolean") accounts[index].active = body.active;
         const newPassword = String(body?.password || "");
         if (newPassword) {
@@ -1220,6 +1240,43 @@ async function handleAdminUsers(request, env) {
     }
 
     return jsonResponse({ ok: false, error: "不支持的用户操作。" }, 400);
+}
+
+async function handleOwnPasswordChange(request, env) {
+    if (request.method !== "POST") return methodNotAllowed("POST");
+    await ensureKv(env);
+
+    const username = normalizeUsername(request.headers.get("X-PP-Username"));
+    if (!username) return jsonResponse({ ok: false, error: "无法识别当前账号，请重新登录。" }, 401);
+    if (username === "admin") {
+        return jsonResponse({ ok: false, error: "内置 admin 密码由 Cloudflare ADMIN_PASSWORD 管理，不能在网站里修改。" }, 400);
+    }
+
+    let body;
+    try { body = await request.json(); }
+    catch { return jsonResponse({ ok: false, error: "提交格式不正确。" }, 400); }
+
+    const currentPassword = String(body?.currentPassword || "");
+    const newPassword = String(body?.newPassword || "");
+    if (!currentPassword) return jsonResponse({ ok: false, error: "请输入当前密码。" }, 400);
+    if (newPassword.length < 8 || newPassword.length > 128) {
+        return jsonResponse({ ok: false, error: "新密码必须为 8-128 个字符。" }, 400);
+    }
+    if (currentPassword === newPassword) {
+        return jsonResponse({ ok: false, error: "新密码不能与当前密码相同。" }, 400);
+    }
+
+    const accounts = await getUserAccounts(env);
+    const index = accounts.findIndex((item) => item.username === username && item.active !== false);
+    if (index < 0) return jsonResponse({ ok: false, error: "账号不存在或已停用。" }, 401);
+    if (!await verifyStoredPassword(currentPassword, accounts[index])) {
+        return jsonResponse({ ok: false, error: "当前密码不正确。" }, 401);
+    }
+
+    Object.assign(accounts[index], await createPasswordRecord(newPassword));
+    accounts[index].updatedAt = new Date().toISOString();
+    await env.SHARED_BOARD.put(USER_ACCOUNTS_KEY, JSON.stringify(accounts));
+    return jsonResponse({ ok: true });
 }
 
 function normalizeSystemSettings(raw) {
@@ -2297,7 +2354,7 @@ function checkAdmin(request, env) {
     const role = request.headers.get("X-PP-Role") || "";
     const username = normalizeUsername(request.headers.get("X-PP-Username"));
 
-    if (role !== "admin" || username !== "admin") {
+    if (role !== "admin" || !username) {
         return {
             ok: false,
             response: jsonResponse({ ok: false, error: "没有管理员权限。" }, 403)

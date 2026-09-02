@@ -152,6 +152,77 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // ========================================
+    // 当前用户：自行修改密码
+    // ========================================
+    const changePasswordButton = document.getElementById("change-password-button");
+    const changePasswordModal = document.getElementById("change-password-modal");
+    const changePasswordForm = document.getElementById("change-password-form");
+    const currentPasswordInput = document.getElementById("current-password");
+    const newPasswordInput = document.getElementById("new-password");
+    const confirmNewPasswordInput = document.getElementById("confirm-new-password");
+    const changePasswordMessage = document.getElementById("change-password-message");
+
+    function closeChangePasswordModal() {
+        if (!changePasswordModal) return;
+        changePasswordModal.classList.remove("open");
+        changePasswordModal.setAttribute("aria-hidden", "true");
+        if (changePasswordForm) changePasswordForm.reset();
+        setFormMessage(changePasswordMessage, "", "");
+    }
+
+    if (changePasswordButton) {
+        changePasswordButton.addEventListener("click", function () {
+            if (!currentUser) return;
+            if (currentUser.username === "admin") {
+                alert("内置 admin 的密码由 Cloudflare ADMIN_PASSWORD 管理，不能在网站里修改。其他创建出来的账号（包括管理员账号）都可以自行修改密码。");
+                return;
+            }
+            if (!changePasswordModal) return;
+            if (changePasswordForm) changePasswordForm.reset();
+            setFormMessage(changePasswordMessage, "", "");
+            changePasswordModal.classList.add("open");
+            changePasswordModal.setAttribute("aria-hidden", "false");
+            window.setTimeout(function () { if (currentPasswordInput) currentPasswordInput.focus(); }, 60);
+        });
+    }
+
+    document.querySelectorAll("[data-password-modal-close]").forEach(function (button) {
+        button.addEventListener("click", closeChangePasswordModal);
+    });
+
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const currentPassword = currentPasswordInput ? currentPasswordInput.value : "";
+            const newPassword = newPasswordInput ? newPasswordInput.value : "";
+            const confirmPassword = confirmNewPasswordInput ? confirmNewPasswordInput.value : "";
+            if (newPassword !== confirmPassword) {
+                setFormMessage(changePasswordMessage, "两次输入的新密码不一致。", "error");
+                return;
+            }
+            if (newPassword.length < 8) {
+                setFormMessage(changePasswordMessage, "新密码至少需要 8 个字符。", "error");
+                return;
+            }
+            setFormMessage(changePasswordMessage, "正在修改密码...", "info");
+            try {
+                const response = await fetch("/api/account/password", {
+                    method: "POST",
+                    cache: "no-store",
+                    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                    body: JSON.stringify({ currentPassword: currentPassword, newPassword: newPassword })
+                });
+                const data = await readJsonResponse(response, "密码修改服务暂时异常，请稍后再试。");
+                if (!response.ok) throw new Error(data.error || "密码修改失败。");
+                setFormMessage(changePasswordMessage, "密码修改成功，正在退出，请使用新密码重新登录。", "success");
+                window.setTimeout(function () { window.location.href = "/logout"; }, 900);
+            } catch (error) {
+                setFormMessage(changePasswordMessage, error.message || "密码修改失败。", "error");
+            }
+        });
+    }
+
     function applySystemSettings(settings) {
         systemSettings = settings && typeof settings === "object" ? settings : systemSettings;
         const value = function (key, fallback) { return String(systemSettings[key] || fallback || ""); };
@@ -1400,6 +1471,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const adminUserUsername = document.getElementById("admin-user-username");
     const adminUserDisplayName = document.getElementById("admin-user-display-name");
     const adminUserPassword = document.getElementById("admin-user-password");
+    const adminUserRole = document.getElementById("admin-user-role");
     const adminUserMessage = document.getElementById("admin-user-message");
     const adminUserBody = document.getElementById("admin-user-body");
     const userEditorModal = document.getElementById("user-editor-modal");
@@ -1408,6 +1480,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const userEditUsernameDisplay = document.getElementById("user-edit-username-display");
     const userEditDisplayName = document.getElementById("user-edit-display-name");
     const userEditPassword = document.getElementById("user-edit-password");
+    const userEditRole = document.getElementById("user-edit-role");
     const userEditActive = document.getElementById("user-edit-active");
     const userEditorMessage = document.getElementById("user-editor-message");
 
@@ -1441,7 +1514,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const add = function (text) { const td = document.createElement("td"); td.textContent = text; row.appendChild(td); return td; };
             add(user.username || "");
             add(user.displayName || user.username || "");
-            add("普通用户");
+            add(user.role === "admin" ? "管理员" : "普通用户");
             const stateCell = add(user.active === false ? "已停用" : "正常");
             if (user.active === false) stateCell.classList.add("account-disabled-text");
             add(formatDateTime(user.updatedAt));
@@ -1451,7 +1524,7 @@ document.addEventListener("DOMContentLoaded", function () {
             edit.addEventListener("click", function () { openUserEditor(user); });
             const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "mini-action-btn"; toggle.textContent = user.active === false ? "启用" : "停用";
             toggle.addEventListener("click", async function () {
-                await updateUserAccount(user.username, { displayName: user.displayName, active: user.active === false, password: "" }, user.active === false ? "账号已启用。" : "账号已停用。");
+                await updateUserAccount(user.username, { displayName: user.displayName, role: user.role || "user", active: user.active === false, password: "" }, user.active === false ? "账号已启用。" : "账号已停用。");
             });
             const del = document.createElement("button"); del.type = "button"; del.className = "mini-action-btn danger"; del.textContent = "删除";
             del.addEventListener("click", async function () {
@@ -1470,7 +1543,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         if (!adminUsers.length) {
             const row = document.createElement("tr");
-            const td = document.createElement("td"); td.colSpan = 6; td.className = "admin-empty-cell"; td.textContent = "还没有创建普通用户账号。"; row.appendChild(td); adminUserBody.appendChild(row);
+            const td = document.createElement("td"); td.colSpan = 6; td.className = "admin-empty-cell"; td.textContent = "还没有创建其他用户账号。"; row.appendChild(td); adminUserBody.appendChild(row);
         }
     }
 
@@ -1480,9 +1553,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const username = adminUserUsername.value.trim().toLowerCase();
             const displayName = adminUserDisplayName.value.trim();
             const password = adminUserPassword.value;
+            const role = adminUserRole ? adminUserRole.value : "user";
             setFormMessage(adminUserMessage, "正在创建账号...", "info");
             try {
-                const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "create", username, displayName, password }) });
+                const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "create", username, displayName, password, role }) });
                 const data = await readJsonResponse(response, "用户账号服务暂时异常，请刷新后重试。");
                 if (!response.ok) throw new Error(data.error || "创建失败。");
                 adminUsers = Array.isArray(data.users) ? data.users : [];
@@ -1498,6 +1572,7 @@ document.addEventListener("DOMContentLoaded", function () {
         userEditUsername.value = user.username || "";
         userEditUsernameDisplay.value = user.username || "";
         userEditDisplayName.value = user.displayName || user.username || "";
+        if (userEditRole) userEditRole.value = user.role === "admin" ? "admin" : "user";
         userEditPassword.value = "";
         userEditActive.checked = user.active !== false;
         setFormMessage(userEditorMessage, "", "");
@@ -1531,6 +1606,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             const ok = await updateUserAccount(userEditUsername.value, {
                 displayName: userEditDisplayName.value.trim(),
+                role: userEditRole ? userEditRole.value : "user",
                 active: userEditActive.checked,
                 password: userEditPassword.value
             }, "账号已更新。");
@@ -2609,6 +2685,7 @@ document.addEventListener("DOMContentLoaded", function () {
         closeHistoryModal();
         closeMeetingButtonEditor();
         closeRosterEditor();
+        closeChangePasswordModal();
     });
 
 

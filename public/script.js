@@ -1,3 +1,113 @@
+// ========================================
+// 网站登录：30 分钟无操作自动退出；关闭标签页后重新打开需要再次输入密码
+// ========================================
+(function () {
+    const SITE_TAB_KEY = "powerPlantSiteTabSession";
+    const SITE_ACTIVITY_KEY = "powerPlantSiteLastActivity";
+    const ADMIN_PASSWORD_KEY = "powerPlantAdminPassword";
+    const ADMIN_ACTIVITY_KEY = "powerPlantAdminLastActivity";
+    const IDLE_MS = 30 * 60 * 1000;
+    const TOUCH_INTERVAL_MS = 5 * 60 * 1000;
+
+    let lastServerTouch = 0;
+    let redirecting = false;
+
+    function clearSessionState() {
+        try {
+            sessionStorage.removeItem(SITE_TAB_KEY);
+            sessionStorage.removeItem(SITE_ACTIVITY_KEY);
+            sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
+            sessionStorage.removeItem(ADMIN_ACTIVITY_KEY);
+        } catch (error) {}
+    }
+
+    function forceLogin() {
+        if (redirecting) return;
+        redirecting = true;
+        clearSessionState();
+        const next = window.location.pathname + window.location.search;
+        window.location.replace("/logout?next=" + encodeURIComponent(next));
+    }
+
+    function readLastActivity() {
+        try {
+            const value = Number(sessionStorage.getItem(SITE_ACTIVITY_KEY));
+            return Number.isFinite(value) && value > 0 ? value : 0;
+        } catch (error) {
+            return 0;
+        }
+    }
+
+    function hasCurrentTabSession() {
+        try {
+            return sessionStorage.getItem(SITE_TAB_KEY) === "1";
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function isExpired(now) {
+        const lastActivity = readLastActivity();
+        return !lastActivity || now - lastActivity >= IDLE_MS;
+    }
+
+    async function touchServerSession(now) {
+        if (now - lastServerTouch < TOUCH_INTERVAL_MS) return;
+        lastServerTouch = now;
+
+        try {
+            const response = await fetch("/api/site/session/touch", {
+                method: "POST",
+                cache: "no-store",
+                credentials: "same-origin"
+            });
+
+            if (response.status === 401 || response.status === 503) {
+                forceLogin();
+            }
+        } catch (error) {
+            // 网络暂时中断时不立即退出；下一次请求仍会由 Worker 检查会话。
+        }
+    }
+
+    function recordActivity() {
+        if (redirecting) return;
+        const now = Date.now();
+
+        if (isExpired(now)) {
+            forceLogin();
+            return;
+        }
+
+        try {
+            sessionStorage.setItem(SITE_ACTIVITY_KEY, String(now));
+        } catch (error) {}
+
+        touchServerSession(now);
+    }
+
+    if (!hasCurrentTabSession() || isExpired(Date.now())) {
+        forceLogin();
+        return;
+    }
+
+    ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (eventName) {
+        window.addEventListener(eventName, recordActivity, { passive: true });
+    });
+
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible" && isExpired(Date.now())) {
+            forceLogin();
+        }
+    });
+
+    window.setInterval(function () {
+        if (isExpired(Date.now())) {
+            forceLogin();
+        }
+    }, 30 * 1000);
+})();
+
 document.addEventListener("DOMContentLoaded", function () {
 
     const menuItems = document.querySelectorAll(".menu-item[data-page]");
@@ -26,8 +136,13 @@ document.addEventListener("DOMContentLoaded", function () {
     let meetingButtons = [];
     let meetingButtonsLoaded = false;
 
-    let adminPassword = sessionStorage.getItem("powerPlantAdminPassword") || "";
+    const ADMIN_PASSWORD_KEY = "powerPlantAdminPassword";
+    const ADMIN_ACTIVITY_KEY = "powerPlantAdminLastActivity";
+    const ADMIN_IDLE_MS = 30 * 60 * 1000;
+
+    let adminPassword = sessionStorage.getItem(ADMIN_PASSWORD_KEY) || "";
     let adminVerified = false;
+    let adminLastActivity = Number(sessionStorage.getItem(ADMIN_ACTIVITY_KEY)) || 0;
 
     const pageInformation = {
         home: {
@@ -1053,7 +1168,38 @@ document.addEventListener("DOMContentLoaded", function () {
     const adminLoginMessage = document.getElementById("admin-login-message");
     const adminLogoutButton = document.getElementById("admin-logout-button");
 
+    function adminSessionExpired() {
+        if (!adminPassword && !adminVerified) return false;
+        return !adminLastActivity || Date.now() - adminLastActivity >= ADMIN_IDLE_MS;
+    }
+
+    function touchAdminActivity() {
+        if (!adminVerified || !adminPassword) return;
+        adminLastActivity = Date.now();
+        sessionStorage.setItem(ADMIN_ACTIVITY_KEY, String(adminLastActivity));
+    }
+
+    function clearAdminSession() {
+        adminPassword = "";
+        adminVerified = false;
+        adminLastActivity = 0;
+        sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
+        sessionStorage.removeItem(ADMIN_ACTIVITY_KEY);
+    }
+
+    function expireAdminSession(showMessage) {
+        clearAdminSession();
+        showAdminLogin();
+        if (showMessage) {
+            setFormMessage(adminLoginMessage, "管理员登录已超过 30 分钟无操作，请重新输入密码。", "error");
+        }
+    }
+
     async function initializeAdminPage() {
+        if (adminSessionExpired()) {
+            expireAdminSession(false);
+        }
+
         if (adminVerified) {
             showAdminDashboard();
             return;
@@ -1067,8 +1213,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            adminPassword = "";
-            sessionStorage.removeItem("powerPlantAdminPassword");
+            clearAdminSession();
         }
 
         showAdminLogin();
@@ -1113,7 +1258,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (ok) {
                 adminPassword = password;
                 adminVerified = true;
-                sessionStorage.setItem("powerPlantAdminPassword", password);
+                adminLastActivity = Date.now();
+                sessionStorage.setItem(ADMIN_PASSWORD_KEY, password);
+                sessionStorage.setItem(ADMIN_ACTIVITY_KEY, String(adminLastActivity));
                 adminPasswordInput.value = "";
                 setFormMessage(adminLoginMessage, "", "");
                 showAdminDashboard();
@@ -1162,14 +1309,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener("click", function () {
-            adminPassword = "";
-            adminVerified = false;
-            sessionStorage.removeItem("powerPlantAdminPassword");
+            clearAdminSession();
             showAdminLogin();
         });
     }
 
     function adminFetch(url, options) {
+        if (adminSessionExpired()) {
+            expireAdminSession(true);
+            return Promise.reject(new Error("管理员登录已超时，请重新登录。"));
+        }
+
+        touchAdminActivity();
         const settings = Object.assign({}, options || {});
         settings.headers = Object.assign(
             {
@@ -1184,6 +1335,22 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch(url, settings);
     }
 
+
+    ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (eventName) {
+        window.addEventListener(eventName, function () {
+            const adminPage = document.getElementById("admin-page");
+            if (adminVerified && adminPage && adminPage.classList.contains("active-page")) {
+                touchAdminActivity();
+            }
+        }, { passive: true });
+    });
+
+    window.setInterval(function () {
+        if (adminVerified && adminSessionExpired()) {
+            const adminPage = document.getElementById("admin-page");
+            expireAdminSession(Boolean(adminPage && adminPage.classList.contains("active-page")));
+        }
+    }, 30 * 1000);
 
     // ========================================
     // 管理后台标签

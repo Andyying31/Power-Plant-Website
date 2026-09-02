@@ -5,7 +5,18 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>沙巴光伏自备电厂导航</title>
-<link href="style.css?v=16" rel="stylesheet"/>
+<script>
+try {
+    if (sessionStorage.getItem("powerPlantSiteTabSession") !== "1") {
+        document.documentElement.style.visibility = "hidden";
+        location.replace("/logout?next=" + encodeURIComponent(location.pathname + location.search));
+    }
+} catch (e) {
+    document.documentElement.style.visibility = "hidden";
+    location.replace("/logout?next=" + encodeURIComponent(location.pathname + location.search));
+}
+</script>
+<link href="style.css?v=18" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -545,6 +556,6 @@
             </div>
 </div>
 </div>
-<script src="script.js?v=16"></script>
+<script src="script.js?v=18"></script>
 </body>
 </html>

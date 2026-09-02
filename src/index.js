@@ -468,9 +468,47 @@ const MEETING_LINK_KEY = "meeting-links";
 const MEETING_BUTTON_KEY = "meeting-buttons-v2";
 const ROSTER_KEY = "roster-data";
 
+// ===== Website password gate =====
+// This is intentionally separate from ADMIN_PASSWORD.
+// SITE_PASSWORD is for normal staff access; ADMIN_PASSWORD still protects the admin backend.
+const SITE_SESSION_COOKIE = "pp_site_session";
+const SITE_SESSION_SECONDS = 30 * 60;
+
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
+
+        if (url.pathname === "/login") {
+            return handleSiteLogin(request, env);
+        }
+
+        if (url.pathname === "/logout") {
+            return handleSiteLogout(request);
+        }
+
+        // Protect the whole website, including static files and APIs.
+        const siteAuth = await checkSiteAccess(request, env);
+        if (!siteAuth.ok) {
+            if (url.pathname.startsWith("/api/")) {
+                return jsonResponse(
+                    {
+                        ok: false,
+                        loginRequired: true,
+                        error: siteAuth.configMissing
+                            ? "SITE_PASSWORD is not configured."
+                            : "请先登录网站。"
+                    },
+                    siteAuth.configMissing ? 503 : 401
+                );
+            }
+
+            const next = url.pathname + url.search;
+            return redirectResponse(`/login?next=${encodeURIComponent(next)}`);
+        }
+
+        if (url.pathname === "/api/site/session/touch") {
+            return handleSiteSessionTouch(request, env);
+        }
 
         if (url.pathname === "/api/shared-note") {
             return handleSharedNote(request, env);
@@ -507,6 +545,312 @@ export default {
         return env.ASSETS.fetch(request);
     }
 };
+
+async function handleSiteLogin(request, env) {
+    const url = new URL(request.url);
+    const requestedNext = sanitizeNextPath(url.searchParams.get("next"));
+
+    if (request.method === "GET") {
+        // Always show the password page when /login is opened.
+        // This also guarantees that reopening the site does not silently reuse a prior tab session.
+        return loginPage({
+            next: requestedNext,
+            configMissing: !env.SITE_PASSWORD
+        });
+    }
+
+    if (request.method !== "POST") {
+        return methodNotAllowed("GET, POST");
+    }
+
+    if (!env.SITE_PASSWORD) {
+        return loginPage({
+            next: requestedNext,
+            configMissing: true
+        }, 503);
+    }
+
+    let form;
+    try {
+        form = await request.formData();
+    } catch {
+        return loginPage({ next: requestedNext, error: "提交格式不正确，请重试。" }, 400);
+    }
+
+    const supplied = String(form.get("password") || "");
+    const next = sanitizeNextPath(form.get("next") || requestedNext);
+
+    if (supplied !== env.SITE_PASSWORD) {
+        return loginPage({ next, error: "密码不正确，请重新输入。" }, 401);
+    }
+
+    const token = await createSiteSessionToken(env.SITE_PASSWORD);
+    const headers = new Headers({
+        "Cache-Control": "no-store"
+    });
+    // Session cookie only: no Max-Age / Expires, so it will not become a long-lived browser cookie.
+    headers.append(
+        "Set-Cookie",
+        `${SITE_SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax`
+    );
+
+    return loginSuccessPage(next, headers);
+}
+
+function handleSiteLogout(request) {
+    const url = new URL(request.url);
+    const next = sanitizeNextPath(url.searchParams.get("next"));
+    const location = `/login?next=${encodeURIComponent(next)}`;
+    const headers = new Headers({
+        "Location": location,
+        "Cache-Control": "no-store"
+    });
+    headers.append(
+        "Set-Cookie",
+        `${SITE_SESSION_COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`
+    );
+    return new Response(null, { status: 303, headers });
+}
+
+async function handleSiteSessionTouch(request, env) {
+    if (request.method !== "POST") {
+        return methodNotAllowed("POST");
+    }
+
+    const token = await createSiteSessionToken(env.SITE_PASSWORD);
+    const headers = new Headers({
+        "Content-Type": "application/json; charset=UTF-8",
+        "Cache-Control": "no-store"
+    });
+    headers.append(
+        "Set-Cookie",
+        `${SITE_SESSION_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Lax`
+    );
+
+    return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
+}
+
+async function checkSiteAccess(request, env) {
+    if (!env.SITE_PASSWORD) {
+        return { ok: false, configMissing: true };
+    }
+
+    const token = getCookie(request, SITE_SESSION_COOKIE);
+    if (!token) {
+        return { ok: false, configMissing: false };
+    }
+
+    const parts = token.split(".");
+    if (parts.length !== 2) {
+        return { ok: false, configMissing: false };
+    }
+
+    const issuedAt = Number(parts[0]);
+    const signature = parts[1];
+    const now = Math.floor(Date.now() / 1000);
+
+    if (
+        !Number.isInteger(issuedAt) ||
+        issuedAt > now + 300 ||
+        now - issuedAt > SITE_SESSION_SECONDS
+    ) {
+        return { ok: false, configMissing: false };
+    }
+
+    const expected = await signSiteSession(env.SITE_PASSWORD, issuedAt);
+    return {
+        ok: timingSafeEqual(signature, expected),
+        configMissing: false
+    };
+}
+
+async function createSiteSessionToken(secret) {
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const signature = await signSiteSession(secret, issuedAt);
+    return `${issuedAt}.${signature}`;
+}
+
+async function signSiteSession(secret, issuedAt) {
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(secret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+    );
+    const signature = await crypto.subtle.sign(
+        "HMAC",
+        key,
+        encoder.encode(`power-plant-site-session-v1:${issuedAt}`)
+    );
+    return bytesToBase64Url(new Uint8Array(signature));
+}
+
+function bytesToBase64Url(bytes) {
+    let binary = "";
+    for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+    }
+    return btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/g, "");
+}
+
+function timingSafeEqual(a, b) {
+    if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) {
+        return false;
+    }
+    let diff = 0;
+    for (let i = 0; i < a.length; i += 1) {
+        diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return diff === 0;
+}
+
+function getCookie(request, name) {
+    const raw = request.headers.get("Cookie") || "";
+    const parts = raw.split(";");
+    for (const part of parts) {
+        const index = part.indexOf("=");
+        if (index < 0) continue;
+        const key = part.slice(0, index).trim();
+        if (key === name) {
+            return part.slice(index + 1).trim();
+        }
+    }
+    return "";
+}
+
+function sanitizeNextPath(value) {
+    const next = typeof value === "string" ? value.trim() : "";
+    if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/login")) {
+        return "/";
+    }
+    return next;
+}
+
+function redirectResponse(location) {
+    return new Response(null, {
+        status: 302,
+        headers: {
+            "Location": location,
+            "Cache-Control": "no-store"
+        }
+    });
+}
+
+function loginSuccessPage(next, headers) {
+    const safeNext = JSON.stringify(sanitizeNextPath(next)).replace(/</g, "\\u003c");
+    const html = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正在进入系统</title>
+</head>
+<body>
+<script>
+try {
+    sessionStorage.setItem("powerPlantSiteTabSession", "1");
+    sessionStorage.setItem("powerPlantSiteLastActivity", String(Date.now()));
+} catch (e) {}
+location.replace(${safeNext});
+<\/script>
+</body>
+</html>`;
+    headers.set("Content-Type", "text/html; charset=UTF-8");
+    return new Response(html, { status: 200, headers });
+}
+
+function loginPage({ next = "/", error = "", configMissing = false } = {}, status = 200) {
+    const safeNext = escapeHtml(sanitizeNextPath(next));
+    const message = configMissing
+        ? "网站访问密码尚未设置。请先在 Cloudflare 的 Variables and Secrets 添加 SITE_PASSWORD。"
+        : error;
+
+    const html = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>登录｜沙巴光伏自备电厂</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;background:#f5f8fc;color:#182230}
+body{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0%,#eef6ff 0,#f7f9fc 42%,#f5f7fa 100%)}
+.login-shell{width:min(100%,420px)}
+.brand{text-align:center;margin-bottom:24px}
+.brand-mark{width:54px;height:54px;margin:0 auto 14px;border-radius:16px;display:grid;place-items:center;background:#1677ff;color:#fff;font-size:23px;font-weight:700;box-shadow:0 10px 28px rgba(22,119,255,.22)}
+.brand h1{margin:0;font-size:22px;line-height:1.35;font-weight:700;letter-spacing:.2px}
+.brand p{margin:7px 0 0;color:#7b8794;font-size:13px}
+.card{background:#fff;border:1px solid #e7ebf0;border-radius:18px;padding:28px;box-shadow:0 16px 45px rgba(16,36,62,.08)}
+.card h2{margin:0 0 7px;font-size:20px;text-align:center}
+.card .tip{margin:0 0 22px;color:#8b96a5;text-align:center;font-size:13px}
+label{display:block;margin:0 0 8px;font-size:13px;font-weight:600;color:#4b5563}
+input{width:100%;height:48px;border:1px solid #dce2e8;border-radius:11px;padding:0 14px;font-size:16px;outline:none;background:#fff;transition:.18s}
+input:focus{border-color:#1677ff;box-shadow:0 0 0 3px rgba(22,119,255,.10)}
+button{width:100%;height:48px;margin-top:16px;border:0;border-radius:11px;background:#1677ff;color:#fff;font-size:15px;font-weight:650;cursor:pointer;box-shadow:0 7px 18px rgba(22,119,255,.20)}
+button:hover{background:#0f6de8}
+button:active{transform:scale(.99)}
+.alert{margin:0 0 16px;padding:11px 12px;border-radius:10px;background:#fff2f0;border:1px solid #ffccc7;color:#b42318;font-size:13px;line-height:1.5}
+.footer{text-align:center;margin-top:18px;color:#9aa4b2;font-size:12px}
+@media(max-width:520px){body{padding:18px}.card{padding:24px 20px;border-radius:16px}.brand{margin-bottom:20px}.brand h1{font-size:20px}}
+</style>
+</head>
+<body>
+<main class="login-shell">
+    <div class="brand">
+        <div class="brand-mark">光</div>
+        <h1>沙巴光伏自备电厂</h1>
+        <p>内部业务系统</p>
+    </div>
+    <section class="card">
+        <h2>登录</h2>
+        <p class="tip">请输入访问密码</p>
+        ${message ? `<div class="alert">${escapeHtml(message)}</div>` : ""}
+        <form method="post" action="/login" autocomplete="on">
+            <input type="hidden" name="next" value="${safeNext}">
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" autofocus required placeholder="请输入密码">
+            <button type="submit">进入系统</button>
+        </form>
+    </section>
+    <div class="footer">仅限授权人员使用</div>
+</main>
+<script>
+try {
+    sessionStorage.removeItem("powerPlantSiteTabSession");
+    sessionStorage.removeItem("powerPlantSiteLastActivity");
+    sessionStorage.removeItem("powerPlantAdminPassword");
+    sessionStorage.removeItem("powerPlantAdminLastActivity");
+} catch (e) {}
+<\/script>
+</body>
+</html>`;
+
+    return new Response(html, {
+        status,
+        headers: {
+            "Content-Type": "text/html; charset=UTF-8",
+            "Cache-Control": "no-store",
+            "X-Frame-Options": "DENY",
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer"
+        }
+    });
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 
 async function ensureKv(env) {
     if (!env.SHARED_BOARD) {

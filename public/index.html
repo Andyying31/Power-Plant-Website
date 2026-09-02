@@ -16,7 +16,7 @@ try {
     location.replace("/logout?next=" + encodeURIComponent(location.pathname + location.search));
 }
 </script>
-<link href="style.css?v=18" rel="stylesheet"/>
+<link href="style.css?v=19" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -27,13 +27,7 @@ try {
 <p>系统导航</p>
 </div>
 </div>
-<nav class="menu">
-<button class="menu-item active" data-page="home" type="button">主页</button>
-<button class="menu-item" data-page="meeting" type="button">会议</button>
-<button class="menu-item" data-page="daily" type="button">日报</button>
-<button class="menu-item" data-page="roster" type="button">花名册</button>
-<button class="menu-item" data-page="notice" type="button">共享公告</button>
-<button class="menu-item" data-page="admin" type="button">管理后台</button></nav>
+<nav class="menu" id="main-menu"><button class="menu-item active" data-page="home" type="button">主页</button><button class="menu-item" data-page="admin" type="button">管理后台</button></nav>
 </aside>
 <main class="main">
 <header class="topbar">
@@ -57,61 +51,27 @@ try {
 </div>
 <div class="dashboard-badge">部门业务总览</div>
 </div>
-<div class="dashboard-grid">
-<button class="dashboard-card" data-dashboard-page="meeting" type="button">
-<div class="dashboard-card-mark">会</div>
-<div class="dashboard-card-copy"><h3>会议</h3><p>月计划及其他会议业务入口</p></div>
-<span class="dashboard-card-arrow">→</span>
-</button>
-<button class="dashboard-card" data-dashboard-page="daily" type="button">
-<div class="dashboard-card-mark">日</div>
-<div class="dashboard-card-copy"><h3>日报</h3><p>查看部门日报相关资料</p></div>
-<span class="dashboard-card-arrow">→</span>
-</button>
-<button class="dashboard-card" data-dashboard-page="roster" type="button">
-<div class="dashboard-card-mark">人</div>
-<div class="dashboard-card-copy"><h3>花名册</h3><p>人员资料及部门组织结构</p></div>
-<span class="dashboard-card-arrow">→</span>
-</button>
-<button class="dashboard-card" data-dashboard-page="notice" type="button">
-<div class="dashboard-card-mark">公</div>
-<div class="dashboard-card-copy"><h3>共享公告</h3><p>直接查看及编辑部门共享内容</p></div>
-<span class="dashboard-card-arrow">→</span>
-</button>
-</div>
+<div class="dashboard-grid" id="dashboard-grid"></div>
 </div>
 </section>
 <!-- ===================== 会议 ===================== -->
-<section class="page-section" id="meeting-page">
-<div class="section-heading">
-<h2>会议</h2>
-<p>会议相关业务快捷入口</p>
-</div>
-<div class="link-grid" id="meeting-links"></div>
-<div class="meeting-empty" hidden="" id="meeting-empty">目前没有可显示的会议按钮。</div>
-</section>
+
 <!-- ===================== 日报 ===================== -->
-<section class="page-section" id="daily-page">
-<div class="section-heading">
-<h2>日报</h2>
-<p>日报相关业务入口</p>
-</div>
-<div class="empty-panel">
-<strong>日报</strong>
-<p>日报内容暂未添加。</p>
-</div>
-</section>
+
 <!-- ===================== 花名册 ===================== -->
-<section class="page-section" id="roster-page">
+<div id="dynamic-module-pages"></div><section class="page-section" id="roster-page">
 <div class="roster-page-toolbar">
 <div>
-<h2>花名册</h2>
+<h2 id="roster-page-heading">花名册</h2>
 <p id="roster-view-subtitle">查看部门人员花名册或组织结构图</p>
 </div>
 <div aria-label="花名册视图" class="roster-view-tabs" role="tablist">
 <button class="roster-view-tab active" data-roster-view="list" type="button">花名册</button>
 <button class="roster-view-tab" data-roster-view="org" type="button">结构图</button>
 </div>
+</div><div class="module-quick-links" hidden="" id="roster-module-links-area">
+<div class="module-quick-links-heading"><div><h3>快捷入口</h3><p>此模块由管理后台添加的内部按钮。</p></div></div>
+<div class="link-grid" id="roster-module-links"></div>
 </div>
 <div class="roster-view active" id="roster-list-view">
 <div class="section-heading roster-heading">
@@ -282,9 +242,12 @@ try {
 </section>
 <!-- ===================== 共享公告 ===================== -->
 <section class="page-section" id="notice-page">
-<div class="shared-note-heading">
+<div class="module-quick-links" hidden="" id="notice-module-links-area">
+<div class="module-quick-links-heading"><div><h3>快捷入口</h3><p>此模块由管理后台添加的内部按钮。</p></div></div>
+<div class="link-grid" id="notice-module-links"></div>
+</div><div class="shared-note-heading">
 <div>
-<h2>共享公告</h2>
+<h2 id="notice-page-heading">共享公告</h2>
 <p>所有人员都可以直接在下面输入、修改或删除文字，停止输入后会自动保存。</p>
 </div>
 <div class="shared-note-heading-actions">
@@ -305,7 +268,7 @@ try {
 <section class="page-section" id="admin-page">
 <div class="section-heading">
 <h2>管理后台</h2>
-<p>在网页上管理月计划链接、花名册和共享公告历史版本。</p>
+<p>管理主页模块、各模块内部按钮、月计划、花名册及公告历史。</p>
 </div>
 <div class="admin-login-card" id="admin-login-panel">
 <div class="admin-login-icon">管</div>
@@ -330,56 +293,37 @@ try {
 </div>
 <button class="secondary-action-btn" id="admin-logout-button" type="button">退出登录</button>
 </div>
-<div class="admin-tabs">
-<button class="admin-tab active" data-admin-tab="month" type="button">会议按钮</button>
-<button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button>
-<button class="admin-tab" data-admin-tab="history" type="button">公告历史</button>
-</div>
-<div class="admin-tab-panel active" id="admin-month-tab">
+<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button></div>
+<div class="admin-tab-panel active" id="admin-modules-tab">
 <div class="admin-card">
 <div class="admin-card-heading">
-<div>
-<h3>会议按钮管理</h3>
-<p>可以修改名称、说明和链接，也可以新增、删除、隐藏或调整按钮顺序。月计划按钮会继续使用年份 / 月份选择功能。</p>
+<div><h3>主页模块管理</h3><p>主页卡片和顶部导航使用同一份资料。改名称后两边会一起更新；新增模块会自动排在“管理后台”前面。</p></div>
+<button class="primary-action-btn" id="admin-module-add" type="button">+ 新增主页按钮</button>
 </div>
-<button class="primary-action-btn" id="admin-meeting-add" type="button">+ 新增按钮</button>
-</div>
-<div class="meeting-button-admin-list" id="admin-meeting-button-list"></div>
-<div class="form-message" id="admin-meeting-button-message"></div>
+<div class="module-admin-hint">可用“上移 / 下移 / 置顶 / 置底”调整位置；顶部导航和主页顺序会同步。</div>
+<div class="meeting-button-admin-list" id="admin-module-list"></div>
+<div class="form-message" id="admin-module-message"></div>
 </div>
 <div class="admin-card">
 <div class="admin-card-heading">
-<div>
-<h3>月计划链接管理</h3>
-<p>这里管理“月计划”年月对应的 Lark 链接；月计划按钮的名称、说明、显示状态和排序在上面的会议按钮管理中修改。</p>
+<div><h3 id="admin-child-title">内部按钮管理</h3><p id="admin-child-subtitle">先从上面的主页模块中选择“管理里面按钮”。</p></div>
+<button class="primary-action-btn" disabled="" id="admin-child-add" type="button">+ 新增内部按钮</button>
 </div>
+<div class="selected-module-pill" hidden="" id="admin-selected-module"></div>
+<div class="meeting-button-admin-list" id="admin-child-button-list"></div>
+<div class="form-message" id="admin-child-message"></div>
+</div>
+</div><div class="admin-tab-panel" id="admin-plan-tab">
+<div class="admin-card">
+<div class="admin-card-heading">
+<div><h3>月计划链接管理</h3><p>这里管理“月计划”年月对应的 Lark 链接。月计划这个内部按钮的名称、说明、显示状态和顺序，请在“主页模块”里进入对应模块管理。</p></div>
 </div>
 <div class="month-admin-form">
-<div class="field-group">
-<label for="admin-plan-year">年份</label>
-<input id="admin-plan-year" max="2100" min="2020" step="1" type="number"/>
-</div>
-<div class="field-group">
-<label for="admin-plan-month">月份</label>
-<select id="admin-plan-month">
-<option value="01">1月</option>
-<option value="02">2月</option>
-<option value="03">3月</option>
-<option value="04">4月</option>
-<option value="05">5月</option>
-<option value="06">6月</option>
-<option value="07">7月</option>
-<option value="08">8月</option>
-<option value="09">9月</option>
-<option value="10">10月</option>
-<option value="11">11月</option>
-<option value="12">12月</option>
-</select>
-</div>
-<div class="field-group field-grow">
-<label for="admin-plan-url">Lark 链接</label>
-<input id="admin-plan-url" placeholder="https://..." type="url"/>
-</div>
+<div class="field-group"><label for="admin-plan-year">年份</label><input id="admin-plan-year" max="2100" min="2020" step="1" type="number"/></div>
+<div class="field-group"><label for="admin-plan-month">月份</label><select id="admin-plan-month">
+<option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+</select></div>
+<div class="field-group field-grow"><label for="admin-plan-url">Lark 链接</label><input id="admin-plan-url" placeholder="https://..." type="url"/></div>
 <button class="primary-action-btn admin-form-button" id="admin-plan-save" type="button">保存 / 更新</button>
 </div>
 <div class="form-message" id="admin-plan-message"></div>
@@ -453,8 +397,8 @@ try {
 <div aria-labelledby="meeting-button-editor-title" aria-modal="true" class="meeting-button-editor-panel" role="dialog">
 <div class="month-modal-header">
 <div>
-<h2 id="meeting-button-editor-title">新增会议按钮</h2>
-<p id="meeting-button-editor-subtitle">新增后会直接显示在会议页面。</p>
+<h2 id="meeting-button-editor-title">新增内部按钮</h2>
+<p id="meeting-button-editor-subtitle">新增后会显示在当前主页模块里面。</p>
 </div>
 <button aria-label="关闭" class="month-modal-close" data-meeting-button-modal-close="" type="button">×</button>
 </div>
@@ -476,7 +420,7 @@ try {
 <div class="meeting-button-type-note" id="meeting-button-type-note">普通链接按钮</div>
 <label class="meeting-visible-check">
 <input checked="" id="meeting-button-edit-visible" type="checkbox"/>
-<span>在会议页面显示这个按钮</span>
+<span>在当前模块页面显示这个按钮</span>
 </label>
 <div class="form-message" id="meeting-button-editor-message"></div>
 <div class="editor-actions">
@@ -485,7 +429,19 @@ try {
 </div>
 </form>
 </div>
-</div><div aria-hidden="true" class="month-modal" id="roster-editor-modal">
+</div><div aria-hidden="true" class="month-modal" id="module-editor-modal">
+<div class="month-modal-backdrop" data-module-modal-close=""></div>
+<div aria-labelledby="module-editor-title" aria-modal="true" class="meeting-button-editor-panel" role="dialog">
+<div class="month-modal-header"><div><h2 id="module-editor-title">新增主页按钮</h2><p id="module-editor-subtitle">保存后会同时出现在主页 Dashboard 和顶部导航。</p></div><button aria-label="关闭" class="month-modal-close" data-module-modal-close="" type="button">×</button></div>
+<form class="meeting-button-editor-form" id="module-editor-form">
+<input id="module-edit-id" type="hidden"/>
+<div class="field-group"><label for="module-edit-name">按钮名称</label><input id="module-edit-name" maxlength="50" placeholder="例如：安全管理" required="" type="text"/></div>
+<div class="field-group"><label for="module-edit-description">说明</label><input id="module-edit-description" maxlength="160" placeholder="例如：安全管理相关资料与快捷入口" type="text"/></div>
+<label class="meeting-visible-check"><input checked="" id="module-edit-visible" type="checkbox"/><span>在主页和顶部导航显示这个模块</span></label>
+<div class="form-message" id="module-editor-message"></div>
+<div class="editor-actions"><button class="secondary-action-btn" data-module-modal-close="" type="button">取消</button><button class="primary-action-btn" type="submit">保存</button></div>
+</form>
+</div></div><div aria-hidden="true" class="month-modal" id="roster-editor-modal">
 <div class="month-modal-backdrop" data-roster-modal-close=""></div>
 <div aria-labelledby="roster-editor-title" aria-modal="true" class="roster-editor-panel" role="dialog">
 <div class="month-modal-header">
@@ -556,6 +512,6 @@ try {
             </div>
 </div>
 </div>
-<script src="script.js?v=18"></script>
+<script src="script.js?v=19"></script>
 </body>
 </html>

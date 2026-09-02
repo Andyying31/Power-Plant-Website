@@ -110,14 +110,14 @@
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    const menuItems = document.querySelectorAll(".menu-item[data-page]");
-    const pages = document.querySelectorAll(".page-section");
+    const mainMenu = document.getElementById("main-menu");
+    const dashboardGrid = document.getElementById("dashboard-grid");
+    const dynamicModulePages = document.getElementById("dynamic-module-pages");
     const searchInput = document.getElementById("search");
     const searchBox = document.querySelector(".search-box");
     const pageTitle = document.getElementById("page-title");
     const pageSubtitle = document.getElementById("page-subtitle");
 
-    const dashboardCards = document.querySelectorAll("[data-dashboard-page]");
     const rosterViewTabs = document.querySelectorAll("[data-roster-view]");
     const rosterListView = document.getElementById("roster-list-view");
     const rosterOrgView = document.getElementById("roster-org-view");
@@ -129,12 +129,14 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentCategory = "全部";
     let currentStatus = "全部";
     let currentRosterView = "list";
+    let currentPage = "home";
     let rosterData = [];
     let rosterLoaded = false;
     let monthPlanLinks = {};
     let monthPlansLoaded = false;
-    let meetingButtons = [];
-    let meetingButtonsLoaded = false;
+    let portalModules = [];
+    let portalButtons = {};
+    let portalLoaded = false;
 
     const ADMIN_PASSWORD_KEY = "powerPlantAdminPassword";
     const ADMIN_ACTIVITY_KEY = "powerPlantAdminLastActivity";
@@ -144,99 +146,302 @@ document.addEventListener("DOMContentLoaded", function () {
     let adminVerified = false;
     let adminLastActivity = Number(sessionStorage.getItem(ADMIN_ACTIVITY_KEY)) || 0;
 
-    const pageInformation = {
-        home: {
-            title: "沙巴光伏自备电厂导航",
-            subtitle: "部门业务总览",
-            search: ""
-        },
-        meeting: {
-            title: "会议",
-            subtitle: "会议相关业务快捷入口",
-            search: "搜索会议功能..."
-        },
-        daily: {
-            title: "日报",
-            subtitle: "日报相关业务入口",
-            search: "搜索日报..."
-        },
-        roster: {
-            title: "花名册",
-            subtitle: "人员花名册与组织结构",
-            search: "搜索工号、姓名、岗位、职衔..."
-        },
-        notice: {
-            title: "共享公告",
-            subtitle: "所有人员可直接编辑的共享记事板",
-            search: ""
-        },
-        admin: {
-            title: "管理后台",
-            subtitle: "会议链接、花名册及公告历史管理",
-            search: ""
+    function getPortalModule(moduleId) {
+        return portalModules.find(function (item) {
+            return item.id === moduleId;
+        }) || null;
+    }
+
+    async function loadPortalConfig(force) {
+        if (portalLoaded && !force) {
+            return { modules: portalModules, moduleButtons: portalButtons };
         }
-    };
 
-    async function openPage(pageName) {
-        const targetPage = document.getElementById(pageName + "-page");
-        if (!targetPage) return;
+        try {
+            const response = await fetch("/api/portal-config", {
+                cache: "no-store",
+                headers: { "Accept": "application/json" }
+            });
 
-        pages.forEach(function (page) {
-            page.classList.remove("active-page");
+            if (!response.ok) {
+                throw new Error("无法读取主页模块");
+            }
+
+            const data = await response.json();
+            portalModules = Array.isArray(data.modules) ? data.modules : [];
+            portalButtons = data.moduleButtons && typeof data.moduleButtons === "object"
+                ? data.moduleButtons
+                : {};
+            portalLoaded = true;
+            return data;
+        } catch (error) {
+            portalModules = [];
+            portalButtons = {};
+            portalLoaded = true;
+            return { modules: [], moduleButtons: {} };
+        }
+    }
+
+    function moduleMark(name) {
+        const text = String(name || "").trim();
+        if (!text) return "项";
+        return Array.from(text)[0] || "项";
+    }
+
+    function createPortalLinkButton(item) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "link-card searchable";
+
+        const content = document.createElement("div");
+        content.className = "card-content";
+
+        const title = document.createElement("h3");
+        title.textContent = item.name || "未命名按钮";
+
+        const description = document.createElement("p");
+        description.textContent = item.description || (item.type === "month-plan" ? "选择年份和月份" : "打开链接");
+
+        const arrow = document.createElement("div");
+        arrow.className = "card-arrow";
+        arrow.textContent = "→";
+
+        content.appendChild(title);
+        content.appendChild(description);
+        button.appendChild(content);
+        button.appendChild(arrow);
+
+        button.addEventListener("click", function () {
+            if (item.type === "month-plan") {
+                openMonthPlanModal(item.name || "月计划");
+                return;
+            }
+
+            const url = String(item.url || "").trim();
+            if (!/^https:\/\//i.test(url)) {
+                alert("这个按钮还没有设置网址，请联系管理员。 ");
+                return;
+            }
+            window.open(url, "_blank", "noopener,noreferrer");
         });
 
+        return button;
+    }
+
+    function renderModuleButtons(moduleId, container, emptyElement) {
+        if (!container) return;
+        const buttons = Array.isArray(portalButtons[moduleId]) ? portalButtons[moduleId] : [];
+        const visibleButtons = buttons.filter(function (item) {
+            return item && item.visible !== false;
+        });
+
+        container.innerHTML = "";
+        visibleButtons.forEach(function (item) {
+            container.appendChild(createPortalLinkButton(item));
+        });
+
+        if (emptyElement) {
+            emptyElement.hidden = visibleButtons.length !== 0;
+        }
+    }
+
+    function renderSpecialModuleLinks(module) {
+        if (!module) return;
+        const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
+        const hasVisible = buttons.some(function (item) { return item && item.visible !== false; });
+
+        if (module.kind === "roster") {
+            const area = document.getElementById("roster-module-links-area");
+            const container = document.getElementById("roster-module-links");
+            if (area) area.hidden = !hasVisible;
+            renderModuleButtons(module.id, container, null);
+        }
+
+        if (module.kind === "notice") {
+            const area = document.getElementById("notice-module-links-area");
+            const container = document.getElementById("notice-module-links");
+            if (area) area.hidden = !hasVisible;
+            renderModuleButtons(module.id, container, null);
+        }
+    }
+
+    function buildGenericModulePage(module) {
+        const section = document.createElement("section");
+        section.className = "page-section dynamic-module-page";
+        section.id = module.id + "-page";
+        section.setAttribute("data-module-id", module.id);
+
+        const heading = document.createElement("div");
+        heading.className = "section-heading";
+        const h2 = document.createElement("h2");
+        h2.textContent = module.name;
+        const p = document.createElement("p");
+        p.textContent = module.description || "业务快捷入口";
+        heading.appendChild(h2);
+        heading.appendChild(p);
+
+        const grid = document.createElement("div");
+        grid.className = "link-grid";
+        grid.id = "module-links-" + module.id;
+
+        const empty = document.createElement("div");
+        empty.className = "meeting-empty";
+        empty.id = "module-empty-" + module.id;
+        empty.textContent = "目前还没有添加内部按钮。";
+
+        section.appendChild(heading);
+        section.appendChild(grid);
+        section.appendChild(empty);
+        renderModuleButtons(module.id, grid, empty);
+        return section;
+    }
+
+    function renderPortalShell() {
+        if (mainMenu) {
+            mainMenu.querySelectorAll('.menu-item[data-dynamic-module="1"]').forEach(function (item) {
+                item.remove();
+            });
+
+            const adminButton = mainMenu.querySelector('.menu-item[data-page="admin"]');
+            portalModules.filter(function (module) { return module.visible !== false; }).forEach(function (module) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "menu-item";
+                button.setAttribute("data-page", module.id);
+                button.setAttribute("data-dynamic-module", "1");
+                button.textContent = module.name;
+                if (adminButton) mainMenu.insertBefore(button, adminButton);
+                else mainMenu.appendChild(button);
+            });
+        }
+
+        if (dashboardGrid) {
+            dashboardGrid.innerHTML = "";
+            portalModules.filter(function (module) { return module.visible !== false; }).forEach(function (module) {
+                const card = document.createElement("button");
+                card.type = "button";
+                card.className = "dashboard-card";
+                card.setAttribute("data-dashboard-page", module.id);
+
+                const mark = document.createElement("div");
+                mark.className = "dashboard-card-mark";
+                mark.textContent = moduleMark(module.name);
+
+                const copy = document.createElement("div");
+                copy.className = "dashboard-card-copy";
+                const h3 = document.createElement("h3");
+                h3.textContent = module.name;
+                const p = document.createElement("p");
+                p.textContent = module.description || "点击进入模块";
+                copy.appendChild(h3);
+                copy.appendChild(p);
+
+                const arrow = document.createElement("span");
+                arrow.className = "dashboard-card-arrow";
+                arrow.textContent = "→";
+
+                card.appendChild(mark);
+                card.appendChild(copy);
+                card.appendChild(arrow);
+                dashboardGrid.appendChild(card);
+            });
+        }
+
+        if (dynamicModulePages) {
+            dynamicModulePages.innerHTML = "";
+            portalModules.forEach(function (module) {
+                if (module.kind === "generic") {
+                    dynamicModulePages.appendChild(buildGenericModulePage(module));
+                } else {
+                    renderSpecialModuleLinks(module);
+                }
+            });
+        }
+
+        const rosterModule = portalModules.find(function (module) { return module.kind === "roster"; });
+        const noticeModule = portalModules.find(function (module) { return module.kind === "notice"; });
+        const rosterHeading = document.getElementById("roster-page-heading");
+        const noticeHeading = document.getElementById("notice-page-heading");
+        if (rosterHeading && rosterModule) rosterHeading.textContent = rosterModule.name;
+        if (noticeHeading && noticeModule) noticeHeading.textContent = noticeModule.name;
+
+        if (currentPage !== "home" && currentPage !== "admin") {
+            const currentModule = getPortalModule(currentPage);
+            if (!currentModule || currentModule.visible === false) {
+                currentPage = "home";
+            }
+        }
+    }
+
+    async function openPage(pageName) {
+        if (!portalLoaded) {
+            await loadPortalConfig();
+            renderPortalShell();
+        }
+
+        let targetPage = document.getElementById(pageName + "-page");
+        const module = getPortalModule(pageName);
+        if (module && module.kind === "roster") targetPage = document.getElementById("roster-page");
+        if (module && module.kind === "notice") targetPage = document.getElementById("notice-page");
+        if (!targetPage) return;
+
+        document.querySelectorAll(".page-section").forEach(function (page) {
+            page.classList.remove("active-page");
+        });
         targetPage.classList.add("active-page");
 
-        menuItems.forEach(function (item) {
+        document.querySelectorAll(".menu-item[data-page]").forEach(function (item) {
             item.classList.remove("active");
         });
 
-        const currentMenu = document.querySelector(
-            '.menu-item[data-page="' + pageName + '"]'
-        );
-
+        const currentMenu = document.querySelector('.menu-item[data-page="' + pageName + '"]');
         if (currentMenu) {
             currentMenu.classList.add("active");
-
             if (typeof currentMenu.scrollIntoView === "function") {
-                currentMenu.scrollIntoView({
-                    behavior: "smooth",
-                    block: "nearest",
-                    inline: "center"
-                });
+                currentMenu.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
             }
         }
 
-        const info = pageInformation[pageName];
+        currentPage = pageName;
+        let title = "沙巴光伏自备电厂导航";
+        let subtitle = "部门业务总览";
+        let placeholder = "";
 
-        if (info) {
-            pageTitle.textContent = info.title;
-            pageSubtitle.textContent = info.subtitle;
-            searchInput.placeholder = info.search;
+        if (pageName === "admin") {
+            title = "管理后台";
+            subtitle = "主页模块、内部按钮及资料管理";
+        } else if (module) {
+            title = module.name;
+            subtitle = module.description || "业务快捷入口";
+            if (module.kind === "roster") placeholder = "搜索工号、姓名、岗位、职衔...";
+            else if (module.kind === "notice") placeholder = "";
+            else placeholder = "搜索" + module.name + "功能...";
         }
 
+        pageTitle.textContent = title;
+        pageSubtitle.textContent = subtitle;
+        searchInput.placeholder = placeholder;
         if (searchBox) {
-            searchBox.style.display =
-                pageName === "home" || pageName === "notice" || pageName === "admin"
-                    ? "none"
-                    : "flex";
+            searchBox.style.display = pageName === "home" || pageName === "admin" || (module && module.kind === "notice")
+                ? "none" : "flex";
         }
 
         searchInput.value = "";
         resetSearch();
 
-        if (pageName === "meeting") {
-            await loadMeetingButtons();
-            renderMeetingButtons();
+        if (module && module.kind === "generic") {
+            renderModuleButtons(module.id, document.getElementById("module-links-" + module.id), document.getElementById("module-empty-" + module.id));
         }
 
-        if (pageName === "roster") {
+        if (module && module.kind === "roster") {
             switchRosterView("list");
             await loadRoster();
             applyRosterFilters();
+            renderSpecialModuleLinks(module);
         }
 
-        if (pageName === "notice") {
+        if (module && module.kind === "notice") {
+            renderSpecialModuleLinks(module);
             loadSharedNote();
         }
 
@@ -247,30 +452,26 @@ document.addEventListener("DOMContentLoaded", function () {
         window.scrollTo(0, 0);
     }
 
-    menuItems.forEach(function (item) {
-        item.addEventListener("click", function () {
-            const clickedItem = this;
+    if (mainMenu) {
+        mainMenu.addEventListener("click", function (event) {
+            const button = event.target.closest('.menu-item[data-page]');
+            if (!button || !mainMenu.contains(button)) return;
 
-            clickedItem.classList.remove("tap-pop");
-            void clickedItem.offsetWidth;
-            clickedItem.classList.add("tap-pop");
-
-            window.setTimeout(function () {
-                clickedItem.classList.remove("tap-pop");
-            }, 260);
-
-            openPage(clickedItem.getAttribute("data-page"));
+            button.classList.remove("tap-pop");
+            void button.offsetWidth;
+            button.classList.add("tap-pop");
+            window.setTimeout(function () { button.classList.remove("tap-pop"); }, 260);
+            openPage(button.getAttribute("data-page"));
         });
-    });
+    }
 
-    dashboardCards.forEach(function (card) {
-        card.addEventListener("click", function () {
-            const pageName = this.getAttribute("data-dashboard-page");
-            if (pageName) {
-                openPage(pageName);
-            }
+    if (dashboardGrid) {
+        dashboardGrid.addEventListener("click", function (event) {
+            const card = event.target.closest("[data-dashboard-page]");
+            if (!card || !dashboardGrid.contains(card)) return;
+            openPage(card.getAttribute("data-dashboard-page"));
         });
-    });
+    }
 
     rosterViewTabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
@@ -282,17 +483,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const activePage = document.querySelector(".page-section.active-page");
         if (!activePage) return;
 
-        if (activePage.id === "roster-page" && currentRosterView === "list") {
+        const module = getPortalModule(currentPage);
+        if (module && module.kind === "roster" && currentRosterView === "list") {
             applyRosterFilters();
             return;
         }
 
-        if (activePage.id === "roster-page" && currentRosterView === "org") {
+        if (module && module.kind === "roster" && currentRosterView === "org") {
             const keyword = this.value.trim().toLowerCase();
-            const searchableItems = rosterOrgView
-                ? rosterOrgView.querySelectorAll(".searchable")
-                : [];
-
+            const searchableItems = rosterOrgView ? rosterOrgView.querySelectorAll(".searchable") : [];
             searchableItems.forEach(function (item) {
                 const text = item.textContent.toLowerCase();
                 item.classList.toggle("search-hidden", !text.includes(keyword));
@@ -301,16 +500,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const keyword = this.value.trim().toLowerCase();
-        const searchableItems = activePage.querySelectorAll(".searchable");
-
-        searchableItems.forEach(function (item) {
-            const text = item.textContent.toLowerCase();
-
-            if (text.includes(keyword)) {
-                item.classList.remove("search-hidden");
-            } else {
-                item.classList.add("search-hidden");
-            }
+        activePage.querySelectorAll(".searchable").forEach(function (item) {
+            item.classList.toggle("search-hidden", !item.textContent.toLowerCase().includes(keyword));
         });
     });
 
@@ -324,41 +515,31 @@ document.addEventListener("DOMContentLoaded", function () {
         currentRosterView = viewName === "org" ? "org" : "list";
 
         rosterViewTabs.forEach(function (tab) {
-            tab.classList.toggle(
-                "active",
-                tab.getAttribute("data-roster-view") === currentRosterView
-            );
+            tab.classList.toggle("active", tab.getAttribute("data-roster-view") === currentRosterView);
         });
 
-        if (rosterListView) {
-            rosterListView.classList.toggle("active", currentRosterView === "list");
+        if (rosterListView) rosterListView.classList.toggle("active", currentRosterView === "list");
+        if (rosterOrgView) rosterOrgView.classList.toggle("active", currentRosterView === "org");
+
+        if (rosterViewSubtitle) {
+            rosterViewSubtitle.textContent = currentRosterView === "org"
+                ? "部门组织结构图，可左右滑动查看完整内容"
+                : "查看部门人员花名册或组织结构图";
         }
 
-        if (rosterOrgView) {
-            rosterOrgView.classList.toggle("active", currentRosterView === "org");
+        if (searchInput) {
+            searchInput.value = "";
+            searchInput.placeholder = currentRosterView === "org"
+                ? "搜索姓名或岗位..."
+                : "搜索工号、姓名、岗位、职衔...";
         }
-
         resetSearch();
-        searchInput.value = "";
-
-        if (currentRosterView === "org") {
-            pageSubtitle.textContent = "自备电厂部组织结构图";
-            searchInput.placeholder = "搜索姓名或岗位...";
-            if (rosterViewSubtitle) {
-                rosterViewSubtitle.textContent = "当前查看：自备电厂部组织结构图";
-            }
-        } else {
-            pageSubtitle.textContent = "人员花名册与组织结构";
-            searchInput.placeholder = "搜索工号、姓名、岗位、职衔...";
-            if (rosterViewSubtitle) {
-                rosterViewSubtitle.textContent = "查看部门人员花名册或组织结构图";
-            }
-            if (rosterLoaded) {
-                applyRosterFilters();
-            }
-        }
+        if (currentRosterView === "list") applyRosterFilters();
     }
 
+    loadPortalConfig().then(function () {
+        renderPortalShell();
+    });
 
     // ========================================
     // 花名册：云端读取 + 自动统计
@@ -568,93 +749,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+
     // ========================================
-    // 会议按钮：完全由云端资料生成
+    // 各主页模块内部按钮由 portal-config 统一生成
     // ========================================
-
-    const meetingLinksContainer = document.getElementById("meeting-links");
-    const meetingEmpty = document.getElementById("meeting-empty");
-
-    async function loadMeetingButtons(force) {
-        if (meetingButtonsLoaded && !force) return meetingButtons;
-
-        try {
-            const response = await fetch("/api/meeting-buttons", {
-                cache: "no-store",
-                headers: { "Accept": "application/json" }
-            });
-
-            if (!response.ok) {
-                throw new Error("无法读取会议按钮");
-            }
-
-            const data = await response.json();
-            meetingButtons = Array.isArray(data.buttons) ? data.buttons : [];
-            meetingButtonsLoaded = true;
-            return meetingButtons;
-        } catch (error) {
-            meetingButtons = [];
-            meetingButtonsLoaded = true;
-            return meetingButtons;
-        }
-    }
-
-    function renderMeetingButtons() {
-        if (!meetingLinksContainer) return;
-
-        meetingLinksContainer.innerHTML = "";
-
-        const visibleButtons = meetingButtons.filter(function (item) {
-            return item && item.visible !== false;
-        });
-
-        if (meetingEmpty) {
-            meetingEmpty.hidden = visibleButtons.length !== 0;
-        }
-
-        visibleButtons.forEach(function (item) {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.className = "link-card searchable";
-
-            const content = document.createElement("div");
-            content.className = "card-content";
-
-            const title = document.createElement("h3");
-            title.textContent = item.name || "未命名按钮";
-
-            const description = document.createElement("p");
-            description.textContent = item.description || (item.type === "month-plan" ? "选择年份和月份" : "打开链接");
-
-            const arrow = document.createElement("div");
-            arrow.className = "card-arrow";
-            arrow.textContent = "→";
-
-            content.appendChild(title);
-            content.appendChild(description);
-            button.appendChild(content);
-            button.appendChild(arrow);
-
-            button.addEventListener("click", function () {
-                if (item.type === "month-plan") {
-                    openMonthPlanModal(item.name || "月计划");
-                    return;
-                }
-
-                const url = String(item.url || "").trim();
-
-                if (!/^https:\/\//i.test(url)) {
-                    alert((item.name || "这个按钮") + "的链接暂未设置，请联系管理员。");
-                    return;
-                }
-
-                window.open(url, "_blank", "noopener,noreferrer");
-            });
-
-            meetingLinksContainer.appendChild(button);
-        });
-    }
-
 
     // ========================================
     // 月计划：云端链接
@@ -1229,12 +1327,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (adminDashboard) adminDashboard.hidden = false;
 
         await Promise.all([
-            loadMeetingButtons(true),
+            loadPortalConfig(true),
             loadMonthPlans(true),
             loadRoster(true)
         ]);
 
-        renderAdminMeetingButtons();
+        renderPortalShell();
+        renderAdminModules();
+        renderAdminChildButtons();
         renderAdminMonthPlans();
         renderAdminRoster();
         renderHistoryList(document.getElementById("admin-history-list"), true);
@@ -1352,6 +1452,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }, 30 * 1000);
 
+
     // ========================================
     // 管理后台标签
     // ========================================
@@ -1362,46 +1463,47 @@ document.addEventListener("DOMContentLoaded", function () {
     adminTabs.forEach(function (button) {
         button.addEventListener("click", function () {
             const name = this.getAttribute("data-admin-tab");
-
-            adminTabs.forEach(function (item) {
-                item.classList.remove("active");
-            });
-
-            adminTabPanels.forEach(function (panel) {
-                panel.classList.remove("active");
-            });
-
+            adminTabs.forEach(function (item) { item.classList.remove("active"); });
+            adminTabPanels.forEach(function (panel) { panel.classList.remove("active"); });
             this.classList.add("active");
-
             const panel = document.getElementById("admin-" + name + "-tab");
+            if (panel) panel.classList.add("active");
 
-            if (panel) {
-                panel.classList.add("active");
+            if (name === "modules") {
+                renderAdminModules();
+                renderAdminChildButtons();
             }
-
-            if (name === "month") {
-                renderAdminMeetingButtons();
-                renderAdminMonthPlans();
-            }
-
-            if (name === "roster") {
-                renderAdminRoster();
-            }
-
-            if (name === "history") {
-                renderHistoryList(document.getElementById("admin-history-list"), true);
-            }
+            if (name === "plan") renderAdminMonthPlans();
+            if (name === "roster") renderAdminRoster();
+            if (name === "history") renderHistoryList(document.getElementById("admin-history-list"), true);
         });
     });
 
 
     // ========================================
-    // 管理后台：会议按钮完全管理
+    // 管理后台：主页模块 + 每个模块内部按钮
     // ========================================
 
-    const adminMeetingAdd = document.getElementById("admin-meeting-add");
-    const adminMeetingButtonList = document.getElementById("admin-meeting-button-list");
-    const adminMeetingButtonMessage = document.getElementById("admin-meeting-button-message");
+    const adminModuleAdd = document.getElementById("admin-module-add");
+    const adminModuleList = document.getElementById("admin-module-list");
+    const adminModuleMessage = document.getElementById("admin-module-message");
+    const adminChildTitle = document.getElementById("admin-child-title");
+    const adminChildSubtitle = document.getElementById("admin-child-subtitle");
+    const adminChildAdd = document.getElementById("admin-child-add");
+    const adminChildButtonList = document.getElementById("admin-child-button-list");
+    const adminChildMessage = document.getElementById("admin-child-message");
+    const adminSelectedModule = document.getElementById("admin-selected-module");
+
+    const moduleEditorModal = document.getElementById("module-editor-modal");
+    const moduleEditorTitle = document.getElementById("module-editor-title");
+    const moduleEditorSubtitle = document.getElementById("module-editor-subtitle");
+    const moduleEditorForm = document.getElementById("module-editor-form");
+    const moduleEditId = document.getElementById("module-edit-id");
+    const moduleEditName = document.getElementById("module-edit-name");
+    const moduleEditDescription = document.getElementById("module-edit-description");
+    const moduleEditVisible = document.getElementById("module-edit-visible");
+    const moduleEditorMessage = document.getElementById("module-editor-message");
+    const moduleModalCloseButtons = document.querySelectorAll("[data-module-modal-close]");
 
     const meetingButtonEditorModal = document.getElementById("meeting-button-editor-modal");
     const meetingButtonEditorTitle = document.getElementById("meeting-button-editor-title");
@@ -1418,49 +1520,221 @@ document.addEventListener("DOMContentLoaded", function () {
     const meetingButtonEditorMessage = document.getElementById("meeting-button-editor-message");
     const meetingButtonModalCloseButtons = document.querySelectorAll("[data-meeting-button-modal-close]");
 
-    function createMeetingButtonId() {
-        if (window.crypto && typeof window.crypto.randomUUID === "function") {
-            return window.crypto.randomUUID();
-        }
+    let selectedAdminModuleId = "meeting";
 
-        return "meeting-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+    function createPortalModuleId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            return "module-" + window.crypto.randomUUID();
+        }
+        return "module-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
     }
 
-    function openMeetingButtonEditor(item) {
-        if (!meetingButtonEditorModal) return;
+    function createInternalButtonId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            return "button-" + window.crypto.randomUUID();
+        }
+        return "button-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
+    }
 
+    function closeModuleEditor() {
+        if (!moduleEditorModal) return;
+        moduleEditorModal.classList.remove("open");
+        moduleEditorModal.setAttribute("aria-hidden", "true");
+    }
+
+    function openModuleEditor(item) {
+        if (!moduleEditorModal) return;
         const editing = item || null;
-        const type = editing && editing.type === "month-plan" ? "month-plan" : "link";
+        moduleEditId.value = editing ? editing.id : "";
+        moduleEditName.value = editing ? editing.name || "" : "";
+        moduleEditDescription.value = editing ? editing.description || "" : "";
+        moduleEditVisible.checked = editing ? editing.visible !== false : true;
+        moduleEditorTitle.textContent = editing ? "编辑主页按钮" : "新增主页按钮";
+        moduleEditorSubtitle.textContent = editing
+            ? "修改名称后，主页 Dashboard 和顶部导航会一起更新。"
+            : "保存后会同时加入主页 Dashboard，并排在管理后台之前。";
+        setFormMessage(moduleEditorMessage, "", "");
+        moduleEditorModal.classList.add("open");
+        moduleEditorModal.setAttribute("aria-hidden", "false");
+        setTimeout(function () { moduleEditName.focus(); }, 0);
+    }
 
-        meetingButtonEditId.value = editing ? editing.id : "";
-        meetingButtonEditType.value = type;
-        meetingButtonEditName.value = editing ? editing.name || "" : "";
-        meetingButtonEditDescription.value = editing ? editing.description || "" : "";
-        meetingButtonEditUrl.value = editing && type === "link" ? editing.url || "" : "";
-        meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
+    moduleModalCloseButtons.forEach(function (button) {
+        button.addEventListener("click", closeModuleEditor);
+    });
 
-        meetingButtonEditorTitle.textContent = editing ? "编辑会议按钮" : "新增会议按钮";
-        meetingButtonEditorSubtitle.textContent = type === "month-plan"
-            ? "这是年月选择按钮，可以改名称和说明，也可以隐藏或调整顺序。"
-            : "保存后会直接更新会议页面。";
+    if (adminModuleAdd) {
+        adminModuleAdd.addEventListener("click", function () { openModuleEditor(null); });
+    }
 
-        if (meetingButtonUrlGroup) {
-            meetingButtonUrlGroup.hidden = type === "month-plan";
+    async function savePortalModules(next, successMessage) {
+        try {
+            const response = await adminFetch("/api/portal-modules", {
+                method: "PUT",
+                body: JSON.stringify({ modules: next })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "保存失败");
+
+            portalModules = Array.isArray(data.modules) ? data.modules : [];
+            if (data.moduleButtons && typeof data.moduleButtons === "object") {
+                portalButtons = data.moduleButtons;
+            }
+            portalLoaded = true;
+            renderPortalShell();
+            renderAdminModules();
+            renderAdminChildButtons();
+            setFormMessage(adminModuleMessage, successMessage || "主页模块已保存。", "success");
+            return true;
+        } catch (error) {
+            setFormMessage(adminModuleMessage, error.message || "保存失败", "error");
+            return false;
+        }
+    }
+
+    if (moduleEditorForm) {
+        moduleEditorForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const id = String(moduleEditId.value || "").trim();
+            const name = moduleEditName.value.trim();
+            const description = moduleEditDescription.value.trim();
+            if (!name) {
+                setFormMessage(moduleEditorMessage, "请输入按钮名称。", "error");
+                return;
+            }
+
+            const next = portalModules.map(function (item) { return Object.assign({}, item); });
+            if (id) {
+                const index = next.findIndex(function (item) { return item.id === id; });
+                if (index < 0) {
+                    setFormMessage(moduleEditorMessage, "找不到这个主页按钮。", "error");
+                    return;
+                }
+                next[index] = Object.assign({}, next[index], {
+                    name: name,
+                    description: description,
+                    visible: moduleEditVisible.checked
+                });
+            } else {
+                next.push({
+                    id: createPortalModuleId(),
+                    name: name,
+                    description: description,
+                    kind: "generic",
+                    visible: moduleEditVisible.checked
+                });
+            }
+
+            const ok = await savePortalModules(next, id ? "主页按钮已更新。" : "主页按钮已新增。 ");
+            if (ok) closeModuleEditor();
+        });
+    }
+
+    function setSelectedAdminModule(moduleId) {
+        const module = getPortalModule(moduleId);
+        if (!module) return;
+        selectedAdminModuleId = module.id;
+        renderAdminModules();
+        renderAdminChildButtons();
+        if (adminChildButtonList && typeof adminChildButtonList.scrollIntoView === "function") {
+            adminChildButtonList.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }
+
+    function moveArrayItem(list, from, to) {
+        const next = list.slice();
+        if (from < 0 || from >= next.length || to < 0 || to >= next.length || from === to) return next;
+        const item = next.splice(from, 1)[0];
+        next.splice(to, 0, item);
+        return next;
+    }
+
+    function renderAdminModules() {
+        if (!adminModuleList) return;
+        adminModuleList.innerHTML = "";
+        if (!portalModules.length) {
+            adminModuleList.innerHTML = '<div class="history-empty">目前没有主页模块。</div>';
+            return;
         }
 
-        if (meetingButtonTypeNote) {
-            meetingButtonTypeNote.textContent = type === "month-plan"
-                ? "按钮类型：年月选择（月计划）"
-                : "按钮类型：普通链接";
-        }
+        portalModules.forEach(function (item, index) {
+            const row = document.createElement("div");
+            row.className = "meeting-button-admin-row" + (item.visible === false ? " is-hidden-item" : "");
+            if (item.id === selectedAdminModuleId) row.classList.add("is-selected-module");
 
-        setFormMessage(meetingButtonEditorMessage, "", "");
-        meetingButtonEditorModal.classList.add("open");
-        meetingButtonEditorModal.setAttribute("aria-hidden", "false");
+            const info = document.createElement("div");
+            info.className = "meeting-button-admin-info";
+            const titleLine = document.createElement("div");
+            titleLine.className = "meeting-button-title-line";
+            const title = document.createElement("strong");
+            title.textContent = (index + 1) + ". " + (item.name || "未命名按钮");
+            const typeBadge = document.createElement("span");
+            typeBadge.className = "meeting-button-type-badge";
+            typeBadge.textContent = item.kind === "roster" ? "花名册" : item.kind === "notice" ? "共享公告" : "普通模块";
+            const statusBadge = document.createElement("span");
+            statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
+            statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
+            titleLine.appendChild(title);
+            titleLine.appendChild(typeBadge);
+            titleLine.appendChild(statusBadge);
+            const detail = document.createElement("span");
+            const childCount = Array.isArray(portalButtons[item.id]) ? portalButtons[item.id].length : 0;
+            detail.textContent = (item.description || "无说明") + " · 内部按钮 " + childCount + " 个";
+            info.appendChild(titleLine);
+            info.appendChild(detail);
 
-        setTimeout(function () {
-            meetingButtonEditName.focus();
-        }, 0);
+            const actions = document.createElement("div");
+            actions.className = "meeting-button-admin-actions";
+
+            function action(label, className, handler, disabled) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = className || "secondary-action-btn mini";
+                button.textContent = label;
+                button.disabled = Boolean(disabled);
+                button.addEventListener("click", handler);
+                actions.appendChild(button);
+            }
+
+            action("管理里面按钮", "primary-action-btn mini", function () { setSelectedAdminModule(item.id); });
+            action("编辑", "secondary-action-btn mini", function () { openModuleEditor(item); });
+            action("↑ 上移", "secondary-action-btn mini", async function () {
+                if (index === 0) return;
+                await savePortalModules(moveArrayItem(portalModules, index, index - 1), "主页按钮顺序已更新。 ");
+            }, index === 0);
+            action("↓ 下移", "secondary-action-btn mini", async function () {
+                if (index >= portalModules.length - 1) return;
+                await savePortalModules(moveArrayItem(portalModules, index, index + 1), "主页按钮顺序已更新。 ");
+            }, index === portalModules.length - 1);
+            action("置顶", "secondary-action-btn mini", async function () {
+                if (index === 0) return;
+                await savePortalModules(moveArrayItem(portalModules, index, 0), "主页按钮已移到最前。 ");
+            }, index === 0);
+            action("置底", "secondary-action-btn mini", async function () {
+                if (index >= portalModules.length - 1) return;
+                await savePortalModules(moveArrayItem(portalModules, index, portalModules.length - 1), "主页按钮已移到最后。 ");
+            }, index === portalModules.length - 1);
+            action(item.visible === false ? "显示" : "隐藏", "secondary-action-btn mini", async function () {
+                const next = portalModules.map(function (module) {
+                    return module.id === item.id ? Object.assign({}, module, { visible: module.visible === false }) : module;
+                });
+                await savePortalModules(next, item.visible === false ? "主页按钮已显示。" : "主页按钮已隐藏。 ");
+            });
+
+            if (String(item.id).startsWith("module-") && item.kind === "generic") {
+                action("删除", "danger-action-btn mini", async function () {
+                    const confirmed = confirm("确定删除“" + item.name + "”这个主页模块吗？它里面的按钮也会从网站入口中消失。 ");
+                    if (!confirmed) return;
+                    const next = portalModules.filter(function (module) { return module.id !== item.id; });
+                    if (selectedAdminModuleId === item.id) selectedAdminModuleId = "meeting";
+                    await savePortalModules(next, "主页按钮已删除。 ");
+                });
+            }
+
+            row.appendChild(info);
+            row.appendChild(actions);
+            adminModuleList.appendChild(row);
+        });
     }
 
     function closeMeetingButtonEditor() {
@@ -1469,37 +1743,57 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditorModal.setAttribute("aria-hidden", "true");
     }
 
+    function openMeetingButtonEditor(item) {
+        if (!meetingButtonEditorModal || !getPortalModule(selectedAdminModuleId)) return;
+        const editing = item || null;
+        const type = editing && editing.type === "month-plan" ? "month-plan" : "link";
+        meetingButtonEditId.value = editing ? editing.id : "";
+        meetingButtonEditType.value = type;
+        meetingButtonEditName.value = editing ? editing.name || "" : "";
+        meetingButtonEditDescription.value = editing ? editing.description || "" : "";
+        meetingButtonEditUrl.value = editing && type === "link" ? editing.url || "" : "";
+        meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
+        const module = getPortalModule(selectedAdminModuleId);
+        meetingButtonEditorTitle.textContent = editing ? "编辑内部按钮" : "新增内部按钮";
+        meetingButtonEditorSubtitle.textContent = type === "month-plan"
+            ? "这是年月选择按钮，可以改名称、说明、显示状态和顺序。"
+            : "保存后会显示在“" + module.name + "”里面。";
+        if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type === "month-plan";
+        if (meetingButtonTypeNote) {
+            meetingButtonTypeNote.textContent = type === "month-plan" ? "按钮类型：年月选择（月计划）" : "按钮类型：普通链接";
+        }
+        setFormMessage(meetingButtonEditorMessage, "", "");
+        meetingButtonEditorModal.classList.add("open");
+        meetingButtonEditorModal.setAttribute("aria-hidden", "false");
+        setTimeout(function () { meetingButtonEditName.focus(); }, 0);
+    }
+
     meetingButtonModalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeMeetingButtonEditor);
     });
 
-    if (adminMeetingAdd) {
-        adminMeetingAdd.addEventListener("click", function () {
-            openMeetingButtonEditor(null);
-        });
+    if (adminChildAdd) {
+        adminChildAdd.addEventListener("click", function () { openMeetingButtonEditor(null); });
     }
 
-    async function saveMeetingButtons(next, successMessage) {
+    async function savePortalChildButtons(moduleId, next, successMessage) {
         try {
-            const response = await adminFetch("/api/meeting-buttons", {
+            const response = await adminFetch("/api/portal-buttons", {
                 method: "PUT",
-                body: JSON.stringify({ buttons: next })
+                body: JSON.stringify({ moduleId: moduleId, buttons: next })
             });
-
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "保存失败");
-            }
-
-            meetingButtons = Array.isArray(data.buttons) ? data.buttons : [];
-            meetingButtonsLoaded = true;
-            renderAdminMeetingButtons();
-            renderMeetingButtons();
-            setFormMessage(adminMeetingButtonMessage, successMessage || "会议按钮已保存。", "success");
+            if (!response.ok) throw new Error(data.error || "保存失败");
+            portalButtons[moduleId] = Array.isArray(data.buttons) ? data.buttons : [];
+            if (data.moduleButtons && typeof data.moduleButtons === "object") portalButtons = data.moduleButtons;
+            portalLoaded = true;
+            renderPortalShell();
+            renderAdminModules();
+            renderAdminChildButtons();
+            setFormMessage(adminChildMessage, successMessage || "内部按钮已保存。", "success");
             return true;
         } catch (error) {
-            setFormMessage(adminMeetingButtonMessage, error.message || "保存失败", "error");
+            setFormMessage(adminChildMessage, error.message || "保存失败", "error");
             return false;
         }
     }
@@ -1507,182 +1801,136 @@ document.addEventListener("DOMContentLoaded", function () {
     if (meetingButtonEditorForm) {
         meetingButtonEditorForm.addEventListener("submit", async function (event) {
             event.preventDefault();
-
+            const module = getPortalModule(selectedAdminModuleId);
+            if (!module) {
+                setFormMessage(meetingButtonEditorMessage, "请先选择一个主页模块。", "error");
+                return;
+            }
             const id = String(meetingButtonEditId.value || "").trim();
             const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : "link";
             const name = meetingButtonEditName.value.trim();
             const description = meetingButtonEditDescription.value.trim();
             const url = meetingButtonEditUrl.value.trim();
-
             if (!name) {
                 setFormMessage(meetingButtonEditorMessage, "请输入按钮名称。", "error");
                 return;
             }
-
             if (type === "link" && url && !/^https:\/\//i.test(url)) {
                 setFormMessage(meetingButtonEditorMessage, "网址必须以 https:// 开头。", "error");
                 return;
             }
 
-            const next = meetingButtons.map(function (item) {
-                return Object.assign({}, item);
-            });
-
+            const current = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
+            const next = current.map(function (item) { return Object.assign({}, item); });
             const savedItem = {
-                id: id || createMeetingButtonId(),
+                id: id || createInternalButtonId(),
                 name: name,
                 description: description,
                 type: type,
                 url: type === "link" ? url : "",
                 visible: meetingButtonEditVisible.checked
             };
-
             if (id) {
-                const index = next.findIndex(function (item) {
-                    return item.id === id;
-                });
-
-                if (index >= 0) {
-                    next[index] = savedItem;
-                }
+                const index = next.findIndex(function (item) { return item.id === id; });
+                if (index >= 0) next[index] = savedItem;
             } else {
                 next.push(savedItem);
             }
 
-            const ok = await saveMeetingButtons(next, id ? "按钮已更新。" : "按钮已新增。");
-
-            if (ok) {
-                closeMeetingButtonEditor();
-            } else {
-                setFormMessage(meetingButtonEditorMessage, "保存失败，请检查后再试。", "error");
-            }
+            const ok = await savePortalChildButtons(module.id, next, id ? "内部按钮已更新。" : "内部按钮已新增。 ");
+            if (ok) closeMeetingButtonEditor();
         });
     }
 
-    function renderAdminMeetingButtons() {
-        if (!adminMeetingButtonList) return;
+    function renderAdminChildButtons() {
+        if (!adminChildButtonList) return;
+        const module = getPortalModule(selectedAdminModuleId) || portalModules[0] || null;
+        if (!module) {
+            selectedAdminModuleId = "";
+            adminChildButtonList.innerHTML = '<div class="history-empty">请先新增一个主页模块。</div>';
+            if (adminChildAdd) adminChildAdd.disabled = true;
+            if (adminSelectedModule) adminSelectedModule.hidden = true;
+            return;
+        }
+        selectedAdminModuleId = module.id;
+        if (adminChildAdd) adminChildAdd.disabled = false;
+        if (adminChildTitle) adminChildTitle.textContent = "“" + module.name + "”内部按钮";
+        if (adminChildSubtitle) adminChildSubtitle.textContent = "这里新增的按钮只会显示在“" + module.name + "”页面里面。";
+        if (adminSelectedModule) {
+            adminSelectedModule.hidden = false;
+            adminSelectedModule.textContent = "当前模块：" + module.name;
+        }
 
-        adminMeetingButtonList.innerHTML = "";
-
-        if (!meetingButtons.length) {
-            adminMeetingButtonList.innerHTML = '<div class="history-empty">目前没有会议按钮。</div>';
+        const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
+        adminChildButtonList.innerHTML = "";
+        if (!buttons.length) {
+            adminChildButtonList.innerHTML = '<div class="history-empty">这个模块目前没有内部按钮。点击右上角“+ 新增内部按钮”即可添加。</div>';
             return;
         }
 
-        meetingButtons.forEach(function (item, index) {
+        buttons.forEach(function (item, index) {
             const row = document.createElement("div");
             row.className = "meeting-button-admin-row" + (item.visible === false ? " is-hidden-item" : "");
-
             const info = document.createElement("div");
             info.className = "meeting-button-admin-info";
-
             const titleLine = document.createElement("div");
             titleLine.className = "meeting-button-title-line";
-
             const title = document.createElement("strong");
             title.textContent = item.name || "未命名按钮";
-
             const typeBadge = document.createElement("span");
             typeBadge.className = "meeting-button-type-badge";
             typeBadge.textContent = item.type === "month-plan" ? "年月选择" : "普通链接";
-
             const statusBadge = document.createElement("span");
             statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
             statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
-
             titleLine.appendChild(title);
             titleLine.appendChild(typeBadge);
             titleLine.appendChild(statusBadge);
-
             const detail = document.createElement("span");
-            const description = item.description || "无说明";
             detail.textContent = item.type === "month-plan"
-                ? description
-                : description + (item.url ? " · " + item.url : " · 暂未设置链接");
-
+                ? (item.description || "年月选择")
+                : (item.description || "无说明") + (item.url ? " · " + item.url : " · 暂未设置链接");
             info.appendChild(titleLine);
             info.appendChild(detail);
 
             const actions = document.createElement("div");
             actions.className = "meeting-button-admin-actions";
-
-            const edit = document.createElement("button");
-            edit.type = "button";
-            edit.className = "secondary-action-btn mini";
-            edit.textContent = "编辑";
-            edit.addEventListener("click", function () {
-                openMeetingButtonEditor(item);
-            });
-
-            const up = document.createElement("button");
-            up.type = "button";
-            up.className = "secondary-action-btn mini";
-            up.textContent = "↑ 上移";
-            up.disabled = index === 0;
-            up.addEventListener("click", async function () {
+            function action(label, className, handler, disabled) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = className || "secondary-action-btn mini";
+                button.textContent = label;
+                button.disabled = Boolean(disabled);
+                button.addEventListener("click", handler);
+                actions.appendChild(button);
+            }
+            action("编辑", "secondary-action-btn mini", function () { openMeetingButtonEditor(item); });
+            action("↑ 上移", "secondary-action-btn mini", async function () {
                 if (index === 0) return;
-                const next = meetingButtons.slice();
-                const temp = next[index - 1];
-                next[index - 1] = next[index];
-                next[index] = temp;
-                await saveMeetingButtons(next, "按钮顺序已更新。");
-            });
-
-            const down = document.createElement("button");
-            down.type = "button";
-            down.className = "secondary-action-btn mini";
-            down.textContent = "↓ 下移";
-            down.disabled = index === meetingButtons.length - 1;
-            down.addEventListener("click", async function () {
-                if (index >= meetingButtons.length - 1) return;
-                const next = meetingButtons.slice();
-                const temp = next[index + 1];
-                next[index + 1] = next[index];
-                next[index] = temp;
-                await saveMeetingButtons(next, "按钮顺序已更新。");
-            });
-
-            const toggle = document.createElement("button");
-            toggle.type = "button";
-            toggle.className = "secondary-action-btn mini";
-            toggle.textContent = item.visible === false ? "显示" : "隐藏";
-            toggle.addEventListener("click", async function () {
-                const next = meetingButtons.map(function (buttonItem) {
-                    if (buttonItem.id !== item.id) return buttonItem;
-                    return Object.assign({}, buttonItem, { visible: buttonItem.visible === false });
+                await savePortalChildButtons(module.id, moveArrayItem(buttons, index, index - 1), "内部按钮顺序已更新。 ");
+            }, index === 0);
+            action("↓ 下移", "secondary-action-btn mini", async function () {
+                if (index >= buttons.length - 1) return;
+                await savePortalChildButtons(module.id, moveArrayItem(buttons, index, index + 1), "内部按钮顺序已更新。 ");
+            }, index === buttons.length - 1);
+            action(item.visible === false ? "显示" : "隐藏", "secondary-action-btn mini", async function () {
+                const next = buttons.map(function (buttonItem) {
+                    return buttonItem.id === item.id ? Object.assign({}, buttonItem, { visible: buttonItem.visible === false }) : buttonItem;
                 });
-                await saveMeetingButtons(next, item.visible === false ? "按钮已显示。" : "按钮已隐藏。");
+                await savePortalChildButtons(module.id, next, item.visible === false ? "内部按钮已显示。" : "内部按钮已隐藏。 ");
             });
-
-            actions.appendChild(edit);
-            actions.appendChild(up);
-            actions.appendChild(down);
-            actions.appendChild(toggle);
-
             if (item.type !== "month-plan") {
-                const remove = document.createElement("button");
-                remove.type = "button";
-                remove.className = "danger-action-btn mini";
-                remove.textContent = "删除";
-                remove.addEventListener("click", async function () {
+                action("删除", "danger-action-btn mini", async function () {
                     const confirmed = confirm("确定删除“" + (item.name || "这个按钮") + "”吗？");
                     if (!confirmed) return;
-
-                    const next = meetingButtons.filter(function (buttonItem) {
-                        return buttonItem.id !== item.id;
-                    });
-
-                    await saveMeetingButtons(next, "按钮已删除。");
+                    await savePortalChildButtons(module.id, buttons.filter(function (buttonItem) { return buttonItem.id !== item.id; }), "内部按钮已删除。 ");
                 });
-                actions.appendChild(remove);
             }
-
             row.appendChild(info);
             row.appendChild(actions);
-            adminMeetingButtonList.appendChild(row);
+            adminChildButtonList.appendChild(row);
         });
     }
-
 
     // ========================================
     // 管理后台：月计划

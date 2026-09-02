@@ -467,6 +467,18 @@ const MONTH_PLAN_KEY = "month-plan-links";
 const MEETING_LINK_KEY = "meeting-links";
 const MEETING_BUTTON_KEY = "meeting-buttons-v2";
 const ROSTER_KEY = "roster-data";
+const PORTAL_MODULES_KEY = "portal-modules-v1";
+const PORTAL_BUTTONS_KEY = "portal-module-buttons-v1";
+
+const DEFAULT_PORTAL_MODULES = [
+    { id: "meeting", name: "部门管理例会", description: "部门管理例会相关业务入口", kind: "generic", visible: true },
+    { id: "process-operation", name: "工艺运行", description: "工艺运行相关资料与快捷入口", kind: "generic", visible: true },
+    { id: "maintenance-work", name: "维护工作", description: "维护工作相关资料与快捷入口", kind: "generic", visible: true },
+    { id: "chemistry", name: "化学", description: "化学相关资料与快捷入口", kind: "generic", visible: true },
+    { id: "daily", name: "日报", description: "日报相关业务入口", kind: "generic", visible: true },
+    { id: "roster", name: "花名册", description: "人员资料及部门组织结构", kind: "roster", visible: true },
+    { id: "notice", name: "共享公告", description: "部门共享公告与协作内容", kind: "notice", visible: true }
+];
 
 // ===== Website password gate =====
 // This is intentionally separate from ADMIN_PASSWORD.
@@ -520,6 +532,18 @@ export default {
 
         if (url.pathname === "/api/shared-note/restore") {
             return handleSharedNoteRestore(request, env);
+        }
+
+        if (url.pathname === "/api/portal-config") {
+            return handlePortalConfig(request, env);
+        }
+
+        if (url.pathname === "/api/portal-modules") {
+            return handlePortalModules(request, env);
+        }
+
+        if (url.pathname === "/api/portal-buttons") {
+            return handlePortalButtons(request, env);
         }
 
         if (url.pathname === "/api/month-plans") {
@@ -1050,6 +1074,246 @@ async function handleSharedNoteRestore(request, env) {
         content: target.content || "",
         updatedAt: now
     });
+}
+
+
+async function handlePortalConfig(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method !== "GET") {
+        return methodNotAllowed("GET");
+    }
+
+    const config = await getPortalConfig(env);
+    return jsonResponse({
+        ok: true,
+        modules: config.modules,
+        moduleButtons: config.moduleButtons
+    });
+}
+
+async function handlePortalModules(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        const config = await getPortalConfig(env);
+        return jsonResponse({ ok: true, modules: config.modules });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        if (!Array.isArray(body?.modules)) {
+            return jsonResponse({ ok: false, error: "Invalid portal module data." }, 400);
+        }
+
+        if (body.modules.length > 50) {
+            return jsonResponse({ ok: false, error: "主页模块数量不能超过 50 个。" }, 400);
+        }
+
+        let modules;
+        try {
+            modules = normalizePortalModules(body.modules, true);
+        } catch (error) {
+            return jsonResponse({ ok: false, error: error.message }, 400);
+        }
+
+        const rosterCount = modules.filter((item) => item.kind === "roster").length;
+        const noticeCount = modules.filter((item) => item.kind === "notice").length;
+        if (rosterCount !== 1 || noticeCount !== 1) {
+            return jsonResponse({ ok: false, error: "花名册和共享公告模块必须各保留一个；如暂时不用可以选择隐藏。" }, 400);
+        }
+
+        const config = await getPortalConfig(env);
+        const moduleButtons = config.moduleButtons;
+        for (const module of modules) {
+            if (!Array.isArray(moduleButtons[module.id])) {
+                moduleButtons[module.id] = [];
+            }
+        }
+
+        await env.SHARED_BOARD.put(PORTAL_MODULES_KEY, JSON.stringify(modules));
+        await env.SHARED_BOARD.put(PORTAL_BUTTONS_KEY, JSON.stringify(moduleButtons));
+
+        return jsonResponse({ ok: true, modules, moduleButtons });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+async function handlePortalButtons(request, env) {
+    try {
+        await ensureKv(env);
+    } catch (error) {
+        return jsonResponse({ ok: false, error: error.message }, 503);
+    }
+
+    if (request.method === "GET") {
+        const config = await getPortalConfig(env);
+        return jsonResponse({ ok: true, moduleButtons: config.moduleButtons });
+    }
+
+    if (request.method === "PUT") {
+        const auth = checkAdmin(request, env);
+        if (!auth.ok) return auth.response;
+
+        let body;
+        try {
+            body = await request.json();
+        } catch {
+            return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400);
+        }
+
+        const moduleId = typeof body?.moduleId === "string" ? body.moduleId.trim() : "";
+        if (!moduleId || !Array.isArray(body?.buttons)) {
+            return jsonResponse({ ok: false, error: "Invalid module button data." }, 400);
+        }
+
+        if (body.buttons.length > 100) {
+            return jsonResponse({ ok: false, error: "单个主页模块最多只能有 100 个内部按钮。" }, 400);
+        }
+
+        const config = await getPortalConfig(env);
+        if (!config.modules.some((item) => item.id === moduleId)) {
+            return jsonResponse({ ok: false, error: "找不到对应的主页模块。" }, 404);
+        }
+
+        let buttons;
+        try {
+            buttons = normalizeMeetingButtons(body.buttons, true);
+        } catch (error) {
+            return jsonResponse({ ok: false, error: error.message.replaceAll("会议按钮", "内部按钮") }, 400);
+        }
+
+        config.moduleButtons[moduleId] = buttons;
+        await env.SHARED_BOARD.put(PORTAL_BUTTONS_KEY, JSON.stringify(config.moduleButtons));
+
+        // Keep the old meeting key synchronized for backwards compatibility.
+        if (moduleId === "meeting") {
+            await env.SHARED_BOARD.put(MEETING_BUTTON_KEY, JSON.stringify(buttons));
+        }
+
+        return jsonResponse({ ok: true, moduleId, buttons, moduleButtons: config.moduleButtons });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
+
+async function getPortalConfig(env) {
+    let modulesRaw = await env.SHARED_BOARD.get(PORTAL_MODULES_KEY, "json");
+    let modules;
+    let modulesChanged = false;
+
+    if (Array.isArray(modulesRaw) && modulesRaw.length) {
+        modules = normalizePortalModules(modulesRaw, false);
+    } else {
+        modules = DEFAULT_PORTAL_MODULES.map((item) => ({ ...item }));
+        modulesChanged = true;
+    }
+
+    // Older/bad data should never make the special tools disappear.
+    if (!modules.some((item) => item.kind === "roster")) {
+        modules.push({ id: "roster", name: "花名册", description: "人员资料及部门组织结构", kind: "roster", visible: true });
+        modulesChanged = true;
+    }
+    if (!modules.some((item) => item.kind === "notice")) {
+        modules.push({ id: "notice", name: "共享公告", description: "部门共享公告与协作内容", kind: "notice", visible: true });
+        modulesChanged = true;
+    }
+
+    let moduleButtons = await env.SHARED_BOARD.get(PORTAL_BUTTONS_KEY, "json");
+    let buttonsChanged = false;
+    if (!moduleButtons || typeof moduleButtons !== "object" || Array.isArray(moduleButtons)) {
+        moduleButtons = {};
+        buttonsChanged = true;
+    }
+
+    for (const module of modules) {
+        if (!Array.isArray(moduleButtons[module.id])) {
+            if (module.id === "meeting") {
+                moduleButtons[module.id] = await getMeetingButtons(env);
+            } else {
+                moduleButtons[module.id] = [];
+            }
+            buttonsChanged = true;
+        } else {
+            const normalized = normalizeMeetingButtons(moduleButtons[module.id], false);
+            if (JSON.stringify(normalized) !== JSON.stringify(moduleButtons[module.id])) {
+                moduleButtons[module.id] = normalized;
+                buttonsChanged = true;
+            }
+        }
+    }
+
+    if (modulesChanged) {
+        await env.SHARED_BOARD.put(PORTAL_MODULES_KEY, JSON.stringify(modules));
+    }
+    if (buttonsChanged) {
+        await env.SHARED_BOARD.put(PORTAL_BUTTONS_KEY, JSON.stringify(moduleButtons));
+    }
+
+    return { modules, moduleButtons };
+}
+
+function normalizePortalModules(source, strict) {
+    const input = Array.isArray(source) ? source : [];
+    const result = [];
+    const ids = new Set();
+    let rosterCount = 0;
+    let noticeCount = 0;
+
+    for (const raw of input) {
+        const item = raw && typeof raw === "object" ? raw : {};
+        const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
+        const name = typeof item.name === "string" ? item.name.trim().slice(0, 50) : "";
+        const description = typeof item.description === "string" ? item.description.trim().slice(0, 160) : "";
+        const kind = item.kind === "roster" || item.kind === "notice" ? item.kind : "generic";
+        const visible = item.visible !== false;
+
+        if (!id || !/^[A-Za-z0-9_-]+$/.test(id) || !name) {
+            if (strict) throw new Error("每个主页按钮都必须有名称和有效 ID。 ");
+            continue;
+        }
+        if (ids.has(id)) {
+            if (strict) throw new Error("主页按钮 ID 重复，请重新操作。 ");
+            continue;
+        }
+        if (kind === "roster") {
+            rosterCount += 1;
+            if (rosterCount > 1) {
+                if (strict) throw new Error("只能保留一个花名册模块。 ");
+                continue;
+            }
+        }
+        if (kind === "notice") {
+            noticeCount += 1;
+            if (noticeCount > 1) {
+                if (strict) throw new Error("只能保留一个共享公告模块。 ");
+                continue;
+            }
+        }
+
+        ids.add(id);
+        result.push({ id, name, description, kind, visible });
+    }
+
+    return result;
 }
 
 async function handleMeetingButtons(request, env) {

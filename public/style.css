@@ -1822,3 +1822,59 @@ footer {
         width: 100%;
     }
 }
+
+/* ================= v19 动态主页模块 ================= */
+.module-quick-links {
+    max-width: 1400px;
+    margin: 0 0 24px;
+    padding: 18px;
+    border: 1px solid #e5e9ef;
+    border-radius: 13px;
+    background: #ffffff;
+}
+
+.module-quick-links[hidden] { display: none !important; }
+.module-quick-links-heading { margin-bottom: 14px; }
+.module-quick-links-heading h3 { margin: 0; color: #273142; font-size: 15px; font-weight: 650; }
+.module-quick-links-heading p { margin: 5px 0 0; color: #929baa; font-size: 10px; }
+.module-quick-links .link-grid { max-width: none; }
+
+.module-admin-hint {
+    margin: -2px 0 13px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #7a8492;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.meeting-button-admin-row.is-selected-module {
+    border-color: #bcd6fb;
+    box-shadow: 0 0 0 2px rgba(22,119,255,.06);
+}
+
+.selected-module-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    margin: 0 0 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #edf4ff;
+    color: #1677ff;
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.selected-module-pill[hidden] { display: none !important; }
+
+.dynamic-module-page .meeting-empty {
+    max-width: 1050px;
+    margin-top: 12px;
+}
+
+@media (max-width: 650px) {
+    .module-quick-links { padding: 14px; margin-bottom: 18px; }
+    .dashboard-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}

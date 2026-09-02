@@ -4,8 +4,6 @@
 (function () {
     const SITE_TAB_KEY = "powerPlantSiteTabSession";
     const SITE_ACTIVITY_KEY = "powerPlantSiteLastActivity";
-    const ADMIN_PASSWORD_KEY = "powerPlantAdminPassword";
-    const ADMIN_ACTIVITY_KEY = "powerPlantAdminLastActivity";
     const IDLE_MS = 30 * 60 * 1000;
     const TOUCH_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -16,8 +14,6 @@
         try {
             sessionStorage.removeItem(SITE_TAB_KEY);
             sessionStorage.removeItem(SITE_ACTIVITY_KEY);
-            sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
-            sessionStorage.removeItem(ADMIN_ACTIVITY_KEY);
         } catch (error) {}
     }
 
@@ -138,13 +134,45 @@ document.addEventListener("DOMContentLoaded", function () {
     let portalButtons = {};
     let portalLoaded = false;
 
-    const ADMIN_PASSWORD_KEY = "powerPlantAdminPassword";
-    const ADMIN_ACTIVITY_KEY = "powerPlantAdminLastActivity";
-    const ADMIN_IDLE_MS = 30 * 60 * 1000;
+    let currentUser = null;
+    let systemSettings = {};
 
-    let adminPassword = sessionStorage.getItem(ADMIN_PASSWORD_KEY) || "";
-    let adminVerified = false;
-    let adminLastActivity = Number(sessionStorage.getItem(ADMIN_ACTIVITY_KEY)) || 0;
+    async function loadCurrentUser() {
+        try {
+            const response = await fetch("/api/me", { cache: "no-store", headers: { "Accept": "application/json" } });
+            if (!response.ok) throw new Error("login required");
+            const data = await response.json();
+            currentUser = data && data.user ? data.user : null;
+            const display = document.getElementById("current-user-display");
+            if (display && currentUser) display.textContent = currentUser.displayName || currentUser.username || "用户";
+            return currentUser;
+        } catch (error) {
+            window.location.replace("/logout?next=" + encodeURIComponent(window.location.pathname + window.location.search));
+            return null;
+        }
+    }
+
+    function applySystemSettings(settings) {
+        systemSettings = settings && typeof settings === "object" ? settings : systemSettings;
+        const value = function (key, fallback) { return String(systemSettings[key] || fallback || ""); };
+        const brandName = document.getElementById("brand-site-name");
+        const brandSubtitle = document.getElementById("brand-site-subtitle");
+        const homeTitle = document.getElementById("dashboard-home-title");
+        const homeDescription = document.getElementById("dashboard-home-description");
+        const homeBadge = document.getElementById("dashboard-home-badge");
+        const footer = document.getElementById("site-footer");
+        if (brandName) brandName.textContent = value("siteName", "沙巴光伏自备电厂");
+        if (brandSubtitle) brandSubtitle.textContent = value("siteSubtitle", "内部业务系统");
+        if (homeTitle) homeTitle.textContent = value("homeTitle", "沙巴光伏自备电厂");
+        if (homeDescription) homeDescription.textContent = value("homeDescription", "请选择需要进入的业务模块");
+        if (homeBadge) homeBadge.textContent = value("homeBadge", "部门业务总览");
+        if (footer) footer.textContent = value("footerText", "© 2026 沙巴光伏自备电厂");
+        document.title = value("siteName", "沙巴光伏自备电厂") + "内部业务系统";
+        if (currentPage === "home") {
+            if (pageTitle) pageTitle.textContent = value("portalTitle", "沙巴光伏自备电厂导航");
+            if (pageSubtitle) pageSubtitle.textContent = value("portalSubtitle", "部门业务总览");
+        }
+    }
 
     function getPortalModule(moduleId) {
         return portalModules.find(function (item) {
@@ -172,6 +200,10 @@ document.addEventListener("DOMContentLoaded", function () {
             portalButtons = data.moduleButtons && typeof data.moduleButtons === "object"
                 ? data.moduleButtons
                 : {};
+            if (data.settings && typeof data.settings === "object") {
+                systemSettings = data.settings;
+                applySystemSettings(systemSettings);
+            }
             portalLoaded = true;
             return data;
         } catch (error) {
@@ -303,6 +335,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             const adminButton = mainMenu.querySelector('.menu-item[data-page="admin"]');
+            if (adminButton) adminButton.hidden = !(currentUser && currentUser.role === "admin");
             portalModules.filter(function (module) { return module.visible !== false; }).forEach(function (module) {
                 const button = document.createElement("button");
                 button.type = "button";
@@ -374,6 +407,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function openPage(pageName) {
+        if (pageName === "admin" && (!currentUser || currentUser.role !== "admin")) {
+            pageName = "home";
+        }
         if (!portalLoaded) {
             await loadPortalConfig();
             renderPortalShell();
@@ -403,8 +439,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         currentPage = pageName;
-        let title = "沙巴光伏自备电厂导航";
-        let subtitle = "部门业务总览";
+        let title = String(systemSettings.portalTitle || "沙巴光伏自备电厂导航");
+        let subtitle = String(systemSettings.portalSubtitle || "部门业务总览");
         let placeholder = "";
 
         if (pageName === "admin") {
@@ -537,8 +573,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentRosterView === "list") applyRosterFilters();
     }
 
-    loadPortalConfig().then(function () {
+    loadCurrentUser().then(function () {
+        return loadPortalConfig();
+    }).then(function () {
         renderPortalShell();
+        applySystemSettings(systemSettings);
     });
 
     // ========================================
@@ -1215,10 +1254,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function restoreHistoryVersion(id) {
-        if (!adminVerified || !adminPassword) {
-            alert("请先到“管理后台”登录管理员账号。");
+        if (!currentUser || currentUser.role !== "admin") {
+            alert("只有系统管理员可以恢复历史版本。");
             closeHistoryModal();
-            openPage("admin");
             return;
         }
 
@@ -1256,202 +1294,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ========================================
-    // 管理后台登录
+    // 管理后台：使用当前管理员账号，不再二次输入密码
     // ========================================
 
     const adminLoginPanel = document.getElementById("admin-login-panel");
     const adminDashboard = document.getElementById("admin-dashboard");
-    const adminLoginForm = document.getElementById("admin-login-form");
-    const adminPasswordInput = document.getElementById("admin-password");
-    const adminLoginMessage = document.getElementById("admin-login-message");
     const adminLogoutButton = document.getElementById("admin-logout-button");
 
-    function adminSessionExpired() {
-        if (!adminPassword && !adminVerified) return false;
-        return !adminLastActivity || Date.now() - adminLastActivity >= ADMIN_IDLE_MS;
-    }
-
-    function touchAdminActivity() {
-        if (!adminVerified || !adminPassword) return;
-        adminLastActivity = Date.now();
-        sessionStorage.setItem(ADMIN_ACTIVITY_KEY, String(adminLastActivity));
-    }
-
-    function clearAdminSession() {
-        adminPassword = "";
-        adminVerified = false;
-        adminLastActivity = 0;
-        sessionStorage.removeItem(ADMIN_PASSWORD_KEY);
-        sessionStorage.removeItem(ADMIN_ACTIVITY_KEY);
-    }
-
-    function expireAdminSession(showMessage) {
-        clearAdminSession();
-        showAdminLogin();
-        if (showMessage) {
-            setFormMessage(adminLoginMessage, "管理员登录已超过 30 分钟无操作，请重新输入密码。", "error");
-        }
-    }
-
     async function initializeAdminPage() {
-        if (adminSessionExpired()) {
-            expireAdminSession(false);
-        }
-
-        if (adminVerified) {
-            showAdminDashboard();
+        if (!currentUser || currentUser.role !== "admin") {
+            openPage("home");
             return;
         }
-
-        if (adminPassword) {
-            const ok = await verifyAdminPassword(adminPassword, false);
-
-            if (ok) {
-                showAdminDashboard();
-                return;
-            }
-
-            clearAdminSession();
-        }
-
-        showAdminLogin();
-    }
-
-    function showAdminLogin() {
-        if (adminLoginPanel) adminLoginPanel.hidden = false;
-        if (adminDashboard) adminDashboard.hidden = true;
-    }
-
-    async function showAdminDashboard() {
         if (adminLoginPanel) adminLoginPanel.hidden = true;
         if (adminDashboard) adminDashboard.hidden = false;
 
         await Promise.all([
             loadPortalConfig(true),
             loadMonthPlans(true),
-            loadRoster(true)
+            loadRoster(true),
+            loadAdminUsers(true),
+            loadAuditLogs(true)
         ]);
 
         renderPortalShell();
+        renderAdminUsers();
         renderAdminModules();
         renderAdminChildButtons();
         renderAdminMonthPlans();
         renderAdminRoster();
         renderHistoryList(document.getElementById("admin-history-list"), true);
-    }
-
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-
-            const password = adminPasswordInput.value;
-
-            if (!password) {
-                setFormMessage(adminLoginMessage, "请输入管理员密码。", "error");
-                return;
-            }
-
-            setFormMessage(adminLoginMessage, "正在登录...", "info");
-
-            const ok = await verifyAdminPassword(password, true);
-
-            if (ok) {
-                adminPassword = password;
-                adminVerified = true;
-                adminLastActivity = Date.now();
-                sessionStorage.setItem(ADMIN_PASSWORD_KEY, password);
-                sessionStorage.setItem(ADMIN_ACTIVITY_KEY, String(adminLastActivity));
-                adminPasswordInput.value = "";
-                setFormMessage(adminLoginMessage, "", "");
-                showAdminDashboard();
-            }
-        });
-    }
-
-    async function verifyAdminPassword(password, showMessage) {
-        try {
-            const response = await fetch("/api/admin/verify", {
-                method: "POST",
-                headers: {
-                    "X-Admin-Password": password
-                },
-                cache: "no-store"
-            });
-
-            const data = await response.json().catch(function () {
-                return {};
-            });
-
-            if (!response.ok) {
-                if (showMessage) {
-                    const message =
-                        response.status === 503
-                            ? "Cloudflare 还没有设置 ADMIN_PASSWORD。"
-                            : (data.error || "管理员密码不正确。");
-
-                    setFormMessage(adminLoginMessage, message, "error");
-                }
-
-                return false;
-            }
-
-            adminVerified = true;
-            return true;
-
-        } catch (error) {
-            if (showMessage) {
-                setFormMessage(adminLoginMessage, "无法连接管理后台，请稍后再试。", "error");
-            }
-
-            return false;
-        }
+        renderAuditLogs();
+        populateSystemSettingsForm();
     }
 
     if (adminLogoutButton) {
         adminLogoutButton.addEventListener("click", function () {
-            clearAdminSession();
-            showAdminLogin();
+            window.location.href = "/logout";
         });
     }
 
     function adminFetch(url, options) {
-        if (adminSessionExpired()) {
-            expireAdminSession(true);
-            return Promise.reject(new Error("管理员登录已超时，请重新登录。"));
-        }
-
-        touchAdminActivity();
         const settings = Object.assign({}, options || {});
-        settings.headers = Object.assign(
-            {
-                "Content-Type": "application/json",
-                "X-Admin-Password": adminPassword
-            },
-            settings.headers || {}
-        );
-
+        settings.headers = Object.assign({ "Content-Type": "application/json" }, settings.headers || {});
         settings.cache = "no-store";
-
-        return fetch(url, settings);
-    }
-
-
-    ["pointerdown", "keydown", "touchstart", "scroll"].forEach(function (eventName) {
-        window.addEventListener(eventName, function () {
-            const adminPage = document.getElementById("admin-page");
-            if (adminVerified && adminPage && adminPage.classList.contains("active-page")) {
-                touchAdminActivity();
+        return fetch(url, settings).then(function (response) {
+            if (response.status === 401) {
+                window.location.replace("/logout?next=" + encodeURIComponent(window.location.pathname + window.location.search));
             }
-        }, { passive: true });
-    });
-
-    window.setInterval(function () {
-        if (adminVerified && adminSessionExpired()) {
-            const adminPage = document.getElementById("admin-page");
-            expireAdminSession(Boolean(adminPage && adminPage.classList.contains("active-page")));
-        }
-    }, 30 * 1000);
-
+            if (response.status === 403) {
+                openPage("home");
+            }
+            return response;
+        });
+    }
 
     // ========================================
     // 管理后台标签
@@ -1469,6 +1365,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const panel = document.getElementById("admin-" + name + "-tab");
             if (panel) panel.classList.add("active");
 
+            if (name === "users") { loadAdminUsers(true).then(renderAdminUsers); }
             if (name === "modules") {
                 renderAdminModules();
                 renderAdminChildButtons();
@@ -1476,9 +1373,236 @@ document.addEventListener("DOMContentLoaded", function () {
             if (name === "plan") renderAdminMonthPlans();
             if (name === "roster") renderAdminRoster();
             if (name === "history") renderHistoryList(document.getElementById("admin-history-list"), true);
+            if (name === "audit") loadAuditLogs(true).then(renderAuditLogs);
+            if (name === "settings") populateSystemSettingsForm();
         });
     });
 
+
+    // ========================================
+    // 管理后台：用户账号
+    // ========================================
+    let adminUsers = [];
+    let adminUsersLoaded = false;
+    const adminUserCreateForm = document.getElementById("admin-user-create-form");
+    const adminUserUsername = document.getElementById("admin-user-username");
+    const adminUserDisplayName = document.getElementById("admin-user-display-name");
+    const adminUserPassword = document.getElementById("admin-user-password");
+    const adminUserMessage = document.getElementById("admin-user-message");
+    const adminUserBody = document.getElementById("admin-user-body");
+    const userEditorModal = document.getElementById("user-editor-modal");
+    const userEditorForm = document.getElementById("user-editor-form");
+    const userEditUsername = document.getElementById("user-edit-username");
+    const userEditUsernameDisplay = document.getElementById("user-edit-username-display");
+    const userEditDisplayName = document.getElementById("user-edit-display-name");
+    const userEditPassword = document.getElementById("user-edit-password");
+    const userEditActive = document.getElementById("user-edit-active");
+    const userEditorMessage = document.getElementById("user-editor-message");
+
+    async function loadAdminUsers(force) {
+        if (adminUsersLoaded && !force) return adminUsers;
+        try {
+            const response = await adminFetch("/api/admin/users", { method: "GET" });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "无法读取用户账号。");
+            adminUsers = Array.isArray(data.users) ? data.users : [];
+            adminUsersLoaded = true;
+            return adminUsers;
+        } catch (error) {
+            setFormMessage(adminUserMessage, error.message || "无法读取用户账号。", "error");
+            return [];
+        }
+    }
+
+    function formatDateTime(value) {
+        if (!value) return "-";
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return "-";
+        return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function renderAdminUsers() {
+        if (!adminUserBody) return;
+        adminUserBody.innerHTML = "";
+        adminUsers.forEach(function (user) {
+            const row = document.createElement("tr");
+            const add = function (text) { const td = document.createElement("td"); td.textContent = text; row.appendChild(td); return td; };
+            add(user.username || "");
+            add(user.displayName || user.username || "");
+            add("普通用户");
+            const stateCell = add(user.active === false ? "已停用" : "正常");
+            if (user.active === false) stateCell.classList.add("account-disabled-text");
+            add(formatDateTime(user.updatedAt));
+            const actions = document.createElement("td");
+            actions.className = "admin-row-actions";
+            const edit = document.createElement("button"); edit.type = "button"; edit.className = "mini-action-btn"; edit.textContent = "编辑";
+            edit.addEventListener("click", function () { openUserEditor(user); });
+            const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "mini-action-btn"; toggle.textContent = user.active === false ? "启用" : "停用";
+            toggle.addEventListener("click", async function () {
+                await updateUserAccount(user.username, { displayName: user.displayName, active: user.active === false, password: "" }, user.active === false ? "账号已启用。" : "账号已停用。");
+            });
+            const del = document.createElement("button"); del.type = "button"; del.className = "mini-action-btn danger"; del.textContent = "删除";
+            del.addEventListener("click", async function () {
+                if (!confirm("确定删除用户 “" + user.username + "” 吗？删除后该账号将不能再登录。")) return;
+                try {
+                    const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "delete", username: user.username }) });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "删除失败。");
+                    adminUsers = Array.isArray(data.users) ? data.users : [];
+                    renderAdminUsers();
+                    setFormMessage(adminUserMessage, "账号已删除。", "success");
+                } catch (error) { setFormMessage(adminUserMessage, error.message || "删除失败。", "error"); }
+            });
+            actions.appendChild(edit); actions.appendChild(toggle); actions.appendChild(del); row.appendChild(actions);
+            adminUserBody.appendChild(row);
+        });
+        if (!adminUsers.length) {
+            const row = document.createElement("tr");
+            const td = document.createElement("td"); td.colSpan = 6; td.className = "admin-empty-cell"; td.textContent = "还没有创建普通用户账号。"; row.appendChild(td); adminUserBody.appendChild(row);
+        }
+    }
+
+    if (adminUserCreateForm) {
+        adminUserCreateForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const username = adminUserUsername.value.trim().toLowerCase();
+            const displayName = adminUserDisplayName.value.trim();
+            const password = adminUserPassword.value;
+            setFormMessage(adminUserMessage, "正在创建账号...", "info");
+            try {
+                const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify({ action: "create", username, displayName, password }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "创建失败。");
+                adminUsers = Array.isArray(data.users) ? data.users : [];
+                adminUserCreateForm.reset();
+                renderAdminUsers();
+                setFormMessage(adminUserMessage, "账号已创建，可以直接交给员工登录。", "success");
+            } catch (error) { setFormMessage(adminUserMessage, error.message || "创建失败。", "error"); }
+        });
+    }
+
+    function openUserEditor(user) {
+        if (!userEditorModal) return;
+        userEditUsername.value = user.username || "";
+        userEditUsernameDisplay.value = user.username || "";
+        userEditDisplayName.value = user.displayName || user.username || "";
+        userEditPassword.value = "";
+        userEditActive.checked = user.active !== false;
+        setFormMessage(userEditorMessage, "", "");
+        userEditorModal.classList.add("open");
+        userEditorModal.setAttribute("aria-hidden", "false");
+    }
+
+    document.querySelectorAll("[data-user-modal-close]").forEach(function (button) {
+        button.addEventListener("click", function () {
+            if (userEditorModal) { userEditorModal.classList.remove("open"); userEditorModal.setAttribute("aria-hidden", "true"); }
+        });
+    });
+
+    async function updateUserAccount(username, values, message) {
+        try {
+            const response = await adminFetch("/api/admin/users", { method: "POST", body: JSON.stringify(Object.assign({ action: "update", username: username }, values)) });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "保存失败。");
+            adminUsers = Array.isArray(data.users) ? data.users : [];
+            renderAdminUsers();
+            setFormMessage(adminUserMessage, message || "账号已更新。", "success");
+            return true;
+        } catch (error) {
+            setFormMessage(userEditorMessage || adminUserMessage, error.message || "保存失败。", "error");
+            return false;
+        }
+    }
+
+    if (userEditorForm) {
+        userEditorForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const ok = await updateUserAccount(userEditUsername.value, {
+                displayName: userEditDisplayName.value.trim(),
+                active: userEditActive.checked,
+                password: userEditPassword.value
+            }, "账号已更新。");
+            if (ok && userEditorModal) { userEditorModal.classList.remove("open"); userEditorModal.setAttribute("aria-hidden", "true"); }
+        });
+    }
+
+    // ========================================
+    // 管理后台：Audit Log
+    // ========================================
+    let auditLogs = [];
+    let auditLoaded = false;
+    const adminAuditBody = document.getElementById("admin-audit-body");
+    const adminAuditMessage = document.getElementById("admin-audit-message");
+    const adminAuditRefresh = document.getElementById("admin-audit-refresh");
+
+    async function loadAuditLogs(force) {
+        if (auditLoaded && !force) return auditLogs;
+        try {
+            const response = await adminFetch("/api/admin/audit", { method: "GET" });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "无法读取操作日志。");
+            auditLogs = Array.isArray(data.logs) ? data.logs : [];
+            auditLoaded = true;
+            return auditLogs;
+        } catch (error) {
+            setFormMessage(adminAuditMessage, error.message || "无法读取操作日志。", "error");
+            return [];
+        }
+    }
+
+    function renderAuditLogs() {
+        if (!adminAuditBody) return;
+        adminAuditBody.innerHTML = "";
+        auditLogs.forEach(function (item) {
+            const row = document.createElement("tr");
+            [formatDateTime(item.time), item.actor || "-", item.role === "admin" ? "管理员" : "普通用户", item.action || "-", item.target || "-", item.detail || "-"].forEach(function (text) {
+                const td = document.createElement("td"); td.textContent = text; row.appendChild(td);
+            });
+            adminAuditBody.appendChild(row);
+        });
+        if (!auditLogs.length) {
+            const row = document.createElement("tr"); const td = document.createElement("td"); td.colSpan = 6; td.className = "admin-empty-cell"; td.textContent = "目前还没有操作记录。"; row.appendChild(td); adminAuditBody.appendChild(row);
+        }
+    }
+    if (adminAuditRefresh) adminAuditRefresh.addEventListener("click", function () { loadAuditLogs(true).then(renderAuditLogs); });
+
+    // ========================================
+    // 管理后台：系统设置
+    // ========================================
+    const adminSettingsForm = document.getElementById("admin-settings-form");
+    const adminSettingsMessage = document.getElementById("admin-settings-message");
+    const settingFields = {
+        siteName: document.getElementById("setting-site-name"),
+        siteSubtitle: document.getElementById("setting-site-subtitle"),
+        portalTitle: document.getElementById("setting-portal-title"),
+        portalSubtitle: document.getElementById("setting-portal-subtitle"),
+        homeTitle: document.getElementById("setting-home-title"),
+        homeDescription: document.getElementById("setting-home-description"),
+        homeBadge: document.getElementById("setting-home-badge"),
+        footerText: document.getElementById("setting-footer-text")
+    };
+
+    function populateSystemSettingsForm() {
+        Object.keys(settingFields).forEach(function (key) { if (settingFields[key]) settingFields[key].value = systemSettings[key] || ""; });
+    }
+
+    if (adminSettingsForm) {
+        adminSettingsForm.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            const settings = {};
+            Object.keys(settingFields).forEach(function (key) { settings[key] = settingFields[key] ? settingFields[key].value.trim() : ""; });
+            setFormMessage(adminSettingsMessage, "正在保存...", "info");
+            try {
+                const response = await adminFetch("/api/system-settings", { method: "PUT", body: JSON.stringify({ settings: settings }) });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || "保存失败。");
+                systemSettings = data.settings || settings;
+                applySystemSettings(systemSettings);
+                populateSystemSettingsForm();
+                setFormMessage(adminSettingsMessage, "系统设置已保存。", "success");
+            } catch (error) { setFormMessage(adminSettingsMessage, error.message || "保存失败。", "error"); }
+        });
+    }
 
     // ========================================
     // 管理后台：主页模块 + 每个模块内部按钮

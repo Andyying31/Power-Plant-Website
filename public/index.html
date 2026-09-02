@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>沙巴光伏自备电厂导航</title>
+<title>沙巴光伏自备电厂内部业务系统</title>
 <script>
 try {
     if (sessionStorage.getItem("powerPlantSiteTabSession") !== "1") {
@@ -16,18 +16,18 @@ try {
     location.replace("/logout?next=" + encodeURIComponent(location.pathname + location.search));
 }
 </script>
-<link href="style.css?v=19" rel="stylesheet"/>
+<link href="style.css?v=22" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
 <div class="brand">
 <div class="brand-logo">光</div>
 <div class="brand-text">
-<h2>沙巴光伏自备电厂</h2>
-<p>系统导航</p>
+<h2 id="brand-site-name">沙巴光伏自备电厂</h2>
+<p id="brand-site-subtitle">内部业务系统</p>
 </div>
 </div>
-<nav class="menu" id="main-menu"><button class="menu-item active" data-page="home" type="button">主页</button><button class="menu-item" data-page="admin" type="button">管理后台</button></nav>
+<nav class="menu" id="main-menu"><button class="menu-item active" data-page="home" type="button">主页</button><button class="menu-item" data-page="admin" hidden type="button">管理后台</button></nav><div class="user-session" id="user-session"><span class="user-session-name" id="current-user-display">用户</span><a href="/logout">退出</a></div>
 </aside>
 <main class="main">
 <header class="topbar">
@@ -46,10 +46,10 @@ try {
 <div class="dashboard-welcome">
 <div class="dashboard-welcome-copy">
 <div class="dashboard-kicker">POWER PLANT PORTAL</div>
-<h2>沙巴光伏自备电厂</h2>
-<p>请选择需要进入的业务模块</p>
+<h2 id="dashboard-home-title">沙巴光伏自备电厂</h2>
+<p id="dashboard-home-description">请选择需要进入的业务模块</p>
 </div>
-<div class="dashboard-badge">部门业务总览</div>
+<div class="dashboard-badge" id="dashboard-home-badge">部门业务总览</div>
 </div>
 <div class="dashboard-grid" id="dashboard-grid"></div>
 </div>
@@ -268,9 +268,9 @@ try {
 <section class="page-section" id="admin-page">
 <div class="section-heading">
 <h2>管理后台</h2>
-<p>管理主页模块、各模块内部按钮、月计划、花名册及公告历史。</p>
+<p>管理用户账号、主页模块、业务资料、操作日志、系统设置及数据备份。</p>
 </div>
-<div class="admin-login-card" id="admin-login-panel">
+<div class="admin-login-card" hidden id="admin-login-panel">
 <div class="admin-login-icon">管</div>
 <div class="admin-login-copy">
 <h3>管理员登录</h3>
@@ -288,13 +288,26 @@ try {
 <div class="admin-dashboard" hidden="" id="admin-dashboard">
 <div class="admin-dashboard-top">
 <div>
-<strong>管理后台已登录</strong>
-<span>修改内容后会直接保存到 Cloudflare。</span>
+<strong>系统管理员</strong>
+<span>管理员操作会记录到 Audit Log。</span>
 </div>
-<button class="secondary-action-btn" id="admin-logout-button" type="button">退出登录</button>
+<button class="secondary-action-btn" id="admin-logout-button" type="button">退出系统</button>
 </div>
-<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button><button class="admin-tab" data-admin-tab="backup" type="button">数据备份</button></div>
-<div class="admin-tab-panel active" id="admin-modules-tab">
+<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="users" type="button">用户账号</button><button class="admin-tab" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button><button class="admin-tab" data-admin-tab="audit" type="button">操作日志</button><button class="admin-tab" data-admin-tab="settings" type="button">系统设置</button><button class="admin-tab" data-admin-tab="backup" type="button">数据备份</button></div>
+<div class="admin-tab-panel active" id="admin-users-tab">
+<div class="admin-card">
+<div class="admin-card-heading"><div><h3>用户账号与权限</h3><p>你创建的账号都是普通用户，只能进入业务网站，不会看到“管理后台”。系统管理员账号固定为 admin。</p></div></div>
+<div class="account-admin-note"><strong>管理员账号：</strong> admin　<span>权限：系统管理员（可进入后台）</span></div>
+<form class="account-create-form" id="admin-user-create-form">
+<div class="field-group"><label for="admin-user-username">用户名</label><input id="admin-user-username" maxlength="32" placeholder="例如：zhangsan" required type="text" autocomplete="off"/></div>
+<div class="field-group"><label for="admin-user-display-name">显示名称</label><input id="admin-user-display-name" maxlength="80" placeholder="例如：张三" required type="text"/></div>
+<div class="field-group"><label for="admin-user-password">初始密码</label><input id="admin-user-password" minlength="8" maxlength="128" placeholder="至少 8 个字符" required type="password" autocomplete="new-password"/></div>
+<button class="primary-action-btn admin-form-button" type="submit">创建账号</button>
+</form>
+<div class="form-message" id="admin-user-message"></div>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>用户名</th><th>显示名称</th><th>权限</th><th>状态</th><th>最后更新</th><th class="admin-actions-col">操作</th></tr></thead><tbody id="admin-user-body"></tbody></table></div>
+</div></div>
+<div class="admin-tab-panel" id="admin-modules-tab">
 <div class="admin-card">
 <div class="admin-card-heading">
 <div><h3>主页模块管理</h3><p>主页卡片和顶部导航使用同一份资料。改名称后两边会一起更新；新增模块会自动排在“管理后台”前面。</p></div>
@@ -375,12 +388,30 @@ try {
 <div class="form-message" id="admin-history-message"></div>
 </div>
 </div>
+<div class="admin-tab-panel" id="admin-audit-tab">
+<div class="admin-card"><div class="admin-card-heading"><div><h3>操作日志 / Audit Log</h3><p>记录账号登录、共享公告修改，以及管理员对模块、花名册、月计划、账号、设置、备份等操作。最多保留最近 500 条。</p></div><button class="secondary-action-btn" id="admin-audit-refresh" type="button">刷新</button></div>
+<div class="admin-table-wrap"><table class="admin-table audit-table"><thead><tr><th>时间</th><th>账号</th><th>权限</th><th>操作</th><th>对象</th><th>详情</th></tr></thead><tbody id="admin-audit-body"></tbody></table></div><div class="form-message" id="admin-audit-message"></div></div>
+</div>
+<div class="admin-tab-panel" id="admin-settings-tab">
+<div class="admin-card"><div class="admin-card-heading"><div><h3>系统设置</h3><p>这里修改系统名称、登录页文字、主页文字和页脚。保存后所有用户看到的界面都会同步更新。</p></div></div>
+<form class="system-settings-form" id="admin-settings-form">
+<div class="field-group"><label for="setting-site-name">系统名称</label><input id="setting-site-name" maxlength="80" required type="text"/></div>
+<div class="field-group"><label for="setting-site-subtitle">系统副标题</label><input id="setting-site-subtitle" maxlength="120" required type="text"/></div>
+<div class="field-group"><label for="setting-portal-title">顶部页面标题</label><input id="setting-portal-title" maxlength="100" required type="text"/></div>
+<div class="field-group"><label for="setting-portal-subtitle">顶部页面说明</label><input id="setting-portal-subtitle" maxlength="160" required type="text"/></div>
+<div class="field-group"><label for="setting-home-title">主页标题</label><input id="setting-home-title" maxlength="100" required type="text"/></div>
+<div class="field-group"><label for="setting-home-description">主页说明</label><input id="setting-home-description" maxlength="180" required type="text"/></div>
+<div class="field-group"><label for="setting-home-badge">主页右侧标签</label><input id="setting-home-badge" maxlength="80" required type="text"/></div>
+<div class="field-group"><label for="setting-footer-text">页脚文字</label><input id="setting-footer-text" maxlength="160" required type="text"/></div>
+<div class="settings-actions"><button class="primary-action-btn" type="submit">保存系统设置</button></div>
+</form><div class="form-message" id="admin-settings-message"></div></div>
+</div>
 <div class="admin-tab-panel" id="admin-backup-tab">
 <div class="admin-card">
 <div class="admin-card-heading">
 <div>
 <h3>完整数据备份</h3>
-<p>导出当前 Cloudflare KV 中的全部网站数据。包含花名册、主页模块、内部按钮、月计划、共享公告及历史版本等；不包含网站密码和管理员密码。</p>
+<p>导出当前 Cloudflare KV 中的全部网站数据。包含用户账号（仅密码哈希）、系统设置、操作日志、花名册、主页模块、内部按钮、月计划、共享公告及历史版本等；不包含 Cloudflare 的 ADMIN_PASSWORD。</p>
 </div>
 <button class="primary-action-btn" id="admin-backup-download" type="button">导出完整备份</button>
 </div>
@@ -403,7 +434,7 @@ try {
 </div>
 </div>
 </div>
-</section><footer>© 2026 沙巴光伏自备电厂</footer>
+</section><footer id="site-footer">© 2026 沙巴光伏自备电厂</footer>
 </main>
 <!-- ===================== 月计划年月选择窗口 ===================== -->
 <div aria-hidden="true" class="month-modal" id="history-modal">
@@ -468,7 +499,7 @@ try {
 <div class="form-message" id="module-editor-message"></div>
 <div class="editor-actions"><button class="secondary-action-btn" data-module-modal-close="" type="button">取消</button><button class="primary-action-btn" type="submit">保存</button></div>
 </form>
-</div></div><div aria-hidden="true" class="month-modal" id="roster-editor-modal">
+</div></div><div aria-hidden="true" class="month-modal" id="user-editor-modal"><div class="month-modal-backdrop" data-user-modal-close=""></div><div aria-labelledby="user-editor-title" aria-modal="true" class="meeting-button-editor-panel" role="dialog"><div class="month-modal-header"><div><h2 id="user-editor-title">编辑用户</h2><p>可修改显示名称、账号状态，也可以在这里重设密码。</p></div><button aria-label="关闭" class="month-modal-close" data-user-modal-close="" type="button">×</button></div><form class="meeting-button-editor-form" id="user-editor-form"><input id="user-edit-username" type="hidden"/><div class="field-group"><label>用户名</label><input id="user-edit-username-display" disabled type="text"/></div><div class="field-group"><label for="user-edit-display-name">显示名称</label><input id="user-edit-display-name" maxlength="80" required type="text"/></div><div class="field-group"><label for="user-edit-password">重设密码（不修改可留空）</label><input id="user-edit-password" minlength="8" maxlength="128" placeholder="至少 8 个字符" type="password" autocomplete="new-password"/></div><label class="meeting-visible-check"><input checked id="user-edit-active" type="checkbox"/><span>允许这个账号登录</span></label><div class="form-message" id="user-editor-message"></div><div class="editor-actions"><button class="secondary-action-btn" data-user-modal-close="" type="button">取消</button><button class="primary-action-btn" type="submit">保存</button></div></form></div></div><div aria-hidden="true" class="month-modal" id="roster-editor-modal">
 <div class="month-modal-backdrop" data-roster-modal-close=""></div>
 <div aria-labelledby="roster-editor-title" aria-modal="true" class="roster-editor-panel" role="dialog">
 <div class="month-modal-header">
@@ -539,6 +570,6 @@ try {
             </div>
 </div>
 </div>
-<script src="script.js?v=19"></script>
+<script src="script.js?v=22"></script>
 </body>
 </html>

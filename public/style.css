@@ -1977,3 +1977,68 @@ footer {
         min-width: 0;
     }
 }
+
+
+/* ================= v22 账号 / 权限 / Audit / 系统设置 ================= */
+.user-session {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 4px;
+    white-space: nowrap;
+    font-size: 12px;
+}
+.user-session-name {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #566275;
+    font-weight: 600;
+}
+.user-session a {
+    padding: 7px 9px;
+    border: 1px solid #e1e7ef;
+    border-radius: 9px;
+    background: #fff;
+    color: #667386;
+    text-decoration: none;
+}
+.user-session a:hover { color: #1677ff; border-color: #cdddf2; }
+.account-admin-note {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #dfe8f5;
+    border-radius: 11px;
+    background: #f7faff;
+    color: #5d6878;
+    font-size: 12px;
+}
+.account-create-form {
+    display: grid;
+    grid-template-columns: minmax(150px,.8fr) minmax(180px,1fr) minmax(180px,1fr) auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+.account-disabled-text { color: #b42318; font-weight: 600; }
+.admin-empty-cell { padding: 26px !important; text-align: center; color: #98a2b3; }
+.system-settings-form {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 16px;
+}
+.system-settings-form .settings-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+.audit-table td:first-child { white-space: nowrap; }
+@media (max-width: 900px) {
+    .account-create-form { grid-template-columns: 1fr 1fr; }
+    .account-create-form .admin-form-button { min-height: 44px; }
+    .system-settings-form { grid-template-columns: 1fr; }
+    .system-settings-form .settings-actions { grid-column: auto; }
+}
+@media (max-width: 720px) {
+    .sidebar { gap: 10px; padding-left: 12px; padding-right: 12px; }
+    .user-session-name { display: none; }
+    .user-session a { padding: 7px 8px; }
+    .account-create-form { grid-template-columns: 1fr; }
+}

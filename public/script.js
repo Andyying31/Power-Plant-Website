@@ -580,6 +580,107 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // ========================================
+    // 手机版：在页面内容区域左右滑动切换主页面
+    // 左滑 = 下一页，右滑 = 上一页。电脑端完全不启用。
+    // ========================================
+    (function enableMobilePageSwipe() {
+        const mobileQuery = window.matchMedia("(max-width: 650px)");
+        const mainContent = document.querySelector(".main");
+        if (!mainContent || !mainMenu) return;
+
+        let startX = 0;
+        let startY = 0;
+        let tracking = false;
+        let blocked = false;
+        let navigating = false;
+
+        const BLOCK_SELECTOR = [
+            ".menu",
+            ".admin-tabs",
+            ".filter-group",
+            ".org-scroll",
+            ".admin-table-wrap",
+            ".roster-table-wrap",
+            ".month-grid",
+            "input",
+            "textarea",
+            "select",
+            "[contenteditable='true']"
+        ].join(",");
+
+        function visibleNavigationButtons() {
+            return Array.from(mainMenu.querySelectorAll('.menu-item[data-page]')).filter(function (button) {
+                return !button.hidden && button.offsetParent !== null;
+            });
+        }
+
+        function shouldBlockSwipe(target) {
+            if (!target || !target.closest) return false;
+            return Boolean(target.closest(BLOCK_SELECTOR));
+        }
+
+        mainContent.addEventListener("touchstart", function (event) {
+            if (!mobileQuery.matches || event.touches.length !== 1) {
+                tracking = false;
+                return;
+            }
+
+            const touch = event.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            blocked = shouldBlockSwipe(event.target);
+            tracking = !blocked;
+        }, { passive: true });
+
+        mainContent.addEventListener("touchend", function (event) {
+            if (!tracking || blocked || navigating || !mobileQuery.matches || !event.changedTouches.length) {
+                tracking = false;
+                return;
+            }
+
+            const touch = event.changedTouches[0];
+            const deltaX = touch.clientX - startX;
+            const deltaY = touch.clientY - startY;
+            tracking = false;
+
+            // 必须是明确的横向滑动，避免正常上下滚动时误切页面。
+            if (Math.abs(deltaX) < 72) return;
+            if (Math.abs(deltaX) <= Math.abs(deltaY) * 1.25) return;
+
+            const buttons = visibleNavigationButtons();
+            if (!buttons.length) return;
+
+            let index = buttons.findIndex(function (button) {
+                return button.getAttribute("data-page") === currentPage;
+            });
+            if (index < 0) index = 0;
+
+            const nextIndex = deltaX < 0 ? index + 1 : index - 1;
+            if (nextIndex < 0 || nextIndex >= buttons.length) return;
+
+            const nextButton = buttons[nextIndex];
+            const nextPage = nextButton.getAttribute("data-page");
+            if (!nextPage) return;
+
+            navigating = true;
+            nextButton.classList.remove("tap-pop");
+            void nextButton.offsetWidth;
+            nextButton.classList.add("tap-pop");
+            openPage(nextPage);
+
+            window.setTimeout(function () {
+                nextButton.classList.remove("tap-pop");
+                navigating = false;
+            }, 320);
+        }, { passive: true });
+
+        mainContent.addEventListener("touchcancel", function () {
+            tracking = false;
+            blocked = false;
+        }, { passive: true });
+    })();
+
     rosterViewTabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
             switchRosterView(this.getAttribute("data-roster-view"));

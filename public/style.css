@@ -2046,3 +2046,8 @@ footer {
     .user-session a, .user-session-action { padding: 7px 8px; }
     .account-create-form { grid-template-columns: 1fr; }
 }
+
+
+/* ================= 主页简化（移除欢迎横幅） ================= */
+.compact-home-dashboard { padding-top: 0; }
+.dashboard-grid.no-hero { margin-top: 0; }

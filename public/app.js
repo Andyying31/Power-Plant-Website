@@ -219,6 +219,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 const data = await readJsonResponse(response, "密码修改服务暂时异常，请稍后再试。");
                 if (!response.ok) throw new Error(data.error || "密码修改失败。");
+                try {
+                    const rememberedUsername = localStorage.getItem("ppRememberedUsername") || "";
+                    const rememberedPassword = localStorage.getItem("ppRememberedPassword");
+                    if (rememberedPassword !== null && currentUser && rememberedUsername === currentUser.username) {
+                        localStorage.setItem("ppRememberedPassword", newPassword);
+                    }
+                } catch (e) {}
                 setFormMessage(changePasswordMessage, "密码修改成功，正在退出，请使用新密码重新登录。", "success");
                 window.setTimeout(function () { window.location.href = "/logout"; }, 900);
             } catch (error) {

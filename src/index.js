@@ -947,6 +947,29 @@ function loginSuccessPage(next, headers) {
 try {
     sessionStorage.setItem("powerPlantSiteTabSession", "1");
     sessionStorage.setItem("powerPlantSiteLastActivity", String(Date.now()));
+
+    // v31：只有账号密码验证成功后，才把用户勾选的登录信息保存到本机浏览器。
+    const rememberAccount = sessionStorage.getItem("ppPendingRememberAccount") === "1";
+    const rememberPassword = sessionStorage.getItem("ppPendingRememberPassword") === "1";
+    const pendingUsername = sessionStorage.getItem("ppPendingUsername") || "";
+    const pendingPassword = sessionStorage.getItem("ppPendingPassword") || "";
+
+    if (rememberAccount || rememberPassword) {
+        localStorage.setItem("ppRememberedUsername", pendingUsername);
+    } else {
+        localStorage.removeItem("ppRememberedUsername");
+    }
+
+    if (rememberPassword) {
+        localStorage.setItem("ppRememberedPassword", pendingPassword);
+    } else {
+        localStorage.removeItem("ppRememberedPassword");
+    }
+
+    sessionStorage.removeItem("ppPendingRememberAccount");
+    sessionStorage.removeItem("ppPendingRememberPassword");
+    sessionStorage.removeItem("ppPendingUsername");
+    sessionStorage.removeItem("ppPendingPassword");
 } catch (e) {}
 location.replace(${safeNext});
 <\/script></body></html>`;
@@ -975,17 +998,65 @@ body{min-height:100vh;display:grid;place-items:center;padding:24px;background:ra
 .brand h1{margin:0;font-size:22px;line-height:1.35;font-weight:700}.brand p{margin:7px 0 0;color:#7b8794;font-size:13px}.card{background:#fff;border:1px solid #e7ebf0;border-radius:18px;padding:28px;box-shadow:0 16px 45px rgba(16,36,62,.08)}
 .card h2{margin:0 0 7px;font-size:20px;text-align:center}.card .tip{margin:0 0 22px;color:#8b96a5;text-align:center;font-size:13px}.field{margin-top:14px}.field:first-of-type{margin-top:0}label{display:block;margin:0 0 8px;font-size:13px;font-weight:600;color:#4b5563}
 input{width:100%;height:48px;border:1px solid #dce2e8;border-radius:11px;padding:0 14px;font-size:15px;outline:none;background:#fff;transition:.18s}input:focus{border-color:#1677ff;box-shadow:0 0 0 3px rgba(22,119,255,.10)}
+.remember-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:15px}.remember-option{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:13px;font-weight:500;color:#4b5563;cursor:pointer;user-select:none}.remember-option input{width:17px;height:17px;margin:0;padding:0;accent-color:#1677ff;box-shadow:none}.remember-note{width:100%;margin-top:-7px;color:#98a2b3;font-size:11px;line-height:1.45}
 button{width:100%;height:48px;margin-top:18px;border:0;border-radius:11px;background:#1677ff;color:#fff;font-size:15px;font-weight:650;cursor:pointer;box-shadow:0 7px 18px rgba(22,119,255,.20)}button:hover{background:#0f6de8}button:active{transform:scale(.99)}
 .alert{margin:0 0 16px;padding:11px 12px;border-radius:10px;background:#fff2f0;border:1px solid #ffccc7;color:#b42318;font-size:13px;line-height:1.5}.footer{text-align:center;margin-top:18px;color:#9aa4b2;font-size:12px}
-@media(max-width:520px){body{padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));align-items:center}.login-shell{width:100%;max-width:390px}.brand{margin-bottom:18px}.brand-mark{width:48px;height:48px;margin-bottom:12px;border-radius:14px;font-size:20px}.brand h1{font-size:20px}.brand p{margin-top:5px;font-size:12px}.card{padding:22px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(16,36,62,.07)}.card h2{font-size:19px}.card .tip{margin-bottom:18px;font-size:12px}label{font-size:12px}input{height:46px;font-size:16px}button{height:46px;margin-top:16px}.footer{margin-top:14px;font-size:11px}}
+@media(max-width:520px){body{padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));align-items:center}.login-shell{width:100%;max-width:390px}.brand{margin-bottom:18px}.brand-mark{width:48px;height:48px;margin-bottom:12px;border-radius:14px;font-size:20px}.brand h1{font-size:20px}.brand p{margin-top:5px;font-size:12px}.card{padding:22px 18px;border-radius:16px;box-shadow:0 10px 30px rgba(16,36,62,.07)}.card h2{font-size:19px}.card .tip{margin-bottom:18px;font-size:12px}label{font-size:12px}input{height:46px;font-size:16px}.remember-row{gap:14px;margin-top:14px}.remember-option{font-size:12px}.remember-option input{width:17px;height:17px}.remember-note{font-size:10px}button{height:46px;margin-top:16px}.footer{margin-top:14px;font-size:11px}}
 </style></head>
 <body><main class="login-shell"><div class="brand"><div class="brand-mark">光</div><h1>${escapeHtml(cfg.siteName)}</h1><p>${escapeHtml(cfg.siteSubtitle)}</p></div>
 <section class="card"><h2>账号登录</h2><p class="tip">请输入管理员创建的用户名和密码</p>${message ? `<div class="alert">${escapeHtml(message)}</div>` : ""}
-<form method="post" action="/login" autocomplete="on"><input type="hidden" name="next" value="${safeNext}">
+<form id="site-login-form" method="post" action="/login" autocomplete="on"><input type="hidden" name="next" value="${safeNext}">
 <div class="field"><label for="username">用户名</label><input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus required placeholder="请输入用户名"></div>
 <div class="field"><label for="password">密码</label><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="请输入密码"></div>
+<div class="remember-row"><label class="remember-option"><input id="remember-account" type="checkbox">记住账号</label><label class="remember-option"><input id="remember-password" type="checkbox">记住密码</label><div class="remember-note">登录信息仅保存在当前手机或电脑的这个浏览器中，请勿在公用设备勾选。</div></div>
 <button type="submit">进入系统</button></form></section><div class="footer">仅限授权人员使用</div></main>
-<script>try{sessionStorage.removeItem("powerPlantSiteTabSession");sessionStorage.removeItem("powerPlantSiteLastActivity");sessionStorage.removeItem("powerPlantAdminPassword");sessionStorage.removeItem("powerPlantAdminLastActivity")}catch(e){}if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}<\/script>
+<script>
+try{
+    sessionStorage.removeItem("powerPlantSiteTabSession");
+    sessionStorage.removeItem("powerPlantSiteLastActivity");
+    sessionStorage.removeItem("powerPlantAdminPassword");
+    sessionStorage.removeItem("powerPlantAdminLastActivity");
+    // 登录失败或重新进入登录页时，丢弃尚未验证成功的临时登录信息。
+    sessionStorage.removeItem("ppPendingRememberAccount");
+    sessionStorage.removeItem("ppPendingRememberPassword");
+    sessionStorage.removeItem("ppPendingUsername");
+    sessionStorage.removeItem("ppPendingPassword");
+
+    const loginForm = document.getElementById("site-login-form");
+    const usernameInput = document.getElementById("username");
+    const passwordInput = document.getElementById("password");
+    const rememberAccount = document.getElementById("remember-account");
+    const rememberPassword = document.getElementById("remember-password");
+    const savedUsername = localStorage.getItem("ppRememberedUsername") || "";
+    const savedPassword = localStorage.getItem("ppRememberedPassword") || "";
+
+    if (savedUsername) {
+        usernameInput.value = savedUsername;
+        rememberAccount.checked = true;
+    }
+    if (savedPassword) {
+        passwordInput.value = savedPassword;
+        rememberPassword.checked = true;
+        rememberAccount.checked = true;
+    }
+
+    rememberPassword.addEventListener("change", function () {
+        if (rememberPassword.checked) rememberAccount.checked = true;
+    });
+    rememberAccount.addEventListener("change", function () {
+        if (!rememberAccount.checked) rememberPassword.checked = false;
+    });
+
+    loginForm.addEventListener("submit", function () {
+        if (rememberPassword.checked) rememberAccount.checked = true;
+        sessionStorage.setItem("ppPendingRememberAccount", rememberAccount.checked ? "1" : "0");
+        sessionStorage.setItem("ppPendingRememberPassword", rememberPassword.checked ? "1" : "0");
+        sessionStorage.setItem("ppPendingUsername", usernameInput.value || "");
+        sessionStorage.setItem("ppPendingPassword", passwordInput.value || "");
+    });
+} catch(e) {}
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}
+<\/script>
 </body></html>`;
 
     return new Response(html, {

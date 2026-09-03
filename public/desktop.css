@@ -2498,3 +2498,120 @@ footer {
 .global-search-result { width:100%; display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:12px; padding:12px; border:0; border-bottom:1px solid #f0f2f5; background:#fff; text-align:left; font:inherit; cursor:pointer; }
 .global-search-result:hover { background:#f8fafc; } .global-search-result-type { display:inline-flex; justify-content:center; padding:5px 7px; border-radius:8px; background:#eef4fb; color:#48709d; font-size:10px; font-weight:650; }
 .global-search-result-copy { min-width:0; display:flex; flex-direction:column; gap:4px; } .global-search-result-copy strong { color:#273142; font-size:13px; } .global-search-result-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#929baa; font-size:11px; } .global-search-result-arrow { color:#a5adba; }
+
+
+/* ================= v33 通用按钮类型 / 月份网址编辑 ================= */
+.meeting-button-editor-form select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 11px;
+    border: 1px solid #dfe5ed;
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    color: #273142;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.meeting-button-editor-form select:focus {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.08);
+}
+
+.meeting-month-editor {
+    padding: 14px;
+    border: 1px solid #dfe7f2;
+    border-radius: 11px;
+    background: #f8fafc;
+}
+
+.meeting-month-editor-heading strong {
+    display: block;
+    color: #273142;
+    font-size: 12px;
+}
+
+.meeting-month-editor-heading span {
+    display: block;
+    margin-top: 4px;
+    color: #8b95a4;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.meeting-month-toolbar {
+    display: grid;
+    grid-template-columns: 150px minmax(245px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-top: 13px;
+}
+
+.meeting-month-add-year > label {
+    display: block;
+    margin-bottom: 6px;
+    color: #667085;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.meeting-month-add-year > div {
+    display: flex;
+    gap: 7px;
+}
+
+.meeting-month-add-year input {
+    min-width: 0;
+    width: 100%;
+    min-height: 40px;
+    padding: 9px 11px;
+    border: 1px solid #dfe5ed;
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.meeting-month-clear-year {
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+.meeting-month-url-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    margin-top: 13px;
+}
+
+.meeting-month-url-row {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+}
+
+.meeting-month-url-row span {
+    color: #475467;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.meeting-month-url-row input {
+    min-width: 0;
+    width: 100%;
+    min-height: 38px !important;
+    padding: 8px 9px !important;
+    background: #ffffff;
+    font-size: 10px !important;
+}
+
+.meeting-month-hint {
+    margin-top: 10px;
+    color: #98a2b3;
+    font-size: 9px;
+    line-height: 1.55;
+}

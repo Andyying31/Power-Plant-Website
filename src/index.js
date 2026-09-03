@@ -1763,6 +1763,10 @@ async function getPortalConfig(env) {
         buttonsChanged = true;
     }
 
+    let legacyMonthPlans = null;
+    let legacyMonthPlansChecked = false;
+    let legacyMonthPlansMigrated = false;
+
     for (const module of modules) {
         if (!Array.isArray(moduleButtons[module.id])) {
             if (module.id === "meeting") {
@@ -1775,6 +1779,26 @@ async function getPortalConfig(env) {
             const normalized = normalizeMeetingButtons(moduleButtons[module.id], false);
             if (JSON.stringify(normalized) !== JSON.stringify(moduleButtons[module.id])) {
                 moduleButtons[module.id] = normalized;
+                buttonsChanged = true;
+            }
+        }
+
+        // v33: 把旧版单独保存的“月计划”网址自动迁移进对应月份按钮。
+        const legacyButtonIndex = moduleButtons[module.id].findIndex((button) =>
+            !legacyMonthPlansMigrated && button.type === "month-plan" && button.id === "month-plan" && Object.keys(button.monthLinks || {}).length === 0
+        );
+        if (legacyButtonIndex >= 0) {
+            if (!legacyMonthPlansChecked) {
+                legacyMonthPlansChecked = true;
+                legacyMonthPlans = await env.SHARED_BOARD.get(MONTH_PLAN_KEY, "json");
+            }
+            const migratedLinks = normalizeMonthLinkMap(legacyMonthPlans, false, "月计划");
+            if (Object.keys(migratedLinks).length) {
+                moduleButtons[module.id][legacyButtonIndex] = {
+                    ...moduleButtons[module.id][legacyButtonIndex],
+                    monthLinks: migratedLinks
+                };
+                legacyMonthPlansMigrated = true;
                 buttonsChanged = true;
             }
         }
@@ -1917,6 +1941,7 @@ async function getMeetingButtons(env) {
             description: "选择年份和月份后打开对应的 Lark 月计划",
             type: "month-plan",
             url: "",
+            monthLinks: {},
             visible: true
         },
         {
@@ -1953,11 +1978,32 @@ async function getMeetingButtons(env) {
     return buttons;
 }
 
+function normalizeMonthLinkMap(source, strict, buttonName) {
+    const safe = source && typeof source === "object" && !Array.isArray(source) ? source : {};
+    const entries = Object.entries(safe);
+    if (strict && entries.length > 240) {
+        throw new Error(`“${buttonName || "月份链接"}”最多保存 240 个月份网址。`);
+    }
+    const result = {};
+    for (const [key, value] of entries) {
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(key)) continue;
+        const year = Number(key.slice(0, 4));
+        if (year < 2020 || year > 2100) continue;
+        if (typeof value !== "string") continue;
+        const trimmed = value.trim().slice(0, 2000);
+        if (trimmed && !/^https:\/\//i.test(trimmed)) {
+            if (strict) throw new Error(`“${buttonName || "月份链接"}”的 ${key} 网址必须以 https:// 开头。`);
+            continue;
+        }
+        if (trimmed) result[key] = trimmed;
+    }
+    return result;
+}
+
 function normalizeMeetingButtons(source, strict) {
     const input = Array.isArray(source) ? source : [];
     const result = [];
     const ids = new Set();
-    let monthPlanCount = 0;
 
     for (let index = 0; index < input.length; index += 1) {
         const item = input[index] && typeof input[index] === "object" ? input[index] : {};
@@ -1966,38 +2012,20 @@ function normalizeMeetingButtons(source, strict) {
         const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
         const type = item.type === "month-plan" ? "month-plan" : "link";
         const url = type === "link" && typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
+        const monthLinks = normalizeMonthLinkMap(item.monthLinks, strict, name);
         const visible = item.visible !== false;
 
         if (!id || !name) {
-            if (strict) {
-                throw new Error("每个会议按钮都必须有名称和有效 ID。");
-            }
+            if (strict) throw new Error("每个内部按钮都必须有名称和有效 ID。");
             continue;
         }
-
         if (ids.has(id)) {
-            if (strict) {
-                throw new Error("会议按钮 ID 重复，请重新操作。 ");
-            }
+            if (strict) throw new Error("内部按钮 ID 重复，请重新操作。 ");
             continue;
         }
-
         if (type === "link" && url && !/^https:\/\//i.test(url)) {
-            if (strict) {
-                throw new Error(`“${name}”的网址必须以 https:// 开头。`);
-            }
+            if (strict) throw new Error(`“${name}”的网址必须以 https:// 开头。`);
             continue;
-        }
-
-        if (type === "month-plan") {
-            monthPlanCount += 1;
-
-            if (monthPlanCount > 1) {
-                if (strict) {
-                    throw new Error("只能保留一个年月选择（月计划）按钮。 ");
-                }
-                continue;
-            }
         }
 
         ids.add(id);
@@ -2007,6 +2035,7 @@ function normalizeMeetingButtons(source, strict) {
             description,
             type,
             url,
+            monthLinks: type === "month-plan" ? monthLinks : {},
             visible
         });
     }

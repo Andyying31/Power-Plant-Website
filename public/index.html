@@ -22,8 +22,8 @@ try {
 <meta name="apple-mobile-web-app-title" content="自备电厂"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-<link href="desktop.css?v=31" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=31" media="(max-width: 650px)" rel="stylesheet"/>
+<link href="desktop.css?v=33" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=33" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -295,7 +295,7 @@ try {
 </div>
 <button class="secondary-action-btn" id="admin-logout-button" type="button">退出系统</button>
 </div>
-<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="users" type="button">用户账号</button><button class="admin-tab" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="plan" type="button">月计划</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button><button class="admin-tab" data-admin-tab="audit" type="button">操作日志</button><button class="admin-tab" data-admin-tab="settings" type="button">系统设置</button><button class="admin-tab" data-admin-tab="backup" type="button">数据备份</button></div>
+<div class="admin-tabs"><button class="admin-tab active" data-admin-tab="users" type="button">用户账号</button><button class="admin-tab" data-admin-tab="modules" type="button">主页模块</button><button class="admin-tab" data-admin-tab="roster" type="button">花名册管理</button><button class="admin-tab" data-admin-tab="history" type="button">公告历史</button><button class="admin-tab" data-admin-tab="audit" type="button">操作日志</button><button class="admin-tab" data-admin-tab="settings" type="button">系统设置</button><button class="admin-tab" data-admin-tab="backup" type="button">数据备份</button></div>
 <div class="admin-tab-panel active" id="admin-users-tab">
 <div class="admin-card">
 <div class="admin-card-heading"><div><h3>用户账号与权限</h3><p>创建账号时可选择“普通用户”或“管理员”。普通用户看不到管理后台；管理员可进入后台进行管理。</p></div></div>
@@ -329,24 +329,7 @@ try {
 <div class="meeting-button-admin-list" id="admin-child-button-list"></div>
 <div class="form-message" id="admin-child-message"></div>
 </div>
-</div><div class="admin-tab-panel" id="admin-plan-tab">
-<div class="admin-card">
-<div class="admin-card-heading">
-<div><h3>月计划链接管理</h3><p>这里管理“月计划”年月对应的 Lark 链接。月计划这个内部按钮的名称、说明、显示状态和顺序，请在“主页模块”里进入对应模块管理。</p></div>
-</div>
-<div class="month-admin-form">
-<div class="field-group"><label for="admin-plan-year">年份</label><input id="admin-plan-year" max="2100" min="2020" step="1" type="number"/></div>
-<div class="field-group"><label for="admin-plan-month">月份</label><select id="admin-plan-month">
-<option value="01">1月</option><option value="02">2月</option><option value="03">3月</option><option value="04">4月</option><option value="05">5月</option><option value="06">6月</option><option value="07">7月</option><option value="08">8月</option><option value="09">9月</option><option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-</select></div>
-<div class="field-group field-grow"><label for="admin-plan-url">Lark 链接</label><input id="admin-plan-url" placeholder="https://..." type="url"/></div>
-<button class="primary-action-btn admin-form-button" id="admin-plan-save" type="button">保存 / 更新</button>
-</div>
-<div class="form-message" id="admin-plan-message"></div>
-<div class="admin-list" id="admin-month-plan-list"></div>
-</div>
-</div>
-<div class="admin-tab-panel" id="admin-roster-tab">
+</div><div class="admin-tab-panel" id="admin-roster-tab">
 <div class="admin-card">
 <div class="admin-card-heading">
 <div>
@@ -392,7 +375,7 @@ try {
 </div>
 </div>
 <div class="admin-tab-panel" id="admin-audit-tab">
-<div class="admin-card"><div class="admin-card-heading"><div><h3>操作日志 / Audit Log</h3><p>记录账号登录、共享公告修改，以及管理员对模块、花名册、月计划、账号、设置、备份等操作。最多保留最近 500 条。</p></div><button class="secondary-action-btn" id="admin-audit-refresh" type="button">刷新</button></div>
+<div class="admin-card"><div class="admin-card-heading"><div><h3>操作日志 / Audit Log</h3><p>记录账号登录、共享公告修改，以及管理员对模块、内部按钮、花名册、账号、设置、备份等操作。最多保留最近 500 条。</p></div><button class="secondary-action-btn" id="admin-audit-refresh" type="button">刷新</button></div>
 <div class="admin-table-wrap"><table class="admin-table audit-table"><thead><tr><th>时间</th><th>账号</th><th>权限</th><th>操作</th><th>对象</th><th>详情</th></tr></thead><tbody id="admin-audit-body"></tbody></table></div><div class="form-message" id="admin-audit-message"></div></div>
 </div>
 <div class="admin-tab-panel" id="admin-settings-tab">
@@ -414,7 +397,7 @@ try {
 <div class="admin-card-heading">
 <div>
 <h3>完整数据备份</h3>
-<p>导出当前 Cloudflare KV 中的全部网站数据。包含用户账号（仅密码哈希）、系统设置、操作日志、花名册、主页模块、内部按钮、月计划、共享公告及历史版本等；不包含 Cloudflare 的 ADMIN_PASSWORD。</p>
+<p>导出当前 Cloudflare KV 中的全部网站数据。包含用户账号（仅密码哈希）、系统设置、操作日志、花名册、主页模块、内部按钮及月份网址、共享公告及历史版本等；不包含 Cloudflare 的 ADMIN_PASSWORD。</p>
 </div>
 <button class="primary-action-btn" id="admin-backup-download" type="button">导出完整备份</button>
 </div>
@@ -439,7 +422,7 @@ try {
 </div>
 </section><footer id="site-footer">© 2026 沙巴光伏自备电厂</footer>
 </main>
-<!-- ===================== 月计划年月选择窗口 ===================== -->
+<!-- ===================== 通用月份链接选择窗口 ===================== -->
 <div aria-hidden="true" class="month-modal" id="history-modal">
 <div class="month-modal-backdrop" data-history-modal-close=""></div>
 <div aria-labelledby="history-modal-title" aria-modal="true" class="history-modal-panel" role="dialog">
@@ -465,7 +448,13 @@ try {
 </div>
 <form class="meeting-button-editor-form" id="meeting-button-editor-form">
 <input id="meeting-button-edit-id" type="hidden"/>
-<input id="meeting-button-edit-type" type="hidden" value="link"/>
+<div class="field-group">
+<label for="meeting-button-edit-type">按钮类型</label>
+<select id="meeting-button-edit-type">
+<option value="link">普通链接</option>
+<option value="month-plan">月份链接</option>
+</select>
+</div>
 <div class="field-group">
 <label for="meeting-button-edit-name">按钮名称</label>
 <input id="meeting-button-edit-name" maxlength="80" placeholder="例如：工作联系单" required="" type="text"/>
@@ -478,7 +467,19 @@ try {
 <label for="meeting-button-edit-url">网址</label>
 <input id="meeting-button-edit-url" maxlength="2000" placeholder="https://..." type="url"/>
 </div>
-<div class="meeting-button-type-note" id="meeting-button-type-note">普通链接按钮</div>
+<div class="meeting-month-editor" id="meeting-month-editor" hidden>
+<div class="meeting-month-editor-heading">
+<div><strong>月份网址</strong><span>在这里直接管理这个按钮每个年份、月份对应的网址，不再放到单独的后台页面。</span></div>
+</div>
+<div class="meeting-month-toolbar">
+<div class="field-group meeting-month-year-select"><label for="meeting-month-year">正在编辑</label><select id="meeting-month-year"></select></div>
+<div class="meeting-month-add-year"><label for="meeting-month-new-year">新增年份</label><div><input id="meeting-month-new-year" min="2020" max="2100" step="1" type="number" placeholder="例如：2027"/><button class="secondary-action-btn" id="meeting-month-add-year" type="button">添加年份</button></div></div>
+<button class="secondary-action-btn meeting-month-clear-year" id="meeting-month-clear-year" type="button">清空该年</button>
+</div>
+<div class="meeting-month-url-grid" id="meeting-month-url-grid"></div>
+<div class="meeting-month-hint">留空的月份会在前台显示“暂未设置”；填写的网址必须以 https:// 开头。</div>
+</div>
+<div class="meeting-button-type-note" id="meeting-button-type-note">按钮类型：普通链接</div>
 <label class="meeting-visible-check">
 <input checked="" id="meeting-button-edit-visible" type="checkbox"/>
 <span>在当前模块页面显示这个按钮</span>
@@ -565,8 +566,8 @@ try {
 <div aria-labelledby="month-modal-title" aria-modal="true" class="month-modal-panel" role="dialog">
 <div class="month-modal-header">
 <div>
-<h2 id="month-modal-title">月计划</h2>
-<p>请选择需要查看的年份和月份</p>
+<h2 id="month-modal-title">月份链接</h2>
+<p>请选择需要打开的年份和月份</p>
 </div>
 <button aria-label="关闭" class="month-modal-close" data-month-modal-close="" type="button">×</button>
 </div>
@@ -576,12 +577,12 @@ try {
 </div>
 <div class="month-grid" id="month-plan-grid"></div>
 <div class="month-modal-note">
-                灰色月份表示暂未设置月计划链接。
+                灰色月份表示暂未设置网址。
             </div>
 </div>
 </div>
-<script src="app.js?v=31"></script>
-<script src="desktop.js?v=31"></script>
-<script src="mobile.js?v=31"></script>
+<script src="app.js?v=33"></script>
+<script src="desktop.js?v=33"></script>
+<script src="mobile.js?v=33"></script>
 </body>
 </html>

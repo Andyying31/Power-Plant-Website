@@ -132,8 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPage = "home";
     let rosterData = [];
     let rosterLoaded = false;
-    let monthPlanLinks = {};
-    let monthPlansLoaded = false;
+    let activeMonthLinks = {};
     let portalModules = [];
     let portalButtons = {};
     let portalLoaded = false;
@@ -304,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function openPortalItem(item) {
         if (item.type === "month-plan") {
-            openMonthPlanModal(item.name || "月计划");
+            openMonthPlanModal(item);
             return;
         }
         const url = String(item.url || "").trim();
@@ -327,7 +326,7 @@ document.addEventListener("DOMContentLoaded", function () {
         title.textContent = item.name || "未命名按钮";
 
         const description = document.createElement("p");
-        description.textContent = item.description || (item.type === "month-plan" ? "选择年份和月份" : "打开链接");
+        description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份打开链接" : "打开链接");
 
         const arrow = document.createElement("div");
         arrow.className = "card-arrow";
@@ -340,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         button.addEventListener("click", function () {
             if (item.type === "month-plan") {
-                openMonthPlanModal(item.name || "月计划");
+                openMonthPlanModal(item);
                 return;
             }
 
@@ -708,7 +707,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             buttons.forEach(function (button) {
                 if (!button || button.visible === false) return;
-                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "年月选择" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url].join(" ") });
+                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "月份链接" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url].join(" ") });
             });
         });
         const rosterModule = portalModules.find(function (module) { return module.kind === "roster" && module.visible !== false; });
@@ -1001,112 +1000,69 @@ document.addEventListener("DOMContentLoaded", function () {
     // ========================================
 
     // ========================================
-    // 月计划：云端链接
+    // 通用月份链接：每个按钮拥有自己的年月网址
     // ========================================
 
-    const monthPlanButton = document.getElementById("month-plan-button");
     const monthPlanModal = document.getElementById("month-plan-modal");
     const monthPlanModalTitle = document.getElementById("month-modal-title");
     const monthPlanYear = document.getElementById("month-plan-year");
     const monthPlanGrid = document.getElementById("month-plan-grid");
     const monthModalCloseButtons = document.querySelectorAll("[data-month-modal-close]");
 
-    async function loadMonthPlans(force) {
-        if (monthPlansLoaded && !force) return monthPlanLinks;
-
-        try {
-            const response = await fetch("/api/month-plans", {
-                cache: "no-store",
-                headers: {
-                    "Accept": "application/json"
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("无法读取月计划链接");
+    function normalizeClientMonthLinks(source) {
+        const result = {};
+        if (!source || typeof source !== "object" || Array.isArray(source)) return result;
+        Object.keys(source).forEach(function (key) {
+            const value = typeof source[key] === "string" ? source[key].trim() : "";
+            if (/^\d{4}-(0[1-9]|1[0-2])$/.test(key) && /^https:\/\//i.test(value)) {
+                result[key] = value;
             }
-
-            const data = await response.json();
-
-            monthPlanLinks =
-                data.plans && typeof data.plans === "object"
-                    ? data.plans
-                    : {};
-
-            monthPlansLoaded = true;
-            return monthPlanLinks;
-
-        } catch (error) {
-            monthPlanLinks = {};
-            monthPlansLoaded = true;
-            return monthPlanLinks;
-        }
+        });
+        return result;
     }
 
     function getMonthPlanYears() {
-        const years = Object.keys(monthPlanLinks).map(function (key) {
+        const years = Object.keys(activeMonthLinks).map(function (key) {
             return key.split("-")[0];
         });
-
         const unique = Array.from(new Set(years));
-
-        if (unique.length === 0) {
-            unique.push(String(new Date().getFullYear()));
-        }
-
-        return unique.sort(function (a, b) {
-            return Number(b) - Number(a);
-        });
+        if (unique.length === 0) unique.push(String(new Date().getFullYear()));
+        return unique.sort(function (a, b) { return Number(b) - Number(a); });
     }
 
     function prepareMonthPlanYears() {
         if (!monthPlanYear) return;
-
         const currentValue = monthPlanYear.value;
         const years = getMonthPlanYears();
-
         monthPlanYear.innerHTML = "";
-
         years.forEach(function (year) {
             const option = document.createElement("option");
             option.value = year;
             option.textContent = year + "年";
             monthPlanYear.appendChild(option);
         });
-
         const currentYear = String(new Date().getFullYear());
-
-        if (years.includes(currentValue)) {
-            monthPlanYear.value = currentValue;
-        } else if (years.includes(currentYear)) {
-            monthPlanYear.value = currentYear;
-        }
+        if (years.includes(currentValue)) monthPlanYear.value = currentValue;
+        else if (years.includes(currentYear)) monthPlanYear.value = currentYear;
     }
 
     function renderMonthPlanMonths() {
         if (!monthPlanGrid || !monthPlanYear) return;
-
         const year = monthPlanYear.value;
         monthPlanGrid.innerHTML = "";
-
         for (let month = 1; month <= 12; month += 1) {
             const monthText = String(month).padStart(2, "0");
             const key = year + "-" + monthText;
-            const url = monthPlanLinks[key];
-
+            const url = activeMonthLinks[key];
             const button = document.createElement("button");
             button.type = "button";
             button.className = "month-choice";
-
             const monthName = document.createElement("strong");
             monthName.textContent = month + "月";
-
             const status = document.createElement("span");
-
             if (url) {
                 button.classList.add("available");
-                status.textContent = "打开月计划";
-
+                status.textContent = "打开链接";
                 button.addEventListener("click", function () {
                     window.open(url, "_blank", "noopener,noreferrer");
                     closeMonthPlanModal();
@@ -1115,43 +1071,48 @@ document.addEventListener("DOMContentLoaded", function () {
                 button.disabled = true;
                 status.textContent = "暂未设置";
             }
-
             button.appendChild(monthName);
             button.appendChild(status);
             monthPlanGrid.appendChild(button);
         }
     }
 
-    async function openMonthPlanModal(customTitle) {
+    async function openMonthPlanModal(item) {
         if (!monthPlanModal) return;
+        let source = item && typeof item === "object" ? item : {};
 
-        if (monthPlanModalTitle) {
-            monthPlanModalTitle.textContent = customTitle || "月计划";
+        // 每次打开月份链接时重新读取一次门户配置，确保管理员刚改的网址可以立即生效。
+        if (source.id) {
+            try {
+                await loadPortalConfig(true);
+                for (const buttons of Object.values(portalButtons)) {
+                    if (!Array.isArray(buttons)) continue;
+                    const fresh = buttons.find(function (button) { return button && button.id === source.id; });
+                    if (fresh) {
+                        source = fresh;
+                        break;
+                    }
+                }
+            } catch (error) {
+                // 网络暂时不可用时继续使用当前页面已有的数据。
+            }
         }
 
-        await loadMonthPlans(true);
+        activeMonthLinks = normalizeClientMonthLinks(source.monthLinks);
+        if (monthPlanModalTitle) monthPlanModalTitle.textContent = source.name || "月份链接";
         prepareMonthPlanYears();
         renderMonthPlanMonths();
-
         monthPlanModal.classList.add("open");
         monthPlanModal.setAttribute("aria-hidden", "false");
     }
 
     function closeMonthPlanModal() {
         if (!monthPlanModal) return;
-
         monthPlanModal.classList.remove("open");
         monthPlanModal.setAttribute("aria-hidden", "true");
     }
 
-    if (monthPlanButton) {
-        monthPlanButton.addEventListener("click", openMonthPlanModal);
-    }
-
-    if (monthPlanYear) {
-        monthPlanYear.addEventListener("change", renderMonthPlanMonths);
-    }
-
+    if (monthPlanYear) monthPlanYear.addEventListener("change", renderMonthPlanMonths);
     monthModalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeMonthPlanModal);
     });
@@ -1518,7 +1479,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         await Promise.all([
             loadPortalConfig(true),
-            loadMonthPlans(true),
             loadRoster(true),
             loadAdminUsers(true),
             loadAuditLogs(true)
@@ -1528,7 +1488,6 @@ document.addEventListener("DOMContentLoaded", function () {
         renderAdminUsers();
         renderAdminModules();
         renderAdminChildButtons();
-        renderAdminMonthPlans();
         renderAdminRoster();
         renderHistoryList(document.getElementById("admin-history-list"), true);
         renderAuditLogs();
@@ -1589,7 +1548,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderAdminModules();
                 renderAdminChildButtons();
             }
-            if (name === "plan") renderAdminMonthPlans();
             if (name === "roster") renderAdminRoster();
             if (name === "history") renderHistoryList(document.getElementById("admin-history-list"), true);
             if (name === "audit") loadAuditLogs(true).then(renderAuditLogs);
@@ -1865,6 +1823,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const meetingButtonEditVisible = document.getElementById("meeting-button-edit-visible");
     const meetingButtonUrlGroup = document.getElementById("meeting-button-url-group");
     const meetingButtonTypeNote = document.getElementById("meeting-button-type-note");
+    const meetingMonthEditor = document.getElementById("meeting-month-editor");
+    const meetingMonthYear = document.getElementById("meeting-month-year");
+    const meetingMonthNewYear = document.getElementById("meeting-month-new-year");
+    const meetingMonthAddYear = document.getElementById("meeting-month-add-year");
+    const meetingMonthClearYear = document.getElementById("meeting-month-clear-year");
+    const meetingMonthUrlGrid = document.getElementById("meeting-month-url-grid");
     const meetingButtonEditorMessage = document.getElementById("meeting-button-editor-message");
     const meetingButtonModalCloseButtons = document.querySelectorAll("[data-meeting-button-modal-close]");
 
@@ -2091,6 +2055,96 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditorModal.setAttribute("aria-hidden", "true");
     }
 
+    let editingMonthLinks = {};
+    let editingMonthYear = String(new Date().getFullYear());
+
+    function cloneMonthLinks(source) {
+        return Object.assign({}, normalizeClientMonthLinks(source));
+    }
+
+    function getEditingMonthYears() {
+        const years = Object.keys(editingMonthLinks).map(function (key) { return key.split("-")[0]; });
+        const unique = Array.from(new Set(years));
+        const current = String(new Date().getFullYear());
+        if (!unique.includes(current)) unique.push(current);
+        return unique.sort(function (a, b) { return Number(b) - Number(a); });
+    }
+
+    function refreshMeetingMonthYearOptions(preferredYear) {
+        if (!meetingMonthYear) return;
+        const wanted = String(preferredYear || editingMonthYear || meetingMonthYear.value || new Date().getFullYear());
+        const years = getEditingMonthYears();
+        if (!years.includes(wanted) && /^\d{4}$/.test(wanted)) years.push(wanted);
+        years.sort(function (a, b) { return Number(b) - Number(a); });
+        meetingMonthYear.innerHTML = "";
+        years.forEach(function (year) {
+            const option = document.createElement("option");
+            option.value = year;
+            option.textContent = year + "年";
+            meetingMonthYear.appendChild(option);
+        });
+        meetingMonthYear.value = years.includes(wanted) ? wanted : years[0];
+        editingMonthYear = meetingMonthYear.value;
+    }
+
+    function syncVisibleMonthInputsToMap(yearOverride) {
+        if (!meetingMonthUrlGrid || !meetingMonthYear) return true;
+        const year = String(yearOverride || editingMonthYear || meetingMonthYear.value);
+        const inputs = meetingMonthUrlGrid.querySelectorAll("input[data-month-number]");
+        for (const input of inputs) {
+            const value = String(input.value || "").trim();
+            const month = input.getAttribute("data-month-number");
+            const key = year + "-" + month;
+            if (value && !/^https:\/\//i.test(value)) {
+                input.focus();
+                setFormMessage(meetingButtonEditorMessage, year + "年" + Number(month) + "月的网址必须以 https:// 开头。", "error");
+                return false;
+            }
+            if (value) editingMonthLinks[key] = value;
+            else delete editingMonthLinks[key];
+        }
+        return true;
+    }
+
+    function renderMeetingMonthUrlGrid() {
+        if (!meetingMonthUrlGrid || !meetingMonthYear) return;
+        const year = editingMonthYear || meetingMonthYear.value || String(new Date().getFullYear());
+        meetingMonthYear.value = year;
+        meetingMonthUrlGrid.innerHTML = "";
+        for (let month = 1; month <= 12; month += 1) {
+            const monthText = String(month).padStart(2, "0");
+            const key = year + "-" + monthText;
+            const row = document.createElement("label");
+            row.className = "meeting-month-url-row";
+            const label = document.createElement("span");
+            label.textContent = month + "月";
+            const input = document.createElement("input");
+            input.type = "url";
+            input.maxLength = 2000;
+            input.placeholder = "https://...";
+            input.value = editingMonthLinks[key] || "";
+            input.setAttribute("data-month-number", monthText);
+            row.appendChild(label);
+            row.appendChild(input);
+            meetingMonthUrlGrid.appendChild(row);
+        }
+    }
+
+    function updateMeetingButtonTypeUI() {
+        const type = meetingButtonEditType && meetingButtonEditType.value === "month-plan" ? "month-plan" : "link";
+        if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type === "month-plan";
+        if (meetingMonthEditor) meetingMonthEditor.hidden = type !== "month-plan";
+        if (meetingButtonTypeNote) {
+            meetingButtonTypeNote.textContent = type === "month-plan"
+                ? "按钮类型：月份链接 · 点击后先选择年份和月份"
+                : "按钮类型：普通链接 · 点击后直接打开网址";
+        }
+        if (type === "month-plan") {
+            refreshMeetingMonthYearOptions();
+            renderMeetingMonthUrlGrid();
+        }
+    }
+
     function openMeetingButtonEditor(item) {
         if (!meetingButtonEditorModal || !getPortalModule(selectedAdminModuleId)) return;
         const editing = item || null;
@@ -2101,19 +2155,72 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditDescription.value = editing ? editing.description || "" : "";
         meetingButtonEditUrl.value = editing && type === "link" ? editing.url || "" : "";
         meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
+        editingMonthLinks = cloneMonthLinks(editing && editing.monthLinks);
+        editingMonthYear = String(new Date().getFullYear());
         const module = getPortalModule(selectedAdminModuleId);
         meetingButtonEditorTitle.textContent = editing ? "编辑内部按钮" : "新增内部按钮";
-        meetingButtonEditorSubtitle.textContent = type === "month-plan"
-            ? "这是年月选择按钮，可以改名称、说明、显示状态和顺序。"
-            : "保存后会显示在“" + module.name + "”里面。";
-        if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type === "month-plan";
-        if (meetingButtonTypeNote) {
-            meetingButtonTypeNote.textContent = type === "month-plan" ? "按钮类型：年月选择（月计划）" : "按钮类型：普通链接";
-        }
+        meetingButtonEditorSubtitle.textContent = "选择普通链接或月份链接；月份网址直接在这里一起维护。";
+        refreshMeetingMonthYearOptions(String(new Date().getFullYear()));
+        updateMeetingButtonTypeUI();
+        if (meetingMonthNewYear) meetingMonthNewYear.value = "";
         setFormMessage(meetingButtonEditorMessage, "", "");
         meetingButtonEditorModal.classList.add("open");
         meetingButtonEditorModal.setAttribute("aria-hidden", "false");
         setTimeout(function () { meetingButtonEditName.focus(); }, 0);
+    }
+
+    if (meetingButtonEditType) {
+        meetingButtonEditType.addEventListener("change", function () {
+            if (meetingMonthEditor && !meetingMonthEditor.hidden && !syncVisibleMonthInputsToMap(editingMonthYear)) {
+                meetingButtonEditType.value = "month-plan";
+                return;
+            }
+            updateMeetingButtonTypeUI();
+            setFormMessage(meetingButtonEditorMessage, "", "");
+        });
+    }
+
+    if (meetingMonthYear) {
+        meetingMonthYear.addEventListener("change", function () {
+            const nextYear = meetingMonthYear.value;
+            if (!syncVisibleMonthInputsToMap(editingMonthYear)) {
+                meetingMonthYear.value = editingMonthYear;
+                return;
+            }
+            editingMonthYear = nextYear;
+            renderMeetingMonthUrlGrid();
+            setFormMessage(meetingButtonEditorMessage, "", "");
+        });
+    }
+
+    if (meetingMonthAddYear) {
+        meetingMonthAddYear.addEventListener("click", function () {
+            if (!syncVisibleMonthInputsToMap(editingMonthYear)) return;
+            const year = String(meetingMonthNewYear && meetingMonthNewYear.value || "").trim();
+            if (!/^\d{4}$/.test(year) || Number(year) < 2020 || Number(year) > 2100) {
+                setFormMessage(meetingButtonEditorMessage, "请输入 2020 到 2100 之间的四位年份。", "error");
+                return;
+            }
+            refreshMeetingMonthYearOptions(year);
+            editingMonthYear = year;
+            meetingMonthYear.value = year;
+            renderMeetingMonthUrlGrid();
+            if (meetingMonthNewYear) meetingMonthNewYear.value = "";
+            setFormMessage(meetingButtonEditorMessage, year + "年已加入，可以填写各月份网址。", "success");
+        });
+    }
+
+    if (meetingMonthClearYear) {
+        meetingMonthClearYear.addEventListener("click", function () {
+            const year = editingMonthYear || (meetingMonthYear ? meetingMonthYear.value : "");
+            if (!year) return;
+            if (!confirm("确定清空 " + year + " 年的 12 个月份网址吗？")) return;
+            Object.keys(editingMonthLinks).forEach(function (key) {
+                if (key.startsWith(year + "-")) delete editingMonthLinks[key];
+            });
+            renderMeetingMonthUrlGrid();
+            setFormMessage(meetingButtonEditorMessage, year + "年的月份网址已清空；点击“保存”后才会正式生效。", "info");
+        });
     }
 
     meetingButtonModalCloseButtons.forEach(function (button) {
@@ -2167,6 +2274,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 setFormMessage(meetingButtonEditorMessage, "网址必须以 https:// 开头。", "error");
                 return;
             }
+            if (type === "month-plan" && !syncVisibleMonthInputsToMap(editingMonthYear)) return;
 
             const current = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             const next = current.map(function (item) { return Object.assign({}, item); });
@@ -2176,6 +2284,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 description: description,
                 type: type,
                 url: type === "link" ? url : "",
+                monthLinks: type === "month-plan" ? cloneMonthLinks(editingMonthLinks) : {},
                 visible: meetingButtonEditVisible.checked
             };
             if (id) {
@@ -2227,7 +2336,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title.textContent = item.name || "未命名按钮";
             const typeBadge = document.createElement("span");
             typeBadge.className = "meeting-button-type-badge";
-            typeBadge.textContent = item.type === "month-plan" ? "年月选择" : "普通链接";
+            typeBadge.textContent = item.type === "month-plan" ? "月份链接" : "普通链接";
             const statusBadge = document.createElement("span");
             statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
             statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
@@ -2235,9 +2344,12 @@ document.addEventListener("DOMContentLoaded", function () {
             titleLine.appendChild(typeBadge);
             titleLine.appendChild(statusBadge);
             const detail = document.createElement("span");
-            detail.textContent = item.type === "month-plan"
-                ? (item.description || "年月选择")
-                : (item.description || "无说明") + (item.url ? " · " + item.url : " · 暂未设置链接");
+            if (item.type === "month-plan") {
+                const monthCount = Object.keys(normalizeClientMonthLinks(item.monthLinks)).length;
+                detail.textContent = (item.description || "按年份和月份打开链接") + " · 已设置 " + monthCount + " 个月份网址";
+            } else {
+                detail.textContent = (item.description || "无说明") + (item.url ? " · " + item.url : " · 暂未设置链接");
+            }
             info.appendChild(titleLine);
             info.appendChild(detail);
 
@@ -2267,13 +2379,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 await savePortalChildButtons(module.id, next, item.visible === false ? "内部按钮已显示。" : "内部按钮已隐藏。 ");
             });
-            if (item.type !== "month-plan") {
-                action("删除", "danger-action-btn mini", async function () {
-                    const confirmed = confirm("确定删除“" + (item.name || "这个按钮") + "”吗？");
-                    if (!confirmed) return;
-                    await savePortalChildButtons(module.id, buttons.filter(function (buttonItem) { return buttonItem.id !== item.id; }), "内部按钮已删除。 ");
-                });
-            }
+            action("删除", "danger-action-btn mini", async function () {
+                const confirmed = confirm("确定删除“" + (item.name || "这个按钮") + "”吗？");
+                if (!confirmed) return;
+                await savePortalChildButtons(module.id, buttons.filter(function (buttonItem) { return buttonItem.id !== item.id; }), "内部按钮已删除。 ");
+            });
             row.appendChild(info);
             row.appendChild(actions);
             adminChildButtonList.appendChild(row);
@@ -2410,157 +2520,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-    // ========================================
-    // 管理后台：月计划
-    // ========================================
-
-    const adminPlanYear = document.getElementById("admin-plan-year");
-    const adminPlanMonth = document.getElementById("admin-plan-month");
-    const adminPlanUrl = document.getElementById("admin-plan-url");
-    const adminPlanSave = document.getElementById("admin-plan-save");
-    const adminPlanMessage = document.getElementById("admin-plan-message");
-    const adminMonthPlanList = document.getElementById("admin-month-plan-list");
-
-    if (adminPlanYear) {
-        adminPlanYear.value = String(new Date().getFullYear());
-    }
-
-    if (adminPlanMonth) {
-        adminPlanMonth.value = String(new Date().getMonth() + 1).padStart(2, "0");
-    }
-
-    if (adminPlanSave) {
-        adminPlanSave.addEventListener("click", async function () {
-            const year = String(adminPlanYear.value || "").trim();
-            const month = String(adminPlanMonth.value || "").trim();
-            const url = String(adminPlanUrl.value || "").trim();
-
-            if (!/^\d{4}$/.test(year)) {
-                setFormMessage(adminPlanMessage, "请输入正确的年份。", "error");
-                return;
-            }
-
-            if (!/^https:\/\//i.test(url)) {
-                setFormMessage(adminPlanMessage, "Lark 链接必须以 https:// 开头。", "error");
-                return;
-            }
-
-            const key = year + "-" + month;
-            const next = Object.assign({}, monthPlanLinks);
-            next[key] = url;
-
-            const saved = await saveMonthPlanMap(next);
-
-            if (saved) {
-                adminPlanUrl.value = "";
-                setFormMessage(adminPlanMessage, year + "年" + Number(month) + "月已保存。", "success");
-            }
-        });
-    }
-
-    async function saveMonthPlanMap(next) {
-        try {
-            const response = await adminFetch("/api/month-plans", {
-                method: "PUT",
-                body: JSON.stringify({
-                    plans: next
-                })
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "保存失败");
-            }
-
-            monthPlanLinks = data.plans || {};
-            monthPlansLoaded = true;
-            renderAdminMonthPlans();
-            return true;
-
-        } catch (error) {
-            setFormMessage(adminPlanMessage, error.message || "保存失败", "error");
-            return false;
-        }
-    }
-
-    function renderAdminMonthPlans() {
-        if (!adminMonthPlanList) return;
-
-        const entries = Object.entries(monthPlanLinks).sort(function (a, b) {
-            return b[0].localeCompare(a[0]);
-        });
-
-        adminMonthPlanList.innerHTML = "";
-
-        if (entries.length === 0) {
-            adminMonthPlanList.innerHTML = '<div class="history-empty">目前还没有设置任何月计划链接。</div>';
-            return;
-        }
-
-        entries.forEach(function (entry) {
-            const key = entry[0];
-            const url = entry[1];
-            const parts = key.split("-");
-
-            const row = document.createElement("div");
-            row.className = "admin-list-row";
-
-            const info = document.createElement("div");
-            info.className = "admin-list-info";
-
-            const title = document.createElement("strong");
-            title.textContent = parts[0] + "年" + Number(parts[1]) + "月";
-
-            const link = document.createElement("span");
-            link.textContent = url;
-
-            info.appendChild(title);
-            info.appendChild(link);
-
-            const actions = document.createElement("div");
-            actions.className = "admin-list-actions";
-
-            const edit = document.createElement("button");
-            edit.type = "button";
-            edit.className = "secondary-action-btn";
-            edit.textContent = "编辑";
-            edit.addEventListener("click", function () {
-                adminPlanYear.value = parts[0];
-                adminPlanMonth.value = parts[1];
-                adminPlanUrl.value = url;
-                adminPlanUrl.focus();
-            });
-
-            const remove = document.createElement("button");
-            remove.type = "button";
-            remove.className = "danger-action-btn";
-            remove.textContent = "删除";
-            remove.addEventListener("click", async function () {
-                const confirmed = confirm("确定删除 " + parts[0] + "年" + Number(parts[1]) + "月 的月计划链接吗？");
-                if (!confirmed) return;
-
-                const next = Object.assign({}, monthPlanLinks);
-                delete next[key];
-
-                const saved = await saveMonthPlanMap(next);
-
-                if (saved) {
-                    setFormMessage(adminPlanMessage, "月计划链接已删除。", "success");
-                }
-            });
-
-            actions.appendChild(edit);
-            actions.appendChild(remove);
-
-            row.appendChild(info);
-            row.appendChild(actions);
-
-            adminMonthPlanList.appendChild(row);
-        });
-    }
-
 
     // ========================================
     // 管理后台：花名册

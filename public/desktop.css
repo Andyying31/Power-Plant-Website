@@ -2478,3 +2478,41 @@ footer {
     .dashboard-card { min-height: 116px; padding: 12px; }
     .dashboard-card-copy h3 { font-size: 13px; }
 }
+
+
+/* ================= v29 门户增强：全站搜索 / 收藏 / 拖拽 ================= */
+.topbar-tools { display:flex; align-items:center; gap:10px; }
+.global-search-trigger { height:44px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 14px; border:1px solid #dfe6ef; border-radius:10px; background:#fff; color:#526071; font-family:inherit; font-size:12px; font-weight:650; cursor:pointer; white-space:nowrap; transition:.18s ease; }
+.global-search-trigger:hover { border-color:#bdd2ee; color:#1269df; box-shadow:0 5px 14px rgba(15,23,42,.05); }
+.global-search-icon { font-size:18px; line-height:1; }
+.favorites-section { margin:0 0 18px; }
+.favorites-heading { display:flex; align-items:end; justify-content:space-between; margin-bottom:11px; }
+.favorites-heading h2 { margin:0; font-size:16px; font-weight:680; color:#273142; }
+.favorites-heading p { margin:5px 0 0; font-size:11px; color:#98a1ae; }
+.favorites-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; }
+.favorite-entry { min-width:0; position:relative; }
+.favorite-module-name { display:block; margin:0 0 5px 4px; color:#9aa4b2; font-size:10px; }
+.favorite-entry .link-card { min-height:96px; padding:16px 42px 16px 17px; }
+.favorite-capable-card { position:relative; padding-right:52px; }
+.favorite-toggle { position:absolute; top:12px; right:12px; z-index:2; width:30px; height:30px; display:grid; place-items:center; border:0; border-radius:9px; background:#f5f7fa; color:#a1a9b5; font-size:18px; line-height:1; cursor:pointer; transition:.16s ease; }
+.favorite-toggle:hover { background:#edf4ff; color:#1677ff; }
+.favorite-toggle.is-favorite { background:#fff7df; color:#c98a00; }
+.global-search-modal { position:fixed; inset:0; z-index:400; display:none; align-items:flex-start; justify-content:center; padding:11vh 24px 24px; }
+.global-search-modal.open { display:flex; }
+.global-search-backdrop { position:absolute; inset:0; background:rgba(15,23,42,.38); backdrop-filter:blur(4px); }
+.global-search-panel { position:relative; width:min(720px,100%); max-height:72vh; overflow:hidden; display:flex; flex-direction:column; background:#fff; border:1px solid #e3e8ef; border-radius:18px; box-shadow:0 24px 70px rgba(15,23,42,.18); }
+.global-search-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 22px 14px; border-bottom:1px solid #eef1f5; }
+.global-search-header h2 { margin:0; font-size:20px; }.global-search-header p { margin:5px 0 0; color:#929baa; font-size:12px; }
+.global-search-input-row { margin:16px 18px 10px; height:48px; display:flex; align-items:center; gap:10px; padding:0 14px; border:1px solid #d9e1eb; border-radius:12px; background:#fff; }
+.global-search-input-row span { color:#9aa3b2; font-size:12px; }.global-search-input-row input { flex:1; height:100%; border:0; outline:0; font:inherit; font-size:14px; }
+.global-search-results { padding:0 12px 14px; overflow:auto; }
+.global-search-empty { padding:28px 12px; text-align:center; color:#9aa3b2; font-size:13px; }
+.global-search-result { width:100%; display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:12px; padding:12px; border:0; border-bottom:1px solid #f0f2f5; background:#fff; text-align:left; font:inherit; cursor:pointer; }
+.global-search-result:hover { background:#f8fafc; }.global-search-result-type { display:inline-flex; justify-content:center; padding:5px 7px; border-radius:8px; background:#eef4fb; color:#48709d; font-size:10px; font-weight:650; }
+.global-search-result-copy { min-width:0; display:flex; flex-direction:column; gap:4px; }.global-search-result-copy strong { color:#273142; font-size:13px; }.global-search-result-copy small { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#929baa; font-size:11px; }.global-search-result-arrow { color:#a5adba; }
+.drag-handle { flex:0 0 auto; width:32px; height:38px; display:grid; place-items:center; padding:0; border:0; border-radius:8px; background:transparent; color:#a0a9b6; font-size:18px; letter-spacing:-3px; cursor:grab; touch-action:none; user-select:none; }
+.drag-handle:hover { background:#f1f5f9; color:#5f6f82; }.drag-handle:active { cursor:grabbing; }
+.meeting-button-admin-row.is-dragging-row { opacity:.72; background:#f7fbff; border-color:#b9d4f6; box-shadow:0 10px 26px rgba(15,23,42,.10); }
+body.portal-reordering { user-select:none; }
+
+.global-search-trigger { margin-left:auto; }

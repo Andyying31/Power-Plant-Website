@@ -16,8 +16,14 @@ try {
     location.replace("/logout?next=" + encodeURIComponent(location.pathname + location.search));
 }
 </script>
-<link href="desktop.css?v=28" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=28" media="(max-width: 650px)" rel="stylesheet"/>
+<meta name="theme-color" content="#1677ff"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="自备电厂"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link href="desktop.css?v=29" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=29" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -36,14 +42,21 @@ try {
 <h1 id="page-title">沙巴光伏自备电厂导航</h1>
 <p id="page-subtitle">部门业务总览</p>
 </div>
+<div class="topbar-tools">
 <div class="search-box">
 <span class="search-symbol">搜索</span>
 <input id="search" placeholder="搜索姓名或岗位..." type="text"/>
+</div>
+<button class="global-search-trigger" id="global-search-trigger" type="button" aria-label="全站搜索"><span class="global-search-icon">⌕</span><span class="global-search-label">全站搜索</span></button>
 </div>
 </header>
 <!-- ===================== 主页：Dashboard ===================== -->
 <section class="page-section active-page" id="home-page">
 <div class="home-dashboard compact-home-dashboard">
+<section class="favorites-section" id="favorites-section" hidden>
+<div class="favorites-heading"><div><h2>我的收藏</h2><p>收藏的常用 Lark 入口会跟随你的账号。</p></div></div>
+<div class="favorites-grid" id="favorites-grid"></div>
+</section>
 <div class="dashboard-grid no-hero" id="dashboard-grid"></div>
 </div>
 </section>
@@ -307,7 +320,7 @@ try {
 <div><h3>主页模块管理</h3><p>主页卡片和顶部导航使用同一份资料。改名称后两边会一起更新；新增模块会自动排在“管理后台”前面。</p></div>
 <button class="primary-action-btn" id="admin-module-add" type="button">+ 新增主页按钮</button>
 </div>
-<div class="module-admin-hint">可用“上移 / 下移 / 置顶 / 置底”调整位置；顶部导航和主页顺序会同步。</div>
+<div class="module-admin-hint">拖住每一行左侧的“⋮⋮”即可直接调整顺序；上移 / 下移等按钮仍保留作备用。顶部导航和主页顺序会同步。</div>
 <div class="meeting-button-admin-list" id="admin-module-list"></div>
 <div class="form-message" id="admin-module-message"></div>
 </div>
@@ -544,6 +557,13 @@ try {
 </div>
 </form>
 </div>
+</div><div aria-hidden="true" class="global-search-modal" id="global-search-modal">
+<div class="global-search-backdrop" data-global-search-close=""></div>
+<div class="global-search-panel" role="dialog" aria-modal="true" aria-labelledby="global-search-title">
+<div class="global-search-header"><div><h2 id="global-search-title">全站搜索</h2><p>搜索主页模块、Lark 按钮和花名册人员</p></div><button class="month-modal-close" data-global-search-close="" type="button" aria-label="关闭">×</button></div>
+<div class="global-search-input-row"><span>搜索</span><input id="global-search-input" type="search" autocomplete="off" placeholder="例如：消缺、月计划、工号、姓名..."/></div>
+<div class="global-search-results" id="global-search-results"><div class="global-search-empty">输入关键词开始搜索。</div></div>
+</div>
 </div><div aria-hidden="true" class="month-modal" id="month-plan-modal">
 <div class="month-modal-backdrop" data-month-modal-close=""></div>
 <div aria-labelledby="month-modal-title" aria-modal="true" class="month-modal-panel" role="dialog">
@@ -564,8 +584,8 @@ try {
             </div>
 </div>
 </div>
-<script src="app.js?v=28"></script>
-<script src="desktop.js?v=28"></script>
-<script src="mobile.js?v=28"></script>
+<script src="app.js?v=29"></script>
+<script src="desktop.js?v=29"></script>
+<script src="mobile.js?v=29"></script>
 </body>
 </html>

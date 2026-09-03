@@ -488,6 +488,7 @@ const SITE_SESSION_SECONDS = 30 * 60;
 const USER_ACCOUNTS_KEY = "user-accounts-v1";
 const AUDIT_LOG_KEY = "audit-log-v1";
 const SYSTEM_SETTINGS_KEY = "system-settings-v1";
+const FAVORITES_KEY_PREFIX = "favorites-v1:";
 const PASSWORD_ITERATIONS = 20000;
 const MAX_USERS = 300;
 const MAX_AUDIT_LOGS = 500;
@@ -513,6 +514,10 @@ export default {
 
         if (url.pathname === "/logout") {
             return handleSiteLogout(request);
+        }
+
+        if (url.pathname === "/manifest.webmanifest" || url.pathname === "/sw.js" || url.pathname.startsWith("/icons/")) {
+            return env.ASSETS.fetch(request);
         }
 
         const siteAuth = await checkSiteAccess(request, env);
@@ -583,6 +588,8 @@ export default {
             }
         } else if (url.pathname === "/api/portal-config") {
             response = await handlePortalConfig(routedRequest, env);
+        } else if (url.pathname === "/api/favorites") {
+            response = await handleFavorites(routedRequest, env);
         } else if (url.pathname === "/api/portal-modules") {
             response = await handlePortalModules(routedRequest, env);
             if (request.method === "PUT") {
@@ -960,7 +967,9 @@ function loginPage({ next = "/", error = "", configMissing = false, settings = D
     const html = `<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="theme-color" content="#1677ff">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="自备电厂">
+<link rel="manifest" href="/manifest.webmanifest"><link rel="apple-touch-icon" href="/icons/icon-192.png">
 <title>登录｜${escapeHtml(cfg.siteName)}</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",Arial,sans-serif;background:#f5f8fc;color:#182230}
@@ -979,7 +988,7 @@ button{width:100%;height:48px;margin-top:18px;border:0;border-radius:11px;backgr
 <div class="field"><label for="username">用户名</label><input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" autofocus required placeholder="请输入用户名"></div>
 <div class="field"><label for="password">密码</label><input id="password" name="password" type="password" autocomplete="current-password" required placeholder="请输入密码"></div>
 <button type="submit">进入系统</button></form></section><div class="footer">仅限授权人员使用</div></main>
-<script>try{sessionStorage.removeItem("powerPlantSiteTabSession");sessionStorage.removeItem("powerPlantSiteLastActivity");sessionStorage.removeItem("powerPlantAdminPassword");sessionStorage.removeItem("powerPlantAdminLastActivity")}catch(e){}<\/script>
+<script>try{sessionStorage.removeItem("powerPlantSiteTabSession");sessionStorage.removeItem("powerPlantSiteLastActivity");sessionStorage.removeItem("powerPlantAdminPassword");sessionStorage.removeItem("powerPlantAdminLastActivity")}catch(e){}if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}<\/script>
 </body></html>`;
 
     return new Response(html, {
@@ -1234,8 +1243,10 @@ async function handleAdminUsers(request, env) {
     }
 
     if (action === "delete") {
+        const deletedUsername = accounts[index].username;
         accounts.splice(index, 1);
         await env.SHARED_BOARD.put(USER_ACCOUNTS_KEY, JSON.stringify(accounts));
+        await env.SHARED_BOARD.delete(FAVORITES_KEY_PREFIX + deletedUsername);
         return jsonResponse({ ok: true, users: accounts.map(sanitizeAccountForAdmin) });
     }
 
@@ -1517,6 +1528,45 @@ async function handleSharedNoteRestore(request, env) {
     });
 }
 
+
+function normalizeFavoriteKeys(source) {
+    const input = Array.isArray(source) ? source : [];
+    const result = [];
+    const seen = new Set();
+    for (const raw of input) {
+        const value = typeof raw === "string" ? raw.trim() : "";
+        if (!/^[A-Za-z0-9_-]{1,120}::[A-Za-z0-9_-]{1,120}$/.test(value)) continue;
+        if (seen.has(value)) continue;
+        seen.add(value);
+        result.push(value);
+        if (result.length >= 100) break;
+    }
+    return result;
+}
+
+async function handleFavorites(request, env) {
+    try { await ensureKv(env); } catch (error) { return jsonResponse({ ok: false, error: error.message }, 503); }
+    const username = normalizeUsername(request.headers.get("X-PP-Username"));
+    if (!username) return jsonResponse({ ok: false, error: "无法识别当前账号，请重新登录。" }, 401);
+    const key = FAVORITES_KEY_PREFIX + username;
+
+    if (request.method === "GET") {
+        const stored = await env.SHARED_BOARD.get(key, "json");
+        return jsonResponse({ ok: true, favorites: normalizeFavoriteKeys(stored) });
+    }
+
+    if (request.method === "PUT") {
+        let body;
+        try { body = await request.json(); } catch { return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400); }
+        if (!Array.isArray(body?.favorites)) return jsonResponse({ ok: false, error: "收藏资料格式不正确。" }, 400);
+        const favorites = normalizeFavoriteKeys(body.favorites);
+        if (body.favorites.length > 100) return jsonResponse({ ok: false, error: "每个账号最多收藏 100 个入口。" }, 400);
+        await env.SHARED_BOARD.put(key, JSON.stringify(favorites));
+        return jsonResponse({ ok: true, favorites });
+    }
+
+    return methodNotAllowed("GET, PUT");
+}
 
 async function handlePortalConfig(request, env) {
     try {

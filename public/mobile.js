@@ -31,7 +31,6 @@
             ".month-grid",
             ".shared-note-editor",
             ".link-card",
-            ".drag-handle",
             ".global-search-panel",
             "input",
             "textarea",

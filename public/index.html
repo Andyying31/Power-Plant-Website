@@ -22,8 +22,8 @@ try {
 <meta name="apple-mobile-web-app-title" content="自备电厂"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-<link href="desktop.css?v=29" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=29" media="(max-width: 650px)" rel="stylesheet"/>
+<link href="desktop.css?v=30" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=30" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -53,10 +53,6 @@ try {
 <!-- ===================== 主页：Dashboard ===================== -->
 <section class="page-section active-page" id="home-page">
 <div class="home-dashboard compact-home-dashboard">
-<section class="favorites-section" id="favorites-section" hidden>
-<div class="favorites-heading"><div><h2>我的收藏</h2><p>收藏的常用 Lark 入口会跟随你的账号。</p></div></div>
-<div class="favorites-grid" id="favorites-grid"></div>
-</section>
 <div class="dashboard-grid no-hero" id="dashboard-grid"></div>
 </div>
 </section>
@@ -320,7 +316,7 @@ try {
 <div><h3>主页模块管理</h3><p>主页卡片和顶部导航使用同一份资料。改名称后两边会一起更新；新增模块会自动排在“管理后台”前面。</p></div>
 <button class="primary-action-btn" id="admin-module-add" type="button">+ 新增主页按钮</button>
 </div>
-<div class="module-admin-hint">拖住每一行左侧的“⋮⋮”即可直接调整顺序；上移 / 下移等按钮仍保留作备用。顶部导航和主页顺序会同步。</div>
+<div class="module-admin-hint">可用“上移 / 下移 / 置顶 / 置底”调整位置；顶部导航和主页顺序会同步。</div>
 <div class="meeting-button-admin-list" id="admin-module-list"></div>
 <div class="form-message" id="admin-module-message"></div>
 </div>
@@ -584,8 +580,8 @@ try {
             </div>
 </div>
 </div>
-<script src="app.js?v=29"></script>
-<script src="desktop.js?v=29"></script>
-<script src="mobile.js?v=29"></script>
+<script src="app.js?v=30"></script>
+<script src="desktop.js?v=30"></script>
+<script src="mobile.js?v=30"></script>
 </body>
 </html>

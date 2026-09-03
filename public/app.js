@@ -115,8 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const globalSearchModal = document.getElementById("global-search-modal");
     const globalSearchInput = document.getElementById("global-search-input");
     const globalSearchResults = document.getElementById("global-search-results");
-    const favoritesSection = document.getElementById("favorites-section");
-    const favoritesGrid = document.getElementById("favorites-grid");
     const pageTitle = document.getElementById("page-title");
     const pageSubtitle = document.getElementById("page-subtitle");
 
@@ -139,8 +137,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let portalModules = [];
     let portalButtons = {};
     let portalLoaded = false;
-    let favoriteKeys = new Set();
-    let favoritesLoaded = false;
 
     let currentUser = null;
     let systemSettings = {};
@@ -299,65 +295,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return Array.from(text)[0] || "项";
     }
 
-    function favoriteKey(moduleId, buttonId) {
-        return String(moduleId || "") + "::" + String(buttonId || "");
-    }
-
-    function isFavorite(moduleId, buttonId) {
-        return favoriteKeys.has(favoriteKey(moduleId, buttonId));
-    }
-
-    async function loadFavorites(force) {
-        if (favoritesLoaded && !force) return favoriteKeys;
-        try {
-            const response = await fetch("/api/favorites", { cache: "no-store", headers: { "Accept": "application/json" } });
-            if (!response.ok) throw new Error("无法读取收藏夹");
-            const data = await response.json();
-            favoriteKeys = new Set(Array.isArray(data.favorites) ? data.favorites : []);
-        } catch (error) {
-            favoriteKeys = new Set();
-        }
-        favoritesLoaded = true;
-        return favoriteKeys;
-    }
-
-    async function saveFavorites(nextSet) {
-        const next = Array.from(nextSet).slice(0, 100);
-        const response = await fetch("/api/favorites", {
-            method: "PUT",
-            cache: "no-store",
-            headers: { "Content-Type": "application/json", "Accept": "application/json" },
-            body: JSON.stringify({ favorites: next })
-        });
-        const data = await readJsonResponse(response, "收藏保存失败，请稍后再试。");
-        if (!response.ok) throw new Error(data.error || "收藏保存失败");
-        favoriteKeys = new Set(Array.isArray(data.favorites) ? data.favorites : next);
-        favoritesLoaded = true;
-        syncFavoriteStars();
-        renderFavoritesHome();
-    }
-
-    async function toggleFavorite(moduleId, buttonId) {
-        const key = favoriteKey(moduleId, buttonId);
-        const next = new Set(favoriteKeys);
-        if (next.has(key)) next.delete(key); else next.add(key);
-        try {
-            await saveFavorites(next);
-        } catch (error) {
-            alert(error.message || "收藏保存失败");
-        }
-    }
-
-    function syncFavoriteStars() {
-        document.querySelectorAll("[data-favorite-key]").forEach(function (button) {
-            const active = favoriteKeys.has(button.getAttribute("data-favorite-key"));
-            button.classList.toggle("is-favorite", active);
-            button.textContent = active ? "★" : "☆";
-            button.setAttribute("aria-label", active ? "取消收藏" : "加入收藏");
-            button.title = active ? "取消收藏" : "加入收藏";
-        });
-    }
-
     function openPortalItem(item) {
         if (item.type === "month-plan") {
             openMonthPlanModal(item.name || "月计划");
@@ -371,11 +308,10 @@ document.addEventListener("DOMContentLoaded", function () {
         window.open(url, "_blank", "noopener,noreferrer");
     }
 
-    function createPortalLinkButton(item, moduleId) {
-        const card = document.createElement("div");
-        card.className = "link-card searchable favorite-capable-card";
-        card.setAttribute("role", "button");
-        card.setAttribute("tabindex", "0");
+    function createPortalLinkButton(item) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "link-card searchable";
 
         const content = document.createElement("div");
         content.className = "card-content";
@@ -390,63 +326,26 @@ document.addEventListener("DOMContentLoaded", function () {
         arrow.className = "card-arrow";
         arrow.textContent = "→";
 
-        const favorite = document.createElement("button");
-        favorite.type = "button";
-        favorite.className = "favorite-toggle";
-        favorite.setAttribute("data-favorite-key", favoriteKey(moduleId, item.id));
-        favorite.textContent = isFavorite(moduleId, item.id) ? "★" : "☆";
-        favorite.classList.toggle("is-favorite", isFavorite(moduleId, item.id));
-        favorite.setAttribute("aria-label", isFavorite(moduleId, item.id) ? "取消收藏" : "加入收藏");
-        favorite.title = favorite.getAttribute("aria-label");
-        favorite.addEventListener("click", function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            toggleFavorite(moduleId, item.id);
-        });
-
         content.appendChild(title);
         content.appendChild(description);
-        card.appendChild(content);
-        card.appendChild(arrow);
-        card.appendChild(favorite);
+        button.appendChild(content);
+        button.appendChild(arrow);
 
-        card.addEventListener("click", function (event) {
-            if (event.target.closest(".favorite-toggle")) return;
-            openPortalItem(item);
-        });
-        card.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                openPortalItem(item);
+        button.addEventListener("click", function () {
+            if (item.type === "month-plan") {
+                openMonthPlanModal(item.name || "月计划");
+                return;
             }
+
+            const url = String(item.url || "").trim();
+            if (!/^https:\/\//i.test(url)) {
+                alert("这个按钮还没有设置网址，请联系管理员。 ");
+                return;
+            }
+            window.open(url, "_blank", "noopener,noreferrer");
         });
 
-        return card;
-    }
-
-    function renderFavoritesHome() {
-        if (!favoritesSection || !favoritesGrid) return;
-        favoritesGrid.innerHTML = "";
-        const found = [];
-        portalModules.forEach(function (module) {
-            if (!module || module.visible === false) return;
-            const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
-            buttons.forEach(function (item) {
-                if (!item || item.visible === false) return;
-                if (favoriteKeys.has(favoriteKey(module.id, item.id))) found.push({ module: module, item: item });
-            });
-        });
-        favoritesSection.hidden = found.length === 0;
-        found.forEach(function (entry) {
-            const wrap = document.createElement("div");
-            wrap.className = "favorite-entry";
-            const moduleName = document.createElement("span");
-            moduleName.className = "favorite-module-name";
-            moduleName.textContent = entry.module.name;
-            wrap.appendChild(moduleName);
-            wrap.appendChild(createPortalLinkButton(entry.item, entry.module.id));
-            favoritesGrid.appendChild(wrap);
-        });
+        return button;
     }
 
     function renderModuleButtons(moduleId, container, emptyElement) {
@@ -458,7 +357,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         container.innerHTML = "";
         visibleButtons.forEach(function (item) {
-            container.appendChild(createPortalLinkButton(item, moduleId));
+            container.appendChild(createPortalLinkButton(item));
         });
 
         if (emptyElement) {
@@ -586,10 +485,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const noticeHeading = document.getElementById("notice-page-heading");
         if (rosterHeading && rosterModule) rosterHeading.textContent = rosterModule.name;
         if (noticeHeading && noticeModule) noticeHeading.textContent = noticeModule.name;
-        if (favoritesLoaded) {
-            syncFavoriteStars();
-            renderFavoritesHome();
-        }
 
         if (currentPage !== "home" && currentPage !== "admin") {
             const currentModule = getPortalModule(currentPage);
@@ -879,12 +774,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     loadCurrentUser().then(function () {
-        return Promise.all([loadPortalConfig(), loadFavorites()]);
+        return loadPortalConfig();
     }).then(function () {
         renderPortalShell();
         applySystemSettings(systemSettings);
-        syncFavoriteStars();
-        renderFavoritesHome();
     });
 
     // ========================================
@@ -2097,64 +1990,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return next;
     }
 
-    function attachPointerReorder(container, row, handle, onCommit) {
-        if (!container || !row || !handle) return;
-        let dragging = false;
-        let pointerId = null;
-        let initialOrder = "";
-
-        function orderString() {
-            return Array.from(container.querySelectorAll("[data-sort-id]")).map(function (item) { return item.getAttribute("data-sort-id"); }).join("|");
-        }
-
-        handle.addEventListener("pointerdown", function (event) {
-            if (event.button !== undefined && event.button !== 0) return;
-            event.preventDefault();
-            dragging = true;
-            pointerId = event.pointerId;
-            initialOrder = orderString();
-            row.classList.add("is-dragging-row");
-            document.body.classList.add("portal-reordering");
-            try { handle.setPointerCapture(pointerId); } catch (error) {}
-        });
-
-        handle.addEventListener("pointermove", function (event) {
-            if (!dragging || event.pointerId !== pointerId) return;
-            event.preventDefault();
-            const element = document.elementFromPoint(event.clientX, event.clientY);
-            const target = element && element.closest ? element.closest("[data-sort-id]") : null;
-            if (!target || target === row || target.parentElement !== container) return;
-            const rect = target.getBoundingClientRect();
-            if (event.clientY < rect.top + rect.height / 2) container.insertBefore(row, target);
-            else container.insertBefore(row, target.nextSibling);
-        });
-
-        async function finish(event) {
-            if (!dragging || (event.pointerId !== undefined && event.pointerId !== pointerId)) return;
-            dragging = false;
-            row.classList.remove("is-dragging-row");
-            document.body.classList.remove("portal-reordering");
-            try { handle.releasePointerCapture(pointerId); } catch (error) {}
-            const finalOrder = orderString();
-            pointerId = null;
-            if (finalOrder === initialOrder) return;
-            const ids = finalOrder ? finalOrder.split("|") : [];
-            await onCommit(ids);
-        }
-        handle.addEventListener("pointerup", finish);
-        handle.addEventListener("pointercancel", finish);
-    }
-
-    function createDragHandle() {
-        const handle = document.createElement("button");
-        handle.type = "button";
-        handle.className = "drag-handle";
-        handle.textContent = "⋮⋮";
-        handle.title = "拖动调整顺序";
-        handle.setAttribute("aria-label", "拖动调整顺序");
-        return handle;
-    }
-
     function renderAdminModules() {
         if (!adminModuleList) return;
         adminModuleList.innerHTML = "";
@@ -2166,9 +2001,7 @@ document.addEventListener("DOMContentLoaded", function () {
         portalModules.forEach(function (item, index) {
             const row = document.createElement("div");
             row.className = "meeting-button-admin-row" + (item.visible === false ? " is-hidden-item" : "");
-            row.setAttribute("data-sort-id", item.id);
             if (item.id === selectedAdminModuleId) row.classList.add("is-selected-module");
-            const dragHandle = createDragHandle();
 
             const info = document.createElement("div");
             info.className = "meeting-button-admin-info";
@@ -2239,15 +2072,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             }
 
-            row.appendChild(dragHandle);
             row.appendChild(info);
             row.appendChild(actions);
             adminModuleList.appendChild(row);
-            attachPointerReorder(adminModuleList, row, dragHandle, async function (ids) {
-                const byId = new Map(portalModules.map(function (module) { return [module.id, module]; }));
-                const next = ids.map(function (id) { return byId.get(id); }).filter(Boolean);
-                if (next.length === portalModules.length) await savePortalModules(next, "主页按钮拖拽排序已保存。 ");
-            });
         });
     }
 
@@ -2385,8 +2212,6 @@ document.addEventListener("DOMContentLoaded", function () {
         buttons.forEach(function (item, index) {
             const row = document.createElement("div");
             row.className = "meeting-button-admin-row" + (item.visible === false ? " is-hidden-item" : "");
-            row.setAttribute("data-sort-id", item.id);
-            const dragHandle = createDragHandle();
             const info = document.createElement("div");
             info.className = "meeting-button-admin-info";
             const titleLine = document.createElement("div");
@@ -2442,15 +2267,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     await savePortalChildButtons(module.id, buttons.filter(function (buttonItem) { return buttonItem.id !== item.id; }), "内部按钮已删除。 ");
                 });
             }
-            row.appendChild(dragHandle);
             row.appendChild(info);
             row.appendChild(actions);
             adminChildButtonList.appendChild(row);
-            attachPointerReorder(adminChildButtonList, row, dragHandle, async function (ids) {
-                const byId = new Map(buttons.map(function (buttonItem) { return [buttonItem.id, buttonItem]; }));
-                const next = ids.map(function (id) { return byId.get(id); }).filter(Boolean);
-                if (next.length === buttons.length) await savePortalChildButtons(module.id, next, "内部按钮拖拽排序已保存。 ");
-            });
         });
     }
 

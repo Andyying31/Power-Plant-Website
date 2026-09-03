@@ -488,7 +488,6 @@ const SITE_SESSION_SECONDS = 30 * 60;
 const USER_ACCOUNTS_KEY = "user-accounts-v1";
 const AUDIT_LOG_KEY = "audit-log-v1";
 const SYSTEM_SETTINGS_KEY = "system-settings-v1";
-const FAVORITES_KEY_PREFIX = "favorites-v1:";
 const PASSWORD_ITERATIONS = 20000;
 const MAX_USERS = 300;
 const MAX_AUDIT_LOGS = 500;
@@ -588,8 +587,6 @@ export default {
             }
         } else if (url.pathname === "/api/portal-config") {
             response = await handlePortalConfig(routedRequest, env);
-        } else if (url.pathname === "/api/favorites") {
-            response = await handleFavorites(routedRequest, env);
         } else if (url.pathname === "/api/portal-modules") {
             response = await handlePortalModules(routedRequest, env);
             if (request.method === "PUT") {
@@ -1243,10 +1240,8 @@ async function handleAdminUsers(request, env) {
     }
 
     if (action === "delete") {
-        const deletedUsername = accounts[index].username;
         accounts.splice(index, 1);
         await env.SHARED_BOARD.put(USER_ACCOUNTS_KEY, JSON.stringify(accounts));
-        await env.SHARED_BOARD.delete(FAVORITES_KEY_PREFIX + deletedUsername);
         return jsonResponse({ ok: true, users: accounts.map(sanitizeAccountForAdmin) });
     }
 
@@ -1528,45 +1523,6 @@ async function handleSharedNoteRestore(request, env) {
     });
 }
 
-
-function normalizeFavoriteKeys(source) {
-    const input = Array.isArray(source) ? source : [];
-    const result = [];
-    const seen = new Set();
-    for (const raw of input) {
-        const value = typeof raw === "string" ? raw.trim() : "";
-        if (!/^[A-Za-z0-9_-]{1,120}::[A-Za-z0-9_-]{1,120}$/.test(value)) continue;
-        if (seen.has(value)) continue;
-        seen.add(value);
-        result.push(value);
-        if (result.length >= 100) break;
-    }
-    return result;
-}
-
-async function handleFavorites(request, env) {
-    try { await ensureKv(env); } catch (error) { return jsonResponse({ ok: false, error: error.message }, 503); }
-    const username = normalizeUsername(request.headers.get("X-PP-Username"));
-    if (!username) return jsonResponse({ ok: false, error: "无法识别当前账号，请重新登录。" }, 401);
-    const key = FAVORITES_KEY_PREFIX + username;
-
-    if (request.method === "GET") {
-        const stored = await env.SHARED_BOARD.get(key, "json");
-        return jsonResponse({ ok: true, favorites: normalizeFavoriteKeys(stored) });
-    }
-
-    if (request.method === "PUT") {
-        let body;
-        try { body = await request.json(); } catch { return jsonResponse({ ok: false, error: "Invalid JSON body." }, 400); }
-        if (!Array.isArray(body?.favorites)) return jsonResponse({ ok: false, error: "收藏资料格式不正确。" }, 400);
-        const favorites = normalizeFavoriteKeys(body.favorites);
-        if (body.favorites.length > 100) return jsonResponse({ ok: false, error: "每个账号最多收藏 100 个入口。" }, 400);
-        await env.SHARED_BOARD.put(key, JSON.stringify(favorites));
-        return jsonResponse({ ok: true, favorites });
-    }
-
-    return methodNotAllowed("GET, PUT");
-}
 
 async function handlePortalConfig(request, env) {
     try {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "power-plant-pwa-v29";
+const CACHE_NAME = "power-plant-pwa-v30";
 const SAFE_ASSETS = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",

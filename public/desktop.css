@@ -439,18 +439,19 @@ body {
 .section-heading p { margin: 7px 0 0; color: #9aa3b2; font-size: 13px; }
 
 .link-grid {
-    max-width: 1050px;
+    width: 100%;
+    max-width: 1440px;
     display: grid;
-    grid-template-columns: repeat(2,minmax(300px,1fr));
-    gap: 16px;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 12px;
 }
 .link-card {
     position: relative;
-    min-height: 92px;
-    padding: 19px 22px;
+    min-height: 72px;
+    padding: 14px 18px;
     display: flex; align-items: center;
     background: #fff;
-    border: 1px solid #e5e9ef; border-radius: 13px;
+    border: 1px solid #e5e9ef; border-radius: 11px;
     color: #1f2937; text-decoration: none; overflow: hidden;
     transition: transform .2s ease,border-color .2s ease,box-shadow .2s ease;
 }
@@ -460,13 +461,14 @@ body {
 }
 .link-card:hover { transform: translateY(-3px); border-color: #d5e2f7; box-shadow: 0 9px 25px rgba(31,41,55,.07); }
 .link-card:hover::before { opacity: 1; }
-.card-content { flex: 1; padding-right: 20px; }
-.card-content h3 { margin: 0; font-size: 15px; font-weight: 600; }
-.card-content p { margin: 7px 0 0; color: #9aa3b2; font-size: 12px; }
+.card-content { flex: 1; min-width: 0; padding-right: 14px; }
+.card-content h3 { margin: 0; font-size: 14px; line-height: 1.35; font-weight: 600; }
+.card-content p { margin: 4px 0 0; color: #9aa3b2; font-size: 11px; line-height: 1.4; }
 .card-arrow {
-    width: 32px; height: 32px;
+    width: 29px; height: 29px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; background: #f4f7fb; color: #9aa3b2; font-size: 17px;
+    flex-shrink: 0;
+    border-radius: 50%; background: #f4f7fb; color: #9aa3b2; font-size: 15px;
 }
 .empty-panel {
     max-width: 1050px; min-height: 180px; padding: 32px;
@@ -617,6 +619,15 @@ footer {
     margin-top: 55px; padding-top: 18px;
     border-top: 1px solid #e8ecf1;
     color: #a0a8b4; font-size: 11px;
+}
+
+/* 业务入口卡片：大屏 3 列、普通笔记本 2 列 */
+@media (max-width: 1350px) and (min-width: 851px) {
+    .link-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+
+@media (min-width: 1900px) {
+    .link-grid { max-width: 1680px; grid-template-columns: repeat(4,minmax(0,1fr)); }
 }
 
 /* ================= 响应式 ================= */

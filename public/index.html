@@ -22,8 +22,8 @@ try {
 <meta name="apple-mobile-web-app-title" content="自备电厂"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-<link href="desktop.css?v=35" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=35" media="(max-width: 650px)" rel="stylesheet"/>
+<link href="desktop.css?v=36" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=36" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -454,6 +454,7 @@ try {
 <option value="link">普通链接</option>
 <option value="month-plan">月份链接</option>
 <option value="year-plan">年度链接</option>
+<option value="folder">文件夹</option>
 </select>
 </div>
 <div class="field-group">
@@ -489,6 +490,15 @@ try {
 </div>
 <div class="meeting-year-url-grid" id="meeting-year-url-grid"></div>
 <div class="meeting-month-hint">每个年份对应一个网址；填写的网址必须以 https:// 开头。</div>
+</div>
+
+<div class="meeting-month-editor meeting-folder-editor" id="meeting-folder-editor" hidden>
+<div class="meeting-month-editor-heading">
+<div><strong>文件夹内容</strong><span>前台点击这个按钮后，会像打开文件夹一样显示这里的子按钮。每个子按钮可以设置一个网址。</span></div>
+<button class="secondary-action-btn" id="meeting-folder-add-item" type="button">+ 添加子按钮</button>
+</div>
+<div class="meeting-folder-item-list" id="meeting-folder-item-list"></div>
+<div class="meeting-month-hint">子按钮名称必填；网址可以先留空，填写时必须以 https:// 开头。文件夹目前只做一层，不再继续嵌套文件夹。</div>
 </div>
 <div class="meeting-button-type-note" id="meeting-button-type-note">按钮类型：普通链接</div>
 <label class="meeting-visible-check">
@@ -606,8 +616,23 @@ try {
 <div class="month-modal-note">灰色年份表示暂未设置网址。</div>
 </div>
 </div>
-<script src="app.js?v=35"></script>
-<script src="desktop.js?v=35"></script>
-<script src="mobile.js?v=35"></script>
+
+<div aria-hidden="true" class="month-modal" id="folder-modal">
+<div class="month-modal-backdrop" data-folder-modal-close=""></div>
+<div aria-labelledby="folder-modal-title" aria-modal="true" class="month-modal-panel folder-modal-panel" role="dialog">
+<div class="month-modal-header">
+<div>
+<h2 id="folder-modal-title">文件夹</h2>
+<p id="folder-modal-subtitle">请选择需要打开的内容</p>
+</div>
+<button aria-label="关闭" class="month-modal-close" data-folder-modal-close="" type="button">×</button>
+</div>
+<div class="link-grid folder-link-grid" id="folder-modal-grid"></div>
+<div class="month-modal-note">点击子按钮后将在新窗口打开对应链接。</div>
+</div>
+</div>
+<script src="app.js?v=36"></script>
+<script src="desktop.js?v=36"></script>
+<script src="mobile.js?v=36"></script>
 </body>
 </html>

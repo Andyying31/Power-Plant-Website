@@ -2022,6 +2022,38 @@ function normalizeYearLinkMap(source, strict, buttonName) {
     return result;
 }
 
+function normalizeFolderItems(source, strict, folderName) {
+    const input = Array.isArray(source) ? source : [];
+    if (strict && input.length > 100) {
+        throw new Error(`“${folderName || "文件夹"}”最多只能有 100 个子按钮。`);
+    }
+    const result = [];
+    const ids = new Set();
+    for (let index = 0; index < input.length; index += 1) {
+        const item = input[index] && typeof input[index] === "object" ? input[index] : {};
+        const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
+        const name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
+        const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
+        const url = typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
+        const visible = item.visible !== false;
+        if (!id || !name) {
+            if (strict) throw new Error(`“${folderName || "文件夹"}”里的每个子按钮都必须有名称。`);
+            continue;
+        }
+        if (ids.has(id)) {
+            if (strict) throw new Error(`“${folderName || "文件夹"}”里的子按钮 ID 重复，请重新操作。`);
+            continue;
+        }
+        if (url && !/^https:\/\//i.test(url)) {
+            if (strict) throw new Error(`“${name}”的网址必须以 https:// 开头。`);
+            continue;
+        }
+        ids.add(id);
+        result.push({ id, name, description, url, visible });
+    }
+    return result;
+}
+
 function normalizeMeetingButtons(source, strict) {
     const input = Array.isArray(source) ? source : [];
     const result = [];
@@ -2032,10 +2064,11 @@ function normalizeMeetingButtons(source, strict) {
         const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
         const name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
         const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
-        const type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : "link";
+        const type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : item.type === "folder" ? "folder" : "link";
         const url = type === "link" && typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
         const monthLinks = normalizeMonthLinkMap(item.monthLinks, strict, name);
         const yearLinks = normalizeYearLinkMap(item.yearLinks, strict, name);
+        const folderItems = normalizeFolderItems(item.folderItems, strict, name);
         const visible = item.visible !== false;
 
         if (!id || !name) {
@@ -2060,6 +2093,7 @@ function normalizeMeetingButtons(source, strict) {
             url,
             monthLinks: type === "month-plan" ? monthLinks : {},
             yearLinks: type === "year-plan" ? yearLinks : {},
+            folderItems: type === "folder" ? folderItems : [],
             visible
         });
     }

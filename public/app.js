@@ -134,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let rosterLoaded = false;
     let activeMonthLinks = {};
     let activeYearLinks = {};
+    let activeFolderItems = [];
     let portalModules = [];
     let portalButtons = {};
     let portalLoaded = false;
@@ -311,6 +312,10 @@ document.addEventListener("DOMContentLoaded", function () {
             openYearPlanModal(item);
             return;
         }
+        if (item.type === "folder") {
+            openFolderModal(item);
+            return;
+        }
         const url = String(item.url || "").trim();
         if (!/^https:\/\//i.test(url)) {
             alert("这个按钮还没有设置网址，请联系管理员。 ");
@@ -331,11 +336,12 @@ document.addEventListener("DOMContentLoaded", function () {
         title.textContent = item.name || "未命名按钮";
 
         const description = document.createElement("p");
-        description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份打开链接" : item.type === "year-plan" ? "按年份打开链接" : "打开链接");
+        description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份打开链接" : item.type === "year-plan" ? "按年份打开链接" : item.type === "folder" ? "打开文件夹" : "打开链接");
 
         const arrow = document.createElement("div");
         arrow.className = "card-arrow";
-        arrow.textContent = "→";
+        arrow.textContent = item.type === "folder" ? "›" : "→";
+        if (item.type === "folder") button.classList.add("folder-card");
 
         content.appendChild(title);
         content.appendChild(description);
@@ -349,6 +355,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (item.type === "year-plan") {
                 openYearPlanModal(item);
+                return;
+            }
+            if (item.type === "folder") {
+                openFolderModal(item);
                 return;
             }
 
@@ -716,7 +726,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             buttons.forEach(function (button) {
                 if (!button || button.visible === false) return;
-                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "月份链接" : button.type === "year-plan" ? "年度链接" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url, Object.keys(button.monthLinks || {}).join(" "), Object.keys(button.yearLinks || {}).join(" ")].join(" ") });
+                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "月份链接" : button.type === "year-plan" ? "年度链接" : button.type === "folder" ? "文件夹" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url, Object.keys(button.monthLinks || {}).join(" "), Object.keys(button.yearLinks || {}).join(" ")].join(" ") });
+                if (button.type === "folder") {
+                    normalizeClientFolderItems(button.folderItems).forEach(function (child) {
+                        if (child.visible === false) return;
+                        items.push({ type: "folder-child", module: module, button: button, child: child, title: child.name || "未命名子按钮", subtitle: module.name + " · " + (button.name || "文件夹") + " · " + (child.description || "链接"), text: [module.name, button.name, button.description, child.name, child.description, child.url].join(" ") });
+                    });
+                }
             });
         });
         const rosterModule = portalModules.find(function (module) { return module.kind === "roster" && module.visible !== false; });
@@ -749,7 +765,7 @@ document.addEventListener("DOMContentLoaded", function () {
             button.className = "global-search-result";
             const type = document.createElement("span");
             type.className = "global-search-result-type";
-            type.textContent = entry.type === "module" ? "模块" : entry.type === "button" ? "入口" : "人员";
+            type.textContent = entry.type === "module" ? "模块" : entry.type === "button" ? "入口" : entry.type === "folder-child" ? "文件" : "人员";
             const copy = document.createElement("span");
             copy.className = "global-search-result-copy";
             const strong = document.createElement("strong");
@@ -765,6 +781,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     await openPage(entry.module.id);
                 } else if (entry.type === "button") {
                     openPortalItem(entry.button);
+                } else if (entry.type === "folder-child") {
+                    const url = String(entry.child && entry.child.url || "").trim();
+                    if (/^https:\/\//i.test(url)) window.open(url, "_blank", "noopener,noreferrer");
+                    else alert("这个子按钮还没有设置网址，请联系管理员。");
                 } else if (entry.type === "person") {
                     await openPage(entry.module.id);
                     switchRosterView("list");
@@ -1205,6 +1225,100 @@ document.addEventListener("DOMContentLoaded", function () {
 
     yearModalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeYearPlanModal);
+    });
+
+    // ========================================
+    // 文件夹按钮：打开后显示一层子按钮
+    // ========================================
+    const folderModal = document.getElementById("folder-modal");
+    const folderModalTitle = document.getElementById("folder-modal-title");
+    const folderModalSubtitle = document.getElementById("folder-modal-subtitle");
+    const folderModalGrid = document.getElementById("folder-modal-grid");
+    const folderModalCloseButtons = document.querySelectorAll("[data-folder-modal-close]");
+
+    function normalizeClientFolderItems(source) {
+        if (!Array.isArray(source)) return [];
+        return source.map(function (item, index) {
+            const safe = item && typeof item === "object" ? item : {};
+            return {
+                id: String(safe.id || ("folder-child-" + index)),
+                name: String(safe.name || "").trim(),
+                description: String(safe.description || "").trim(),
+                url: String(safe.url || "").trim(),
+                visible: safe.visible !== false
+            };
+        }).filter(function (item) { return item.name; });
+    }
+
+    function renderFolderItems() {
+        if (!folderModalGrid) return;
+        folderModalGrid.innerHTML = "";
+        const visible = activeFolderItems.filter(function (item) { return item.visible !== false; });
+        if (!visible.length) {
+            const empty = document.createElement("div");
+            empty.className = "history-empty folder-empty";
+            empty.textContent = "这个文件夹目前还没有内容。";
+            folderModalGrid.appendChild(empty);
+            return;
+        }
+        visible.forEach(function (item) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "link-card folder-child-card";
+            const content = document.createElement("div");
+            content.className = "card-content";
+            const title = document.createElement("h3");
+            title.textContent = item.name || "未命名";
+            const description = document.createElement("p");
+            description.textContent = item.description || "打开链接";
+            const arrow = document.createElement("div");
+            arrow.className = "card-arrow";
+            arrow.textContent = "→";
+            content.appendChild(title);
+            content.appendChild(description);
+            button.appendChild(content);
+            button.appendChild(arrow);
+            button.addEventListener("click", function () {
+                const url = String(item.url || "").trim();
+                if (!/^https:\/\//i.test(url)) {
+                    alert("这个子按钮还没有设置网址，请联系管理员。");
+                    return;
+                }
+                window.open(url, "_blank", "noopener,noreferrer");
+            });
+            folderModalGrid.appendChild(button);
+        });
+    }
+
+    async function openFolderModal(item) {
+        if (!folderModal) return;
+        let source = item && typeof item === "object" ? item : {};
+        if (source.id) {
+            try {
+                await loadPortalConfig(true);
+                for (const buttons of Object.values(portalButtons)) {
+                    if (!Array.isArray(buttons)) continue;
+                    const fresh = buttons.find(function (button) { return button && button.id === source.id; });
+                    if (fresh) { source = fresh; break; }
+                }
+            } catch (error) {}
+        }
+        activeFolderItems = normalizeClientFolderItems(source.folderItems);
+        if (folderModalTitle) folderModalTitle.textContent = source.name || "文件夹";
+        if (folderModalSubtitle) folderModalSubtitle.textContent = source.description || "请选择需要打开的内容";
+        renderFolderItems();
+        folderModal.classList.add("open");
+        folderModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeFolderModal() {
+        if (!folderModal) return;
+        folderModal.classList.remove("open");
+        folderModal.setAttribute("aria-hidden", "true");
+    }
+
+    folderModalCloseButtons.forEach(function (button) {
+        button.addEventListener("click", closeFolderModal);
     });
 
 
@@ -1923,6 +2037,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const meetingYearNewYear = document.getElementById("meeting-year-new-year");
     const meetingYearAddYear = document.getElementById("meeting-year-add-year");
     const meetingYearUrlGrid = document.getElementById("meeting-year-url-grid");
+    const meetingFolderEditor = document.getElementById("meeting-folder-editor");
+    const meetingFolderAddItem = document.getElementById("meeting-folder-add-item");
+    const meetingFolderItemList = document.getElementById("meeting-folder-item-list");
     const meetingButtonEditorMessage = document.getElementById("meeting-button-editor-message");
     const meetingButtonModalCloseButtons = document.querySelectorAll("[data-meeting-button-modal-close]");
 
@@ -2285,30 +2402,129 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    let editingFolderItems = [];
+
+    function cloneFolderItems(source) {
+        return normalizeClientFolderItems(source).map(function (item) { return Object.assign({}, item); });
+    }
+
+    function renderMeetingFolderItems() {
+        if (!meetingFolderItemList) return;
+        meetingFolderItemList.innerHTML = "";
+        if (!editingFolderItems.length) {
+            const empty = document.createElement("div");
+            empty.className = "history-empty";
+            empty.textContent = "文件夹目前没有子按钮。点击“+ 添加子按钮”开始添加。";
+            meetingFolderItemList.appendChild(empty);
+            return;
+        }
+        editingFolderItems.forEach(function (item, index) {
+            const card = document.createElement("div");
+            card.className = "meeting-folder-edit-card";
+
+            const order = document.createElement("div");
+            order.className = "meeting-folder-edit-order";
+            order.textContent = String(index + 1).padStart(2, "0");
+
+            const fields = document.createElement("div");
+            fields.className = "meeting-folder-edit-fields";
+            function field(labelText, value, type, placeholder, onInput) {
+                const label = document.createElement("label");
+                const span = document.createElement("span");
+                span.textContent = labelText;
+                const input = document.createElement("input");
+                input.type = type || "text";
+                input.value = value || "";
+                input.placeholder = placeholder || "";
+                input.maxLength = type === "url" ? 2000 : labelText === "说明" ? 200 : 80;
+                input.addEventListener("input", function () { onInput(input.value); });
+                label.appendChild(span);
+                label.appendChild(input);
+                return label;
+            }
+            fields.appendChild(field("名称", item.name, "text", "例如：运行日报", function (value) { item.name = value; }));
+            fields.appendChild(field("说明", item.description, "text", "例如：查看运行日报", function (value) { item.description = value; }));
+            fields.appendChild(field("网址", item.url, "url", "https://...", function (value) { item.url = value; }));
+
+            const actions = document.createElement("div");
+            actions.className = "meeting-folder-edit-actions";
+            const visibleLabel = document.createElement("label");
+            visibleLabel.className = "meeting-folder-visible";
+            const visible = document.createElement("input");
+            visible.type = "checkbox";
+            visible.checked = item.visible !== false;
+            visible.addEventListener("change", function () { item.visible = visible.checked; });
+            const visibleText = document.createElement("span");
+            visibleText.textContent = "显示";
+            visibleLabel.appendChild(visible); visibleLabel.appendChild(visibleText);
+            actions.appendChild(visibleLabel);
+
+            function action(text, disabled, handler, danger) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = danger ? "danger-action-btn mini" : "secondary-action-btn mini";
+                btn.textContent = text;
+                btn.disabled = disabled;
+                btn.addEventListener("click", function (event) { event.preventDefault(); handler(); });
+                actions.appendChild(btn);
+            }
+            action("↑", index === 0, function () { editingFolderItems = moveArrayItem(editingFolderItems, index, index - 1); renderMeetingFolderItems(); });
+            action("↓", index === editingFolderItems.length - 1, function () { editingFolderItems = moveArrayItem(editingFolderItems, index, index + 1); renderMeetingFolderItems(); });
+            action("删除", false, function () { editingFolderItems.splice(index, 1); renderMeetingFolderItems(); }, true);
+
+            card.appendChild(order);
+            card.appendChild(fields);
+            card.appendChild(actions);
+            meetingFolderItemList.appendChild(card);
+        });
+    }
+
+    function validateEditingFolderItems() {
+        for (let i = 0; i < editingFolderItems.length; i += 1) {
+            const item = editingFolderItems[i];
+            item.name = String(item.name || "").trim();
+            item.description = String(item.description || "").trim();
+            item.url = String(item.url || "").trim();
+            if (!item.name) {
+                setFormMessage(meetingButtonEditorMessage, "文件夹第 " + (i + 1) + " 个子按钮还没有填写名称。", "error");
+                return false;
+            }
+            if (item.url && !/^https:\/\//i.test(item.url)) {
+                setFormMessage(meetingButtonEditorMessage, "“" + item.name + "”的网址必须以 https:// 开头。", "error");
+                return false;
+            }
+        }
+        return true;
+    }
+
     function updateMeetingButtonTypeUI() {
         let type = meetingButtonEditType ? meetingButtonEditType.value : "link";
-        if (type !== "month-plan" && type !== "year-plan") type = "link";
+        if (type !== "month-plan" && type !== "year-plan" && type !== "folder") type = "link";
         if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type !== "link";
         if (meetingMonthEditor) meetingMonthEditor.hidden = type !== "month-plan";
         if (meetingYearEditor) meetingYearEditor.hidden = type !== "year-plan";
+        if (meetingFolderEditor) meetingFolderEditor.hidden = type !== "folder";
         if (meetingButtonTypeNote) {
             meetingButtonTypeNote.textContent = type === "month-plan"
                 ? "按钮类型：月份链接 · 点击后先选择年份和月份"
                 : type === "year-plan"
                     ? "按钮类型：年度链接 · 点击后先选择年份"
-                    : "按钮类型：普通链接 · 点击后直接打开网址";
+                    : type === "folder"
+                        ? "按钮类型：文件夹 · 点击后显示文件夹里面的子按钮"
+                        : "按钮类型：普通链接 · 点击后直接打开网址";
         }
         if (type === "month-plan") {
             refreshMeetingMonthYearOptions();
             renderMeetingMonthUrlGrid();
         }
         if (type === "year-plan") renderMeetingYearUrlGrid();
+        if (type === "folder") renderMeetingFolderItems();
     }
 
     function openMeetingButtonEditor(item) {
         if (!meetingButtonEditorModal || !getPortalModule(selectedAdminModuleId)) return;
         const editing = item || null;
-        const type = editing && (editing.type === "month-plan" || editing.type === "year-plan") ? editing.type : "link";
+        const type = editing && (editing.type === "month-plan" || editing.type === "year-plan" || editing.type === "folder") ? editing.type : "link";
         meetingButtonEditId.value = editing ? editing.id : "";
         meetingButtonEditType.value = type;
         meetingButtonEditName.value = editing ? editing.name || "" : "";
@@ -2317,10 +2533,11 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
         editingMonthLinks = cloneMonthLinks(editing && editing.monthLinks);
         editingYearLinks = cloneYearLinks(editing && editing.yearLinks);
+        editingFolderItems = cloneFolderItems(editing && editing.folderItems);
         editingMonthYear = String(new Date().getFullYear());
         const module = getPortalModule(selectedAdminModuleId);
         meetingButtonEditorTitle.textContent = editing ? "编辑内部按钮" : "新增内部按钮";
-        meetingButtonEditorSubtitle.textContent = "选择普通链接、月份链接或年度链接；对应网址直接在这里一起维护。";
+        meetingButtonEditorSubtitle.textContent = "选择普通链接、月份链接、年度链接或文件夹；对应内容直接在这里一起维护。";
         refreshMeetingMonthYearOptions(String(new Date().getFullYear()));
         updateMeetingButtonTypeUI();
         if (meetingMonthNewYear) meetingMonthNewYear.value = "";
@@ -2339,6 +2556,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (meetingYearEditor && !meetingYearEditor.hidden && !syncVisibleYearInputsToMap()) {
                 meetingButtonEditType.value = "year-plan";
+                return;
+            }
+            if (meetingFolderEditor && !meetingFolderEditor.hidden && !validateEditingFolderItems()) {
+                meetingButtonEditType.value = "folder";
                 return;
             }
             updateMeetingButtonTypeUI();
@@ -2406,6 +2627,23 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    if (meetingFolderAddItem) {
+        meetingFolderAddItem.addEventListener("click", function () {
+            editingFolderItems.push({
+                id: createInternalButtonId(),
+                name: "",
+                description: "",
+                url: "",
+                visible: true
+            });
+            renderMeetingFolderItems();
+            const cards = meetingFolderItemList ? meetingFolderItemList.querySelectorAll(".meeting-folder-edit-card") : [];
+            const last = cards.length ? cards[cards.length - 1] : null;
+            const input = last ? last.querySelector('input[type="text"]') : null;
+            if (input) input.focus();
+        });
+    }
+
     meetingButtonModalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeMeetingButtonEditor);
     });
@@ -2445,7 +2683,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             const id = String(meetingButtonEditId.value || "").trim();
-            const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : meetingButtonEditType.value === "year-plan" ? "year-plan" : "link";
+            const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : meetingButtonEditType.value === "year-plan" ? "year-plan" : meetingButtonEditType.value === "folder" ? "folder" : "link";
             const name = meetingButtonEditName.value.trim();
             const description = meetingButtonEditDescription.value.trim();
             const url = meetingButtonEditUrl.value.trim();
@@ -2459,6 +2697,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (type === "month-plan" && !syncVisibleMonthInputsToMap(editingMonthYear)) return;
             if (type === "year-plan" && !syncVisibleYearInputsToMap()) return;
+            if (type === "folder" && !validateEditingFolderItems()) return;
 
             const current = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             const next = current.map(function (item) { return Object.assign({}, item); });
@@ -2470,6 +2709,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 url: type === "link" ? url : "",
                 monthLinks: type === "month-plan" ? cloneMonthLinks(editingMonthLinks) : {},
                 yearLinks: type === "year-plan" ? cloneYearLinks(editingYearLinks) : {},
+                folderItems: type === "folder" ? cloneFolderItems(editingFolderItems) : [],
                 visible: meetingButtonEditVisible.checked
             };
             if (id) {
@@ -2521,7 +2761,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title.textContent = item.name || "未命名按钮";
             const typeBadge = document.createElement("span");
             typeBadge.className = "meeting-button-type-badge";
-            typeBadge.textContent = item.type === "month-plan" ? "月份链接" : item.type === "year-plan" ? "年度链接" : "普通链接";
+            typeBadge.textContent = item.type === "month-plan" ? "月份链接" : item.type === "year-plan" ? "年度链接" : item.type === "folder" ? "文件夹" : "普通链接";
             const statusBadge = document.createElement("span");
             statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
             statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
@@ -2535,6 +2775,9 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (item.type === "year-plan") {
                 const yearCount = Object.keys(normalizeClientYearLinks(item.yearLinks)).length;
                 detail.textContent = (item.description || "按年份打开链接") + " · 已设置 " + yearCount + " 个年度网址";
+            } else if (item.type === "folder") {
+                const folderCount = normalizeClientFolderItems(item.folderItems).length;
+                detail.textContent = (item.description || "文件夹") + " · 子按钮 " + folderCount + " 个";
             } else {
                 detail.textContent = (item.description || "无说明") + (item.url ? " · " + item.url : " · 暂未设置链接");
             }

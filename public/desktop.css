@@ -2662,3 +2662,62 @@ footer {
     .meeting-year-url-row { grid-template-columns: 58px minmax(0, 1fr) auto; }
     .meeting-year-url-row input { min-height: 42px !important; font-size: 16px !important; }
 }
+
+
+/* ================= v36 文件夹按钮 ================= */
+.folder-modal-panel {
+    width: min(980px, calc(100vw - 36px));
+}
+.folder-link-grid {
+    margin-top: 18px;
+}
+.folder-card .card-arrow {
+    font-size: 22px;
+    font-weight: 600;
+}
+.folder-empty {
+    grid-column: 1 / -1;
+}
+.meeting-folder-editor-heading {}
+.meeting-folder-item-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+.meeting-folder-edit-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+    padding: 12px;
+    border: 1px solid #dfe7f2;
+    border-radius: 12px;
+    background: #fff;
+}
+.meeting-folder-edit-order {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f2f6fb;
+    color: #6f7f94;
+    font-size: 12px;
+    font-weight: 700;
+}
+.meeting-folder-edit-fields {
+    display: grid;
+    grid-template-columns: minmax(140px,.8fr) minmax(180px,1fr) minmax(260px,1.7fr);
+    gap: 10px;
+}
+.meeting-folder-edit-fields label { display: grid; gap: 5px; min-width: 0; }
+.meeting-folder-edit-fields label > span { font-size: 12px; color: #718096; }
+.meeting-folder-edit-fields input { width: 100%; min-width: 0; }
+.meeting-folder-edit-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    max-width: 180px;
+}
+.meeting-folder-visible { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #526174; }

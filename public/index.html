@@ -22,8 +22,8 @@ try {
 <meta name="apple-mobile-web-app-title" content="自备电厂"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-<link href="desktop.css?v=34" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=34" media="(max-width: 650px)" rel="stylesheet"/>
+<link href="desktop.css?v=35" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=35" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -453,6 +453,7 @@ try {
 <select id="meeting-button-edit-type">
 <option value="link">普通链接</option>
 <option value="month-plan">月份链接</option>
+<option value="year-plan">年度链接</option>
 </select>
 </div>
 <div class="field-group">
@@ -478,6 +479,16 @@ try {
 </div>
 <div class="meeting-month-url-grid" id="meeting-month-url-grid"></div>
 <div class="meeting-month-hint">留空的月份会在前台显示“暂未设置”；填写的网址必须以 https:// 开头。</div>
+</div>
+<div class="meeting-month-editor meeting-year-editor" id="meeting-year-editor" hidden>
+<div class="meeting-month-editor-heading">
+<div><strong>年度网址</strong><span>为这个按钮设置不同年份对应的网址。前台点击按钮后，用户先选择年份再打开对应链接。</span></div>
+</div>
+<div class="meeting-year-toolbar">
+<div class="meeting-month-add-year"><label for="meeting-year-new-year">新增年份</label><div><input id="meeting-year-new-year" min="2020" max="2100" step="1" type="number" placeholder="例如：2027"/><button class="secondary-action-btn" id="meeting-year-add-year" type="button">添加年份</button></div></div>
+</div>
+<div class="meeting-year-url-grid" id="meeting-year-url-grid"></div>
+<div class="meeting-month-hint">每个年份对应一个网址；填写的网址必须以 https:// 开头。</div>
 </div>
 <div class="meeting-button-type-note" id="meeting-button-type-note">按钮类型：普通链接</div>
 <label class="meeting-visible-check">
@@ -581,8 +592,22 @@ try {
             </div>
 </div>
 </div>
-<script src="app.js?v=34"></script>
-<script src="desktop.js?v=34"></script>
-<script src="mobile.js?v=34"></script>
+<div aria-hidden="true" class="month-modal" id="year-plan-modal">
+<div class="month-modal-backdrop" data-year-modal-close=""></div>
+<div aria-labelledby="year-modal-title" aria-modal="true" class="month-modal-panel" role="dialog">
+<div class="month-modal-header">
+<div>
+<h2 id="year-modal-title">年度链接</h2>
+<p>请选择需要打开的年份</p>
+</div>
+<button aria-label="关闭" class="month-modal-close" data-year-modal-close="" type="button">×</button>
+</div>
+<div class="month-grid year-link-grid" id="year-plan-grid"></div>
+<div class="month-modal-note">灰色年份表示暂未设置网址。</div>
+</div>
+</div>
+<script src="app.js?v=35"></script>
+<script src="desktop.js?v=35"></script>
+<script src="mobile.js?v=35"></script>
 </body>
 </html>

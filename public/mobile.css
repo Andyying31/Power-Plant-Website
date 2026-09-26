@@ -2648,3 +2648,39 @@ html.mobile-ui .main.mobile-swipe-settling {
     .meeting-month-url-row { grid-template-columns: 34px minmax(0, 1fr); }
     .meeting-month-url-row input { min-height: 42px !important; font-size: 16px !important; }
 }
+
+
+/* ================= v35 年度链接 ================= */
+.year-link-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.meeting-year-toolbar {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    margin-top: 14px;
+}
+.meeting-year-toolbar .meeting-month-add-year {
+    width: min(520px, 100%);
+}
+.meeting-year-url-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+.meeting-year-url-row {
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+}
+.meeting-year-url-row > span {
+    white-space: nowrap;
+}
+.meeting-year-remove {
+    align-self: center;
+    min-height: 38px;
+}
+@media (max-width: 650px) {
+    .year-link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .meeting-year-toolbar { display: block; }
+    .meeting-year-url-row { grid-template-columns: 58px minmax(0, 1fr) auto; }
+    .meeting-year-url-row input { min-height: 42px !important; font-size: 16px !important; }
+}

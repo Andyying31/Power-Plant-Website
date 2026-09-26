@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let rosterData = [];
     let rosterLoaded = false;
     let activeMonthLinks = {};
+    let activeYearLinks = {};
     let portalModules = [];
     let portalButtons = {};
     let portalLoaded = false;
@@ -306,6 +307,10 @@ document.addEventListener("DOMContentLoaded", function () {
             openMonthPlanModal(item);
             return;
         }
+        if (item.type === "year-plan") {
+            openYearPlanModal(item);
+            return;
+        }
         const url = String(item.url || "").trim();
         if (!/^https:\/\//i.test(url)) {
             alert("这个按钮还没有设置网址，请联系管理员。 ");
@@ -326,7 +331,7 @@ document.addEventListener("DOMContentLoaded", function () {
         title.textContent = item.name || "未命名按钮";
 
         const description = document.createElement("p");
-        description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份打开链接" : "打开链接");
+        description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份打开链接" : item.type === "year-plan" ? "按年份打开链接" : "打开链接");
 
         const arrow = document.createElement("div");
         arrow.className = "card-arrow";
@@ -340,6 +345,10 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             if (item.type === "month-plan") {
                 openMonthPlanModal(item);
+                return;
+            }
+            if (item.type === "year-plan") {
+                openYearPlanModal(item);
                 return;
             }
 
@@ -707,7 +716,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const buttons = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             buttons.forEach(function (button) {
                 if (!button || button.visible === false) return;
-                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "月份链接" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url].join(" ") });
+                items.push({ type: "button", module: module, button: button, title: button.name || "未命名按钮", subtitle: module.name + " · " + (button.description || (button.type === "month-plan" ? "月份链接" : button.type === "year-plan" ? "年度链接" : "Lark 链接")), text: [module.name, module.description, button.name, button.description, button.url, Object.keys(button.monthLinks || {}).join(" "), Object.keys(button.yearLinks || {}).join(" ")].join(" ") });
             });
         });
         const rosterModule = portalModules.find(function (module) { return module.kind === "roster" && module.visible !== false; });
@@ -1115,6 +1124,87 @@ document.addEventListener("DOMContentLoaded", function () {
     if (monthPlanYear) monthPlanYear.addEventListener("change", renderMonthPlanMonths);
     monthModalCloseButtons.forEach(function (button) {
         button.addEventListener("click", closeMonthPlanModal);
+    });
+
+    // ========================================
+    // 通用年度链接：每个按钮拥有自己的年份网址
+    // ========================================
+    const yearPlanModal = document.getElementById("year-plan-modal");
+    const yearPlanModalTitle = document.getElementById("year-modal-title");
+    const yearPlanGrid = document.getElementById("year-plan-grid");
+    const yearModalCloseButtons = document.querySelectorAll("[data-year-modal-close]");
+
+    function normalizeClientYearLinks(source) {
+        const result = {};
+        if (!source || typeof source !== "object" || Array.isArray(source)) return result;
+        Object.keys(source).forEach(function (key) {
+            const value = typeof source[key] === "string" ? source[key].trim() : "";
+            const year = Number(key);
+            if (/^\d{4}$/.test(key) && year >= 2020 && year <= 2100 && /^https:\/\//i.test(value)) {
+                result[key] = value;
+            }
+        });
+        return result;
+    }
+
+    function renderYearPlanChoices() {
+        if (!yearPlanGrid) return;
+        yearPlanGrid.innerHTML = "";
+        const years = Object.keys(activeYearLinks).sort(function (a, b) { return Number(b) - Number(a); });
+        if (!years.length) {
+            const empty = document.createElement("div");
+            empty.className = "history-empty";
+            empty.textContent = "这个按钮暂未设置年度网址。";
+            yearPlanGrid.appendChild(empty);
+            return;
+        }
+        years.forEach(function (year) {
+            const url = activeYearLinks[year];
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "month-choice available year-choice";
+            const yearName = document.createElement("strong");
+            yearName.textContent = year + "年";
+            const status = document.createElement("span");
+            status.textContent = "打开链接";
+            button.appendChild(yearName);
+            button.appendChild(status);
+            button.addEventListener("click", function () {
+                window.open(url, "_blank", "noopener,noreferrer");
+                closeYearPlanModal();
+            });
+            yearPlanGrid.appendChild(button);
+        });
+    }
+
+    async function openYearPlanModal(item) {
+        if (!yearPlanModal) return;
+        let source = item && typeof item === "object" ? item : {};
+        if (source.id) {
+            try {
+                await loadPortalConfig(true);
+                for (const buttons of Object.values(portalButtons)) {
+                    if (!Array.isArray(buttons)) continue;
+                    const fresh = buttons.find(function (button) { return button && button.id === source.id; });
+                    if (fresh) { source = fresh; break; }
+                }
+            } catch (error) {}
+        }
+        activeYearLinks = normalizeClientYearLinks(source.yearLinks);
+        if (yearPlanModalTitle) yearPlanModalTitle.textContent = source.name || "年度链接";
+        renderYearPlanChoices();
+        yearPlanModal.classList.add("open");
+        yearPlanModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeYearPlanModal() {
+        if (!yearPlanModal) return;
+        yearPlanModal.classList.remove("open");
+        yearPlanModal.setAttribute("aria-hidden", "true");
+    }
+
+    yearModalCloseButtons.forEach(function (button) {
+        button.addEventListener("click", closeYearPlanModal);
     });
 
 
@@ -1829,6 +1919,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const meetingMonthAddYear = document.getElementById("meeting-month-add-year");
     const meetingMonthClearYear = document.getElementById("meeting-month-clear-year");
     const meetingMonthUrlGrid = document.getElementById("meeting-month-url-grid");
+    const meetingYearEditor = document.getElementById("meeting-year-editor");
+    const meetingYearNewYear = document.getElementById("meeting-year-new-year");
+    const meetingYearAddYear = document.getElementById("meeting-year-add-year");
+    const meetingYearUrlGrid = document.getElementById("meeting-year-url-grid");
     const meetingButtonEditorMessage = document.getElementById("meeting-button-editor-message");
     const meetingButtonModalCloseButtons = document.querySelectorAll("[data-meeting-button-modal-close]");
 
@@ -2130,25 +2224,91 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    let editingYearLinks = {};
+
+    function cloneYearLinks(source) {
+        return Object.assign({}, normalizeClientYearLinks(source));
+    }
+
+    function syncVisibleYearInputsToMap() {
+        if (!meetingYearUrlGrid) return true;
+        const inputs = meetingYearUrlGrid.querySelectorAll("input[data-year-number]");
+        for (const input of inputs) {
+            const year = input.getAttribute("data-year-number");
+            const value = String(input.value || "").trim();
+            if (value && !/^https:\/\//i.test(value)) {
+                input.focus();
+                setFormMessage(meetingButtonEditorMessage, year + "年的网址必须以 https:// 开头。", "error");
+                return false;
+            }
+            if (value) editingYearLinks[year] = value;
+            else delete editingYearLinks[year];
+        }
+        return true;
+    }
+
+    function renderMeetingYearUrlGrid() {
+        if (!meetingYearUrlGrid) return;
+        meetingYearUrlGrid.innerHTML = "";
+        const years = Object.keys(editingYearLinks).sort(function (a, b) { return Number(b) - Number(a); });
+        if (!years.length) {
+            const empty = document.createElement("div");
+            empty.className = "history-empty";
+            empty.textContent = "尚未添加年份。请先在上方添加年份。";
+            meetingYearUrlGrid.appendChild(empty);
+            return;
+        }
+        years.forEach(function (year) {
+            const row = document.createElement("label");
+            row.className = "meeting-month-url-row meeting-year-url-row";
+            const label = document.createElement("span");
+            label.textContent = year + "年";
+            const input = document.createElement("input");
+            input.type = "url";
+            input.maxLength = 2000;
+            input.placeholder = "https://...";
+            input.value = editingYearLinks[year] || "";
+            input.setAttribute("data-year-number", year);
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "secondary-action-btn mini meeting-year-remove";
+            remove.textContent = "删除";
+            remove.addEventListener("click", function (event) {
+                event.preventDefault();
+                delete editingYearLinks[year];
+                renderMeetingYearUrlGrid();
+            });
+            row.appendChild(label);
+            row.appendChild(input);
+            row.appendChild(remove);
+            meetingYearUrlGrid.appendChild(row);
+        });
+    }
+
     function updateMeetingButtonTypeUI() {
-        const type = meetingButtonEditType && meetingButtonEditType.value === "month-plan" ? "month-plan" : "link";
-        if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type === "month-plan";
+        let type = meetingButtonEditType ? meetingButtonEditType.value : "link";
+        if (type !== "month-plan" && type !== "year-plan") type = "link";
+        if (meetingButtonUrlGroup) meetingButtonUrlGroup.hidden = type !== "link";
         if (meetingMonthEditor) meetingMonthEditor.hidden = type !== "month-plan";
+        if (meetingYearEditor) meetingYearEditor.hidden = type !== "year-plan";
         if (meetingButtonTypeNote) {
             meetingButtonTypeNote.textContent = type === "month-plan"
                 ? "按钮类型：月份链接 · 点击后先选择年份和月份"
-                : "按钮类型：普通链接 · 点击后直接打开网址";
+                : type === "year-plan"
+                    ? "按钮类型：年度链接 · 点击后先选择年份"
+                    : "按钮类型：普通链接 · 点击后直接打开网址";
         }
         if (type === "month-plan") {
             refreshMeetingMonthYearOptions();
             renderMeetingMonthUrlGrid();
         }
+        if (type === "year-plan") renderMeetingYearUrlGrid();
     }
 
     function openMeetingButtonEditor(item) {
         if (!meetingButtonEditorModal || !getPortalModule(selectedAdminModuleId)) return;
         const editing = item || null;
-        const type = editing && editing.type === "month-plan" ? "month-plan" : "link";
+        const type = editing && (editing.type === "month-plan" || editing.type === "year-plan") ? editing.type : "link";
         meetingButtonEditId.value = editing ? editing.id : "";
         meetingButtonEditType.value = type;
         meetingButtonEditName.value = editing ? editing.name || "" : "";
@@ -2156,13 +2316,15 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditUrl.value = editing && type === "link" ? editing.url || "" : "";
         meetingButtonEditVisible.checked = editing ? editing.visible !== false : true;
         editingMonthLinks = cloneMonthLinks(editing && editing.monthLinks);
+        editingYearLinks = cloneYearLinks(editing && editing.yearLinks);
         editingMonthYear = String(new Date().getFullYear());
         const module = getPortalModule(selectedAdminModuleId);
         meetingButtonEditorTitle.textContent = editing ? "编辑内部按钮" : "新增内部按钮";
-        meetingButtonEditorSubtitle.textContent = "选择普通链接或月份链接；月份网址直接在这里一起维护。";
+        meetingButtonEditorSubtitle.textContent = "选择普通链接、月份链接或年度链接；对应网址直接在这里一起维护。";
         refreshMeetingMonthYearOptions(String(new Date().getFullYear()));
         updateMeetingButtonTypeUI();
         if (meetingMonthNewYear) meetingMonthNewYear.value = "";
+        if (meetingYearNewYear) meetingYearNewYear.value = "";
         setFormMessage(meetingButtonEditorMessage, "", "");
         meetingButtonEditorModal.classList.add("open");
         meetingButtonEditorModal.setAttribute("aria-hidden", "false");
@@ -2173,6 +2335,10 @@ document.addEventListener("DOMContentLoaded", function () {
         meetingButtonEditType.addEventListener("change", function () {
             if (meetingMonthEditor && !meetingMonthEditor.hidden && !syncVisibleMonthInputsToMap(editingMonthYear)) {
                 meetingButtonEditType.value = "month-plan";
+                return;
+            }
+            if (meetingYearEditor && !meetingYearEditor.hidden && !syncVisibleYearInputsToMap()) {
+                meetingButtonEditType.value = "year-plan";
                 return;
             }
             updateMeetingButtonTypeUI();
@@ -2207,6 +2373,23 @@ document.addEventListener("DOMContentLoaded", function () {
             renderMeetingMonthUrlGrid();
             if (meetingMonthNewYear) meetingMonthNewYear.value = "";
             setFormMessage(meetingButtonEditorMessage, year + "年已加入，可以填写各月份网址。", "success");
+        });
+    }
+
+    if (meetingYearAddYear) {
+        meetingYearAddYear.addEventListener("click", function () {
+            if (!syncVisibleYearInputsToMap()) return;
+            const year = String(meetingYearNewYear && meetingYearNewYear.value || "").trim();
+            if (!/^\d{4}$/.test(year) || Number(year) < 2020 || Number(year) > 2100) {
+                setFormMessage(meetingButtonEditorMessage, "请输入 2020 到 2100 之间的四位年份。", "error");
+                return;
+            }
+            if (!(year in editingYearLinks)) editingYearLinks[year] = "";
+            renderMeetingYearUrlGrid();
+            if (meetingYearNewYear) meetingYearNewYear.value = "";
+            const input = meetingYearUrlGrid && meetingYearUrlGrid.querySelector('input[data-year-number="' + year + '"]');
+            if (input) input.focus();
+            setFormMessage(meetingButtonEditorMessage, year + "年已加入，请填写网址。", "success");
         });
     }
 
@@ -2262,7 +2445,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             const id = String(meetingButtonEditId.value || "").trim();
-            const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : "link";
+            const type = meetingButtonEditType.value === "month-plan" ? "month-plan" : meetingButtonEditType.value === "year-plan" ? "year-plan" : "link";
             const name = meetingButtonEditName.value.trim();
             const description = meetingButtonEditDescription.value.trim();
             const url = meetingButtonEditUrl.value.trim();
@@ -2275,6 +2458,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             if (type === "month-plan" && !syncVisibleMonthInputsToMap(editingMonthYear)) return;
+            if (type === "year-plan" && !syncVisibleYearInputsToMap()) return;
 
             const current = Array.isArray(portalButtons[module.id]) ? portalButtons[module.id] : [];
             const next = current.map(function (item) { return Object.assign({}, item); });
@@ -2285,6 +2469,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 type: type,
                 url: type === "link" ? url : "",
                 monthLinks: type === "month-plan" ? cloneMonthLinks(editingMonthLinks) : {},
+                yearLinks: type === "year-plan" ? cloneYearLinks(editingYearLinks) : {},
                 visible: meetingButtonEditVisible.checked
             };
             if (id) {
@@ -2336,7 +2521,7 @@ document.addEventListener("DOMContentLoaded", function () {
             title.textContent = item.name || "未命名按钮";
             const typeBadge = document.createElement("span");
             typeBadge.className = "meeting-button-type-badge";
-            typeBadge.textContent = item.type === "month-plan" ? "月份链接" : "普通链接";
+            typeBadge.textContent = item.type === "month-plan" ? "月份链接" : item.type === "year-plan" ? "年度链接" : "普通链接";
             const statusBadge = document.createElement("span");
             statusBadge.className = "meeting-button-status-badge" + (item.visible === false ? " is-off" : "");
             statusBadge.textContent = item.visible === false ? "已隐藏" : "显示中";
@@ -2347,6 +2532,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (item.type === "month-plan") {
                 const monthCount = Object.keys(normalizeClientMonthLinks(item.monthLinks)).length;
                 detail.textContent = (item.description || "按年份和月份打开链接") + " · 已设置 " + monthCount + " 个月份网址";
+            } else if (item.type === "year-plan") {
+                const yearCount = Object.keys(normalizeClientYearLinks(item.yearLinks)).length;
+                detail.textContent = (item.description || "按年份打开链接") + " · 已设置 " + yearCount + " 个年度网址";
             } else {
                 detail.textContent = (item.description || "无说明") + (item.url ? " · " + item.url : " · 暂未设置链接");
             }

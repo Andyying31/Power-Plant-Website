@@ -2000,6 +2000,28 @@ function normalizeMonthLinkMap(source, strict, buttonName) {
     return result;
 }
 
+function normalizeYearLinkMap(source, strict, buttonName) {
+    const safe = source && typeof source === "object" && !Array.isArray(source) ? source : {};
+    const entries = Object.entries(safe);
+    if (strict && entries.length > 81) {
+        throw new Error(`“${buttonName || "年度链接"}”最多保存 81 个年度网址。`);
+    }
+    const result = {};
+    for (const [key, value] of entries) {
+        if (!/^\d{4}$/.test(key)) continue;
+        const year = Number(key);
+        if (year < 2020 || year > 2100) continue;
+        if (typeof value !== "string") continue;
+        const trimmed = value.trim().slice(0, 2000);
+        if (trimmed && !/^https:\/\//i.test(trimmed)) {
+            if (strict) throw new Error(`“${buttonName || "年度链接"}”的 ${key} 年网址必须以 https:// 开头。`);
+            continue;
+        }
+        if (trimmed) result[key] = trimmed;
+    }
+    return result;
+}
+
 function normalizeMeetingButtons(source, strict) {
     const input = Array.isArray(source) ? source : [];
     const result = [];
@@ -2010,9 +2032,10 @@ function normalizeMeetingButtons(source, strict) {
         const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
         const name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
         const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
-        const type = item.type === "month-plan" ? "month-plan" : "link";
+        const type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : "link";
         const url = type === "link" && typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
         const monthLinks = normalizeMonthLinkMap(item.monthLinks, strict, name);
+        const yearLinks = normalizeYearLinkMap(item.yearLinks, strict, name);
         const visible = item.visible !== false;
 
         if (!id || !name) {
@@ -2036,6 +2059,7 @@ function normalizeMeetingButtons(source, strict) {
             type,
             url,
             monthLinks: type === "month-plan" ? monthLinks : {},
+            yearLinks: type === "year-plan" ? yearLinks : {},
             visible
         });
     }

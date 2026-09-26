@@ -730,7 +730,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (button.type === "folder") {
                     normalizeClientFolderItems(button.folderItems).forEach(function (child) {
                         if (child.visible === false) return;
-                        items.push({ type: "folder-child", module: module, button: button, child: child, title: child.name || "未命名子按钮", subtitle: module.name + " · " + (button.name || "文件夹") + " · " + (child.description || "链接"), text: [module.name, button.name, button.description, child.name, child.description, child.url].join(" ") });
+                        items.push({ type: "folder-child", module: module, button: button, child: child, title: child.name || "未命名子按钮", subtitle: module.name + " · " + (button.name || "文件夹") + " · " + (child.description || (child.type === "month-plan" ? "月份链接" : child.type === "year-plan" ? "年度链接" : "链接")), text: [module.name, button.name, button.description, child.name, child.description, child.url, Object.keys(child.monthLinks || {}).join(" "), Object.keys(child.yearLinks || {}).join(" ")].join(" ") });
                     });
                 }
             });
@@ -782,9 +782,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (entry.type === "button") {
                     openPortalItem(entry.button);
                 } else if (entry.type === "folder-child") {
-                    const url = String(entry.child && entry.child.url || "").trim();
-                    if (/^https:\/\//i.test(url)) window.open(url, "_blank", "noopener,noreferrer");
-                    else alert("这个子按钮还没有设置网址，请联系管理员。");
+                    const child = entry.child || {};
+                    if (child.type === "month-plan") openMonthPlanModal(child);
+                    else if (child.type === "year-plan") openYearPlanModal(child);
+                    else {
+                        const url = String(child.url || "").trim();
+                        if (/^https:\/\//i.test(url)) window.open(url, "_blank", "noopener,noreferrer");
+                        else alert("这个子按钮还没有设置网址，请联系管理员。");
+                    }
                 } else if (entry.type === "person") {
                     await openPage(entry.module.id);
                     switchRosterView("list");
@@ -1240,11 +1245,15 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!Array.isArray(source)) return [];
         return source.map(function (item, index) {
             const safe = item && typeof item === "object" ? item : {};
+            const type = safe.type === "month-plan" ? "month-plan" : safe.type === "year-plan" ? "year-plan" : "link";
             return {
                 id: String(safe.id || ("folder-child-" + index)),
                 name: String(safe.name || "").trim(),
                 description: String(safe.description || "").trim(),
-                url: String(safe.url || "").trim(),
+                type: type,
+                url: type === "link" ? String(safe.url || "").trim() : "",
+                monthLinks: type === "month-plan" ? normalizeClientMonthLinks(safe.monthLinks) : {},
+                yearLinks: type === "year-plan" ? normalizeClientYearLinks(safe.yearLinks) : {},
                 visible: safe.visible !== false
             };
         }).filter(function (item) { return item.name; });
@@ -1270,15 +1279,25 @@ document.addEventListener("DOMContentLoaded", function () {
             const title = document.createElement("h3");
             title.textContent = item.name || "未命名";
             const description = document.createElement("p");
-            description.textContent = item.description || "打开链接";
+            description.textContent = item.description || (item.type === "month-plan" ? "按年份和月份选择" : item.type === "year-plan" ? "按年份选择" : "打开链接");
             const arrow = document.createElement("div");
             arrow.className = "card-arrow";
-            arrow.textContent = "→";
+            arrow.textContent = item.type === "link" ? "→" : "›";
             content.appendChild(title);
             content.appendChild(description);
             button.appendChild(content);
             button.appendChild(arrow);
             button.addEventListener("click", function () {
+                if (item.type === "month-plan") {
+                    closeFolderModal();
+                    openMonthPlanModal(item);
+                    return;
+                }
+                if (item.type === "year-plan") {
+                    closeFolderModal();
+                    openYearPlanModal(item);
+                    return;
+                }
                 const url = String(item.url || "").trim();
                 if (!/^https:\/\//i.test(url)) {
                     alert("这个子按钮还没有设置网址，请联系管理员。");
@@ -2405,7 +2424,162 @@ document.addEventListener("DOMContentLoaded", function () {
     let editingFolderItems = [];
 
     function cloneFolderItems(source) {
-        return normalizeClientFolderItems(source).map(function (item) { return Object.assign({}, item); });
+        return normalizeClientFolderItems(source).map(function (item) {
+            return {
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                type: item.type || "link",
+                url: item.url || "",
+                monthLinks: Object.assign({}, item.monthLinks || {}),
+                yearLinks: Object.assign({}, item.yearLinks || {}),
+                visible: item.visible !== false
+            };
+        });
+    }
+
+    function countConfiguredLinks(item) {
+        if (item.type === "month-plan") return Object.keys(item.monthLinks || {}).filter(function (key) { return String(item.monthLinks[key] || "").trim(); }).length;
+        if (item.type === "year-plan") return Object.keys(item.yearLinks || {}).filter(function (key) { return String(item.yearLinks[key] || "").trim(); }).length;
+        return String(item.url || "").trim() ? 1 : 0;
+    }
+
+    function createFolderField(labelText, value, type, placeholder, onInput) {
+        const label = document.createElement("label");
+        label.className = "folder-child-field";
+        const span = document.createElement("span");
+        span.textContent = labelText;
+        const input = document.createElement("input");
+        input.type = type || "text";
+        input.value = value || "";
+        input.placeholder = placeholder || "";
+        input.maxLength = type === "url" ? 2000 : labelText === "说明" ? 200 : 80;
+        input.addEventListener("input", function () { onInput(input.value); });
+        label.appendChild(span);
+        label.appendChild(input);
+        return label;
+    }
+
+    function renderFolderMonthEditor(item, host) {
+        item.monthLinks = item.monthLinks && typeof item.monthLinks === "object" ? item.monthLinks : {};
+        const details = document.createElement("details");
+        details.className = "folder-child-advanced";
+        const summary = document.createElement("summary");
+        summary.textContent = "设置月份网址（已设置 " + countConfiguredLinks(item) + " 个）";
+        details.appendChild(summary);
+
+        const body = document.createElement("div");
+        body.className = "folder-child-advanced-body";
+        const yearsFromData = Object.keys(item.monthLinks).map(function (key) { return key.split("-")[0]; }).filter(function (year) { return /^\d{4}$/.test(year); });
+        const current = String(new Date().getFullYear());
+        if (!yearsFromData.includes(current)) yearsFromData.push(current);
+        const years = Array.from(new Set(yearsFromData)).sort(function (a, b) { return Number(b) - Number(a); });
+        let activeYear = item._editingMonthYear && years.includes(item._editingMonthYear) ? item._editingMonthYear : years[0];
+        item._editingMonthYear = activeYear;
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "folder-child-mini-toolbar";
+        const yearWrap = document.createElement("label");
+        yearWrap.innerHTML = "<span>正在编辑</span>";
+        const yearSelect = document.createElement("select");
+        years.forEach(function (year) {
+            const option = document.createElement("option");
+            option.value = year;
+            option.textContent = year + "年";
+            yearSelect.appendChild(option);
+        });
+        yearSelect.value = activeYear;
+        yearWrap.appendChild(yearSelect);
+
+        const addWrap = document.createElement("div");
+        addWrap.className = "folder-child-add-year";
+        const addInput = document.createElement("input");
+        addInput.type = "number";
+        addInput.min = "2020"; addInput.max = "2100"; addInput.placeholder = "新增年份";
+        const addBtn = document.createElement("button");
+        addBtn.type = "button"; addBtn.className = "secondary-action-btn mini"; addBtn.textContent = "添加";
+        addWrap.appendChild(addInput); addWrap.appendChild(addBtn);
+        toolbar.appendChild(yearWrap); toolbar.appendChild(addWrap);
+        body.appendChild(toolbar);
+
+        const grid = document.createElement("div");
+        grid.className = "folder-child-month-grid";
+        function paintMonths() {
+            activeYear = item._editingMonthYear || current;
+            grid.innerHTML = "";
+            for (let month = 1; month <= 12; month += 1) {
+                const mm = String(month).padStart(2, "0");
+                const key = activeYear + "-" + mm;
+                const row = document.createElement("label");
+                row.className = "folder-child-url-row";
+                const label = document.createElement("span"); label.textContent = month + "月";
+                const input = document.createElement("input");
+                input.type = "url"; input.maxLength = 2000; input.placeholder = "https://..."; input.value = item.monthLinks[key] || "";
+                input.addEventListener("input", function () {
+                    const value = input.value.trim();
+                    if (value) item.monthLinks[key] = value; else delete item.monthLinks[key];
+                    summary.textContent = "设置月份网址（已设置 " + countConfiguredLinks(item) + " 个）";
+                });
+                row.appendChild(label); row.appendChild(input); grid.appendChild(row);
+            }
+        }
+        yearSelect.addEventListener("change", function () { item._editingMonthYear = yearSelect.value; paintMonths(); });
+        addBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+            const year = String(addInput.value || "").trim();
+            if (!/^\d{4}$/.test(year) || Number(year) < 2020 || Number(year) > 2100) {
+                setFormMessage(meetingButtonEditorMessage, "请输入 2020 到 2100 之间的四位年份。", "error");
+                return;
+            }
+            item._editingMonthYear = year;
+            if (!Array.from(yearSelect.options).some(function (option) { return option.value === year; })) {
+                const option = document.createElement("option"); option.value = year; option.textContent = year + "年"; yearSelect.appendChild(option);
+            }
+            yearSelect.value = year; addInput.value = ""; paintMonths();
+            setFormMessage(meetingButtonEditorMessage, year + "年已加入，可以填写月份网址。", "success");
+        });
+        paintMonths();
+        body.appendChild(grid);
+        details.appendChild(body);
+        host.appendChild(details);
+    }
+
+    function renderFolderYearEditor(item, host) {
+        item.yearLinks = item.yearLinks && typeof item.yearLinks === "object" ? item.yearLinks : {};
+        const details = document.createElement("details");
+        details.className = "folder-child-advanced";
+        const summary = document.createElement("summary");
+        summary.textContent = "设置年度网址（已设置 " + countConfiguredLinks(item) + " 个）";
+        details.appendChild(summary);
+        const body = document.createElement("div"); body.className = "folder-child-advanced-body";
+        const toolbar = document.createElement("div"); toolbar.className = "folder-child-mini-toolbar";
+        const addWrap = document.createElement("div"); addWrap.className = "folder-child-add-year";
+        const addInput = document.createElement("input"); addInput.type = "number"; addInput.min = "2020"; addInput.max = "2100"; addInput.placeholder = "例如：2027";
+        const addBtn = document.createElement("button"); addBtn.type = "button"; addBtn.className = "secondary-action-btn mini"; addBtn.textContent = "添加年份";
+        addWrap.appendChild(addInput); addWrap.appendChild(addBtn); toolbar.appendChild(addWrap); body.appendChild(toolbar);
+        const list = document.createElement("div"); list.className = "folder-child-year-list";
+        function paintYears() {
+            list.innerHTML = "";
+            const years = Object.keys(item.yearLinks).sort(function (a, b) { return Number(b) - Number(a); });
+            if (!years.length) {
+                const empty = document.createElement("div"); empty.className = "history-empty compact"; empty.textContent = "尚未添加年份。"; list.appendChild(empty);
+            }
+            years.forEach(function (year) {
+                const row = document.createElement("div"); row.className = "folder-child-year-row";
+                const label = document.createElement("span"); label.textContent = year + "年";
+                const input = document.createElement("input"); input.type = "url"; input.maxLength = 2000; input.placeholder = "https://..."; input.value = item.yearLinks[year] || "";
+                input.addEventListener("input", function () { item.yearLinks[year] = input.value.trim(); summary.textContent = "设置年度网址（已设置 " + countConfiguredLinks(item) + " 个）"; });
+                const remove = document.createElement("button"); remove.type = "button"; remove.className = "danger-action-btn mini"; remove.textContent = "删除";
+                remove.addEventListener("click", function (event) { event.preventDefault(); delete item.yearLinks[year]; paintYears(); summary.textContent = "设置年度网址（已设置 " + countConfiguredLinks(item) + " 个）"; });
+                row.appendChild(label); row.appendChild(input); row.appendChild(remove); list.appendChild(row);
+            });
+        }
+        addBtn.addEventListener("click", function (event) {
+            event.preventDefault(); const year = String(addInput.value || "").trim();
+            if (!/^\d{4}$/.test(year) || Number(year) < 2020 || Number(year) > 2100) { setFormMessage(meetingButtonEditorMessage, "请输入 2020 到 2100 之间的四位年份。", "error"); return; }
+            if (!(year in item.yearLinks)) item.yearLinks[year] = ""; addInput.value = ""; paintYears();
+        });
+        paintYears(); body.appendChild(list); details.appendChild(body); host.appendChild(details);
     }
 
     function renderMeetingFolderItems() {
@@ -2419,79 +2593,55 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         editingFolderItems.forEach(function (item, index) {
-            const card = document.createElement("div");
-            card.className = "meeting-folder-edit-card";
-
-            const order = document.createElement("div");
-            order.className = "meeting-folder-edit-order";
-            order.textContent = String(index + 1).padStart(2, "0");
-
-            const fields = document.createElement("div");
-            fields.className = "meeting-folder-edit-fields";
-            function field(labelText, value, type, placeholder, onInput) {
-                const label = document.createElement("label");
-                const span = document.createElement("span");
-                span.textContent = labelText;
-                const input = document.createElement("input");
-                input.type = type || "text";
-                input.value = value || "";
-                input.placeholder = placeholder || "";
-                input.maxLength = type === "url" ? 2000 : labelText === "说明" ? 200 : 80;
-                input.addEventListener("input", function () { onInput(input.value); });
-                label.appendChild(span);
-                label.appendChild(input);
-                return label;
-            }
-            fields.appendChild(field("名称", item.name, "text", "例如：运行日报", function (value) { item.name = value; }));
-            fields.appendChild(field("说明", item.description, "text", "例如：查看运行日报", function (value) { item.description = value; }));
-            fields.appendChild(field("网址", item.url, "url", "https://...", function (value) { item.url = value; }));
-
-            const actions = document.createElement("div");
-            actions.className = "meeting-folder-edit-actions";
-            const visibleLabel = document.createElement("label");
-            visibleLabel.className = "meeting-folder-visible";
-            const visible = document.createElement("input");
-            visible.type = "checkbox";
-            visible.checked = item.visible !== false;
-            visible.addEventListener("change", function () { item.visible = visible.checked; });
-            const visibleText = document.createElement("span");
-            visibleText.textContent = "显示";
-            visibleLabel.appendChild(visible); visibleLabel.appendChild(visibleText);
-            actions.appendChild(visibleLabel);
-
-            function action(text, disabled, handler, danger) {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = danger ? "danger-action-btn mini" : "secondary-action-btn mini";
-                btn.textContent = text;
-                btn.disabled = disabled;
-                btn.addEventListener("click", function (event) { event.preventDefault(); handler(); });
-                actions.appendChild(btn);
-            }
+            item.type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : "link";
+            item.monthLinks = item.monthLinks && typeof item.monthLinks === "object" ? item.monthLinks : {};
+            item.yearLinks = item.yearLinks && typeof item.yearLinks === "object" ? item.yearLinks : {};
+            const card = document.createElement("div"); card.className = "meeting-folder-edit-card";
+            const header = document.createElement("div"); header.className = "meeting-folder-edit-header";
+            const order = document.createElement("div"); order.className = "meeting-folder-edit-order"; order.textContent = String(index + 1).padStart(2, "0");
+            const nameField = createFolderField("名称", item.name, "text", "例如：运行日报", function (value) { item.name = value; }); nameField.classList.add("folder-child-name-field");
+            const typeLabel = document.createElement("label"); typeLabel.className = "folder-child-field folder-child-type-field";
+            const typeText = document.createElement("span"); typeText.textContent = "类型";
+            const typeSelect = document.createElement("select");
+            [["link","普通链接"],["month-plan","月份链接"],["year-plan","年度链接"]].forEach(function (entry) { const option = document.createElement("option"); option.value = entry[0]; option.textContent = entry[1]; typeSelect.appendChild(option); });
+            typeSelect.value = item.type;
+            typeSelect.addEventListener("change", function () { item.type = typeSelect.value; renderMeetingFolderItems(); });
+            typeLabel.appendChild(typeText); typeLabel.appendChild(typeSelect);
+            const actions = document.createElement("div"); actions.className = "meeting-folder-edit-actions";
+            const visibleLabel = document.createElement("label"); visibleLabel.className = "meeting-folder-visible";
+            const visible = document.createElement("input"); visible.type = "checkbox"; visible.checked = item.visible !== false; visible.addEventListener("change", function () { item.visible = visible.checked; });
+            const visibleText = document.createElement("span"); visibleText.textContent = "显示"; visibleLabel.appendChild(visible); visibleLabel.appendChild(visibleText); actions.appendChild(visibleLabel);
+            function action(text, disabled, handler, danger) { const btn = document.createElement("button"); btn.type = "button"; btn.className = danger ? "danger-action-btn mini" : "secondary-action-btn mini"; btn.textContent = text; btn.disabled = disabled; btn.addEventListener("click", function (event) { event.preventDefault(); handler(); }); actions.appendChild(btn); }
             action("↑", index === 0, function () { editingFolderItems = moveArrayItem(editingFolderItems, index, index - 1); renderMeetingFolderItems(); });
             action("↓", index === editingFolderItems.length - 1, function () { editingFolderItems = moveArrayItem(editingFolderItems, index, index + 1); renderMeetingFolderItems(); });
             action("删除", false, function () { editingFolderItems.splice(index, 1); renderMeetingFolderItems(); }, true);
+            header.appendChild(order); header.appendChild(nameField); header.appendChild(typeLabel); header.appendChild(actions); card.appendChild(header);
 
-            card.appendChild(order);
-            card.appendChild(fields);
-            card.appendChild(actions);
-            meetingFolderItemList.appendChild(card);
+            const body = document.createElement("div"); body.className = "meeting-folder-edit-body";
+            body.appendChild(createFolderField("说明", item.description, "text", "例如：查看运行日报", function (value) { item.description = value; }));
+            if (item.type === "link") {
+                body.appendChild(createFolderField("网址", item.url, "url", "https://...", function (value) { item.url = value; }));
+            } else if (item.type === "month-plan") {
+                renderFolderMonthEditor(item, body);
+            } else if (item.type === "year-plan") {
+                renderFolderYearEditor(item, body);
+            }
+            card.appendChild(body); meetingFolderItemList.appendChild(card);
         });
     }
 
     function validateEditingFolderItems() {
         for (let i = 0; i < editingFolderItems.length; i += 1) {
             const item = editingFolderItems[i];
-            item.name = String(item.name || "").trim();
-            item.description = String(item.description || "").trim();
-            item.url = String(item.url || "").trim();
-            if (!item.name) {
-                setFormMessage(meetingButtonEditorMessage, "文件夹第 " + (i + 1) + " 个子按钮还没有填写名称。", "error");
-                return false;
+            item.name = String(item.name || "").trim(); item.description = String(item.description || "").trim(); item.url = String(item.url || "").trim();
+            item.type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : "link";
+            if (!item.name) { setFormMessage(meetingButtonEditorMessage, "文件夹第 " + (i + 1) + " 个子按钮还没有填写名称。", "error"); return false; }
+            if (item.type === "link" && item.url && !/^https:\/\//i.test(item.url)) { setFormMessage(meetingButtonEditorMessage, "“" + item.name + "”的网址必须以 https:// 开头。", "error"); return false; }
+            if (item.type === "month-plan") {
+                for (const key of Object.keys(item.monthLinks || {})) { const value = String(item.monthLinks[key] || "").trim(); if (value && !/^https:\/\//i.test(value)) { setFormMessage(meetingButtonEditorMessage, "“" + item.name + "”的 " + key + " 月份网址必须以 https:// 开头。", "error"); return false; } if (!value) delete item.monthLinks[key]; }
             }
-            if (item.url && !/^https:\/\//i.test(item.url)) {
-                setFormMessage(meetingButtonEditorMessage, "“" + item.name + "”的网址必须以 https:// 开头。", "error");
-                return false;
+            if (item.type === "year-plan") {
+                for (const year of Object.keys(item.yearLinks || {})) { const value = String(item.yearLinks[year] || "").trim(); if (value && !/^https:\/\//i.test(value)) { setFormMessage(meetingButtonEditorMessage, "“" + item.name + "”的 " + year + " 年度网址必须以 https:// 开头。", "error"); return false; } if (!value) delete item.yearLinks[year]; }
             }
         }
         return true;
@@ -2633,7 +2783,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 id: createInternalButtonId(),
                 name: "",
                 description: "",
+                type: "link",
                 url: "",
+                monthLinks: {},
+                yearLinks: {},
                 visible: true
             });
             renderMeetingFolderItems();

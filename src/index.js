@@ -2034,7 +2034,10 @@ function normalizeFolderItems(source, strict, folderName) {
         const id = typeof item.id === "string" ? item.id.trim().slice(0, 120) : "";
         const name = typeof item.name === "string" ? item.name.trim().slice(0, 80) : "";
         const description = typeof item.description === "string" ? item.description.trim().slice(0, 200) : "";
-        const url = typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
+        const type = item.type === "month-plan" ? "month-plan" : item.type === "year-plan" ? "year-plan" : "link";
+        const url = type === "link" && typeof item.url === "string" ? item.url.trim().slice(0, 2000) : "";
+        const monthLinks = normalizeMonthLinkMap(item.monthLinks, strict, name);
+        const yearLinks = normalizeYearLinkMap(item.yearLinks, strict, name);
         const visible = item.visible !== false;
         if (!id || !name) {
             if (strict) throw new Error(`“${folderName || "文件夹"}”里的每个子按钮都必须有名称。`);
@@ -2044,12 +2047,21 @@ function normalizeFolderItems(source, strict, folderName) {
             if (strict) throw new Error(`“${folderName || "文件夹"}”里的子按钮 ID 重复，请重新操作。`);
             continue;
         }
-        if (url && !/^https:\/\//i.test(url)) {
+        if (type === "link" && url && !/^https:\/\//i.test(url)) {
             if (strict) throw new Error(`“${name}”的网址必须以 https:// 开头。`);
             continue;
         }
         ids.add(id);
-        result.push({ id, name, description, url, visible });
+        result.push({
+            id,
+            name,
+            description,
+            type,
+            url,
+            monthLinks: type === "month-plan" ? monthLinks : {},
+            yearLinks: type === "year-plan" ? yearLinks : {},
+            visible
+        });
     }
     return result;
 }

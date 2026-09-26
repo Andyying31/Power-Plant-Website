@@ -22,8 +22,8 @@ try {
 <meta name="apple-mobile-web-app-title" content="自备电厂"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
-<link href="desktop.css?v=36" media="(min-width: 651px)" rel="stylesheet"/>
-<link href="mobile.css?v=36" media="(max-width: 650px)" rel="stylesheet"/>
+<link href="desktop.css?v=37" media="(min-width: 651px)" rel="stylesheet"/>
+<link href="mobile.css?v=37" media="(max-width: 650px)" rel="stylesheet"/>
 </head>
 <body>
 <aside class="sidebar">
@@ -494,11 +494,11 @@ try {
 
 <div class="meeting-month-editor meeting-folder-editor" id="meeting-folder-editor" hidden>
 <div class="meeting-month-editor-heading">
-<div><strong>文件夹内容</strong><span>前台点击这个按钮后，会像打开文件夹一样显示这里的子按钮。每个子按钮可以设置一个网址。</span></div>
+<div><strong>文件夹内容</strong><span>前台点击这个按钮后，会像打开文件夹一样显示这里的子按钮。子按钮可以独立选择普通链接、月份链接或年度链接。</span></div>
 <button class="secondary-action-btn" id="meeting-folder-add-item" type="button">+ 添加子按钮</button>
 </div>
 <div class="meeting-folder-item-list" id="meeting-folder-item-list"></div>
-<div class="meeting-month-hint">子按钮名称必填；网址可以先留空，填写时必须以 https:// 开头。文件夹目前只做一层，不再继续嵌套文件夹。</div>
+<div class="meeting-month-hint">子按钮名称必填；每个子按钮可选择普通链接、月份链接或年度链接，并在对应设置区域维护网址。文件夹目前只做一层，不再继续嵌套文件夹。</div>
 </div>
 <div class="meeting-button-type-note" id="meeting-button-type-note">按钮类型：普通链接</div>
 <label class="meeting-visible-check">
@@ -628,11 +628,11 @@ try {
 <button aria-label="关闭" class="month-modal-close" data-folder-modal-close="" type="button">×</button>
 </div>
 <div class="link-grid folder-link-grid" id="folder-modal-grid"></div>
-<div class="month-modal-note">点击子按钮后将在新窗口打开对应链接。</div>
+<div class="month-modal-note">子按钮可直接打开链接，也可按月份或年度选择后再打开。</div>
 </div>
 </div>
-<script src="app.js?v=36"></script>
-<script src="desktop.js?v=36"></script>
-<script src="mobile.js?v=36"></script>
+<script src="app.js?v=37"></script>
+<script src="desktop.js?v=37"></script>
+<script src="mobile.js?v=37"></script>
 </body>
 </html>
